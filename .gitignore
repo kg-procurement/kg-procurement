@@ -1,0 +1,12 @@
+# IDE and Code Editor
+.vscode
+.idea
+
+# Binary
+bin/
+
+# Config
+/config.jsonc
+
+# Dependency
+vendor

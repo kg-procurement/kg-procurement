@@ -1,0 +1,21 @@
+---
+version: '3.9'
+name: procurement-dev
+services:
+  postgres-local:
+    container_name: postgres-local
+    image: postgres:latest
+    restart: always
+    ports:
+      - "5432:5432"
+    expose:
+      - "5432"
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: kg-procurement
+    volumes:
+      - postgres-local:/var/lib/postgresql/data
+volumes:
+  postgres-local:
+    driver: local
