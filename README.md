@@ -13,10 +13,18 @@ For config, copy-paste `config.example.jsonc` to `config.jsonc`
 Run db: `make docker-up`
 
 ## PgAdmin
+
 After pgadmin container is running, open `localhost:15432`, then create server.
 
 Set the following on the `Connection` tab:
+
 - `host`: `postgres-local` (the database service name on compose)
 - `port`: `5432`
 - `username`: `<POSTGRES_USER>`
 - `password`: `<POSTGRES_PASSWORD>`
+
+## Add schema migrations
+
+- Create migrations: goose create <migration_name> sql
+- Move migration to migrations directory (Manually): mv <"FILE_NAME">.sql migrations/<"FILE_NAME">.sql
+- run : `make migrate`

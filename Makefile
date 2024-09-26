@@ -18,3 +18,6 @@ docker-up:
 	docker-compose -f docker-compose.yaml up -d
 docker-down:
 	docker-compose -f docker-compose.yaml down
+
+migrate:
+	@goose -dir migrations postgres "password=postgres user=postgres port=5432 dbname=kg-procurement host=localhost sslmode=disable" up
