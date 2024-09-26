@@ -12,6 +12,14 @@ type Conn struct {
 	db *sql.DB
 }
 
+func (c *Conn) GetDB() *sql.DB {
+	return c.db
+}
+
+func (c *Conn) Close() error {
+	return c.db.Close()
+}
+
 func NewConn(host, user, password, name, port string) *Conn {
 	connStr := fmt.Sprintf("user=%s port=%s password=%s dbname=%s host=%s sslmode=disable",
 		user, port, password, name, host)
@@ -27,8 +35,4 @@ func NewConn(host, user, password, name, port string) *Conn {
 
 	log.Println("Successfully connected to database")
 	return &Conn{db: db}
-}
-
-func (c *Conn) Close() error {
-	return c.db.Close()
 }
