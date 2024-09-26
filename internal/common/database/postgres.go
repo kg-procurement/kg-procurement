@@ -1,3 +1,4 @@
+//go:generate mockgen -typed -source=postgres.go -destination=postgres_mock.go -package=database
 package database
 
 import (
@@ -8,12 +9,28 @@ import (
 	_ "github.com/lib/pq"
 )
 
+// DBConnector provides simple interface for mocking purposes
+type DBConnector interface {
+	Exec(query string, args ...interface{}) (sql.Result, error)
+	Query(query string, args ...interface{}) (*sql.Rows, error)
+	QueryRow(query string, args ...interface{}) *sql.Row
+	Close() error
+}
+
 type Conn struct {
 	db *sql.DB
 }
 
-func (c *Conn) GetDB() *sql.DB {
-	return c.db
+func (c *Conn) Exec(query string, args ...interface{}) (sql.Result, error) {
+	return c.db.Exec(query, args...)
+}
+
+func (c *Conn) Query(query string, args ...interface{}) (*sql.Rows, error) {
+	return c.db.Query(query, args...)
+}
+
+func (c *Conn) QueryRow(query string, args ...interface{}) *sql.Row {
+	return c.db.QueryRow(query, args...)
 }
 
 func (c *Conn) Close() error {

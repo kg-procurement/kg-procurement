@@ -4,14 +4,14 @@ package vendors
 import "context"
 
 type vendorDBAccessor interface {
-	GetSomeStuff(ctx context.Context) error
+	GetSomeStuff(ctx context.Context) ([]string, error)
 }
 
 type VendorService struct {
 	vendorDBAccessor vendorDBAccessor
 }
 
-func (v *VendorService) GetSomeStuff(ctx context.Context) error {
+func (v *VendorService) GetSomeStuff(ctx context.Context) ([]string, error) {
 	return v.vendorDBAccessor.GetSomeStuff(ctx)
 }
 
