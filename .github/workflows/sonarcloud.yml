@@ -28,7 +28,6 @@ jobs:
             -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
             -Dsonar.go.coverage.reportPaths=coverage.out
             -Dsonar.sources=.
-#            internal/common/database is excluded from coverage since sql Open is tricky to mock
             -Dsonar.exclusions=**/vendor/**,**/*_mock.go,internal/common/database/**
             -Dsonar.coverage.exclusions=**/vendor/**,**/*_mock.go
             -Dsonar.language=go
