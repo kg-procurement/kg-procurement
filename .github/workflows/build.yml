@@ -1,0 +1,29 @@
+name: Go Build CI
+
+on:
+  workflow_call:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.23.1'
+
+      - name: Install Dependencies
+        run: go mod download
+
+      - name: Build Application
+        run: make build-ci
+
+      - name: Upload Binary Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kg-procurement-binary
+          path: ./bin/kg-procurement
