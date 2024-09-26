@@ -11,17 +11,15 @@ type Application struct {
 }
 
 type Common struct {
-	Database Database `mapstructure:"database" validate:"required"`
-}
-
-type Database struct {
 	Postgres PostgresConfig `mapstructure:"postgres" validate:"required"`
 }
 
 type PostgresConfig struct {
 	Host     string `mapstructure:"host" validate:"required"`
+	Name     string `mapstructure:"name" validate:"required"`
 	Username string `mapstructure:"username" validate:"required"`
 	Password string `mapstructure:"password" validate:"required"`
+	Port     string `mapstructure:"port" validate:"required"`
 }
 
 func Load() Application {

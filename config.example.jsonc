@@ -1,11 +1,11 @@
 {
   "common": {
-    "database": {
-      "postgres": {
-        "host": "localhost:5432",
-        "username": "postgres",
-        "password": "postgres"
-      }
+    "postgres": {
+      "host": "localhost",
+      "name": "kg-procurement",
+      "username": "postgres",
+      "password": "postgres",
+      "port": "5432"
     }
   }
 }

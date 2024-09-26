@@ -4,8 +4,10 @@ go 1.23.1
 
 require (
 	github.com/go-playground/validator/v10 v10.22.1
+	github.com/lib/pq v1.10.9
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/tidwall/jsonc v0.3.2
+	go.uber.org/mock v0.4.0
 )
 
 require (

@@ -16,6 +16,20 @@ services:
       POSTGRES_DB: kg-procurement
     volumes:
       - postgres-local:/var/lib/postgresql/data
+
+  pgadmin-local:
+    container_name: pgadmin-local
+    image: dpage/pgadmin4
+    restart: always
+    ports:
+      - "15432:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    volumes:
+      - pgadmin-local:/var/lib/pgadmin
+
 volumes:
   postgres-local:
+  pgadmin-local:
     driver: local
