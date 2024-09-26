@@ -20,6 +20,13 @@ jobs:
       - name: Install Dependencies
         run: go mod download
 
+      - name: Run Tests with Coverage
+        run: |
+          go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
+
+      - name: Display Coverage Summary
+        run: go tool cover -func=coverage.out
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v3.0.0
         with:
@@ -28,6 +35,7 @@ jobs:
             -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
             -Dsonar.go.coverage.reportPaths=coverage.out
             -Dsonar.sources=.
+            -Dsonar.tests=.
             -Dsonar.test.inclusions=**/*_test.go
             -Dsonar.exclusions=**/vendor/**,**/*_mock.go,internal/common/database/**
             -Dsonar.coverage.exclusions=**/vendor/**,**/*_mock.go,**/*_test.go
