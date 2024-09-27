@@ -7,7 +7,7 @@ import (
 
 func NewPostgreSQL(
 	config config.PostgresConfig,
-) *database.Conn {
+) database.DBConnector {
 	return database.NewConn(
 		config.Host,
 		config.Username,

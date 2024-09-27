@@ -49,7 +49,7 @@ func TestVendorService_GetSomeStuff(t *testing.T) {
 			v := &VendorService{
 				vendorDBAccessor: tt.fields.vendorDBAccessor,
 			}
-			if err := v.GetSomeStuff(tt.args.ctx); (err != nil) != tt.wantErr {
+			if _, err := v.GetSomeStuff(tt.args.ctx); (err != nil) != tt.wantErr {
 				t.Errorf("GetSomeStuff() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

@@ -79,11 +79,12 @@ func (c *MockvendorDBAccessorGetAllCall) DoAndReturn(f func(context.Context) ([]
 }
 
 // GetSomeStuff mocks base method.
-func (m *MockvendorDBAccessor) GetSomeStuff(ctx context.Context) error {
+func (m *MockvendorDBAccessor) GetSomeStuff(ctx context.Context) ([]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetSomeStuff", ctx)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // GetSomeStuff indicates an expected call of GetSomeStuff.
@@ -99,19 +100,19 @@ type MockvendorDBAccessorGetSomeStuffCall struct {
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockvendorDBAccessorGetSomeStuffCall) Return(arg0 error) *MockvendorDBAccessorGetSomeStuffCall {
-	c.Call = c.Call.Return(arg0)
+func (c *MockvendorDBAccessorGetSomeStuffCall) Return(arg0 []string, arg1 error) *MockvendorDBAccessorGetSomeStuffCall {
+	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockvendorDBAccessorGetSomeStuffCall) Do(f func(context.Context) error) *MockvendorDBAccessorGetSomeStuffCall {
+func (c *MockvendorDBAccessorGetSomeStuffCall) Do(f func(context.Context) ([]string, error)) *MockvendorDBAccessorGetSomeStuffCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockvendorDBAccessorGetSomeStuffCall) DoAndReturn(f func(context.Context) error) *MockvendorDBAccessorGetSomeStuffCall {
+func (c *MockvendorDBAccessorGetSomeStuffCall) DoAndReturn(f func(context.Context) ([]string, error)) *MockvendorDBAccessorGetSomeStuffCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

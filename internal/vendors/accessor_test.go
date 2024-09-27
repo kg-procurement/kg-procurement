@@ -3,73 +3,147 @@ package vendors
 import (
 	"context"
 	"database/sql"
-	"kg/procurement/internal/common/database"
+	"errors"
+	"log"
 	"testing"
 	"time"
+
+	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/onsi/gomega"
 )
 
-func TestVendorAccessor_GetAll(t *testing.T) {
-	db, err := sql.Open("postgres", ":memory:")
-	if err != nil {
-		t.Fatalf("Opening in-memory database error: %w", err)
-	}
+func Test_postgresVendorAccessor_GetSomeStuff(t *testing.T) {
+	t.Parallel()
 
-	defer db.Close()
-
-	create_table_query := `CREATE TABLE "vendor" (
-  "id" int PRIMARY KEY,
-  "name" varchar,
-  "bp_id" int,
-  "bp_name" varchar,
-  "rating"  int,
-  "area_group_id" int,
-  "area_group_name" varchar,
-  "sap_code"	  varchar,
-  "modified_date" timestamp,
-  "modified_by" int,
-  "dt" date
-);`
-
-	_, err = db.Exec(create_table_query)
-	if err != nil {
-		t.Fatalf("Failed creating table vendors: %w", err)
-	}
-
-	testData := Vendor{
-		Id:            1,
-		Name:          "name",
-		BpId:          1,
-		BpName:        "bp_name",
-		Rating:        1,
-		AreaGroupId:   1,
-		AreaGroupName: "group_name",
-		SapCode:       "sap_code",
-		ModifiedDate:  time.Now(),
-		ModifiedBy:    1,
-		Date:          time.Now(),
-	}
-	insertQuery := `
-	INSERT INTO vendors (id, name, bp_id, bp_name, rating, area_group_id, area_group_name, sap_code, modified_date, modified_by, date)
-	VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
-	_, err = db.Exec(insertQuery,
-		testData,
-		testData.Name,
-		testData.BpId,
-		testData.BpName,
-		testData.Rating,
-		testData.AreaGroupId,
-		testData.AreaGroupName,
-		testData.SapCode,
-		testData.ModifiedDate,
-		testData.ModifiedBy,
-		testData.Date,
+	var (
+		accessor *postgresVendorAccessor
+		mock     sqlmock.Sqlmock
 	)
 
-	if err != nil {
-		t.Fatalf("Error while doing insert: %w", err)
+	setup := func(t *testing.T) (*gomega.GomegaWithT, *sql.DB) {
+		g := gomega.NewWithT(t)
+		db, sqlMock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+		if err != nil {
+			log.Fatal("error initializing mock:", err)
+		}
+
+		accessor = newPostgresVendorAccessor(db)
+		mock = sqlMock
+
+		return g, db
 	}
 
-	accessor := newPostgresVendorAccessor()
+	t.Run("success", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
 
-	vendors, err := accessor.GetAll(context.Background())
+		rows := sqlmock.NewRows([]string{"name"}).
+			AddRow("Alice")
+
+		mock.ExpectQuery(`SELECT name FROM users WHERE title = (?)`).
+			WithArgs("test").
+			WillReturnRows(rows)
+
+		ctx := context.Background()
+		res, err := accessor.GetSomeStuff(ctx)
+
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(res).To(gomega.Equal([]string{"Alice"}))
+	})
+
+	t.Run("error on query", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		mock.ExpectQuery(`SELECT name FROM users WHERE title = (?)`).
+			WithArgs("test").
+			WillReturnError(errors.New("some error"))
+
+		ctx := context.Background()
+		res, err := accessor.GetSomeStuff(ctx)
+
+		g.Expect(err).ToNot(gomega.BeNil())
+		g.Expect(res).To(gomega.BeNil())
+	})
+
+	t.Run("error on row scan", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		rows := sqlmock.NewRows([]string{"name"}).
+			AddRow(nil)
+
+		mock.ExpectQuery(`SELECT name FROM users WHERE title = (?)`).
+			WithArgs("test").
+			WillReturnRows(rows)
+
+		ctx := context.Background()
+		res, err := accessor.GetSomeStuff(ctx)
+
+		g.Expect(err).ToNot(gomega.BeNil())
+		g.Expect(res).To(gomega.BeNil())
+	})
+}
+
+func TestVendorAccessor_GetAll(t *testing.T) {
+	t.Parallel()
+
+	var (
+		accessor *postgresVendorAccessor
+		mock     sqlmock.Sqlmock
+	)
+
+	setup := func(t *testing.T) (*gomega.GomegaWithT, *sql.DB) {
+		g := gomega.NewWithT(t)
+		db, sqlMock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+		if err != nil {
+			log.Fatal("error initializing mock:", err)
+		}
+
+		accessor = newPostgresVendorAccessor(db)
+		mock = sqlMock
+
+		return g, db
+	}
+
+	t.Run("success", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+		sampleData := []string{
+			"id",
+			"name",
+			"bp_id",
+			"bp_name",
+			"rating",
+			"area_group_id",
+			"area_group_name",
+			"sap_code",
+			"modified_date",
+			"modified_by",
+			"dt",
+		}
+
+		rows := sqlmock.NewRows(sampleData).
+			AddRow(
+				1,
+				"name",
+				1,
+				"bp_name",
+				1,
+				1,
+				"group_name",
+				"sap_code",
+				time.Now(),
+				1,
+				time.Now(),
+			)
+
+		mock.ExpectQuery(`SELECT * FROM vendor`).
+			WillReturnRows(rows)
+
+		ctx := context.Background()
+		res, err := accessor.GetAll(ctx)
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(res).To(gomega.Equal(sampleData))
+	})
 }
