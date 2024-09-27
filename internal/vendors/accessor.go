@@ -2,6 +2,7 @@ package vendors
 
 import (
 	"context"
+	"fmt"
 	"kg/procurement/internal/common/database"
 )
 
@@ -34,8 +35,55 @@ func (p *postgresVendorAccessor) GetSomeStuff(ctx context.Context) ([]string, er
 }
 
 func (p *postgresVendorAccessor) GetAll(ctx context.Context) ([]Vendor, error) {
-	// db queries here
-	return nil, nil
+	query := `SELECT 
+		"id",
+		"name",
+		"bp_id",
+		"bp_name",
+		"rating",
+		"area_group_id",
+		"area_group_name",
+		"sap_code",
+		"modified_date",
+		"modified_by",
+		"dt" 
+		FROM vendor`
+
+	rows, err := p.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	vendors := []Vendor{}
+
+	for rows.Next() {
+		var vendor Vendor
+		err := rows.Scan(
+			&vendor.Id,
+			&vendor.Name,
+			&vendor.BpId,
+			&vendor.BpName,
+			&vendor.Rating,
+			&vendor.AreaGroupId,
+			&vendor.AreaGroupName,
+			&vendor.SapCode,
+			&vendor.ModifiedDate,
+			&vendor.ModifiedBy,
+			&vendor.Date,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("Failed while scanning row: %w", err)
+		}
+		vendors = append(vendors, vendor)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("Row iteration error: %w", err)
+	}
+
+	return vendors, nil
 }
 
 // newPostgresVendorAccessor is only accessible by the vendor package

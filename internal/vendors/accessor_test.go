@@ -120,6 +120,8 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 		"dt",
 	}
 
+	fixedTime := time.Date(2024, time.September, 27, 12, 30, 0, 0, time.UTC)
+
 	t.Run("success", func(t *testing.T) {
 		g, db := setup(t)
 		defer db.Close()
@@ -134,9 +136,9 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 				1,
 				"group_name",
 				"sap_code",
-				time.Now(),
+				fixedTime,
 				1,
-				time.Now(),
+				fixedTime,
 			)
 
 		mock.ExpectQuery(`SELECT 
@@ -156,8 +158,23 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 
 		ctx := context.Background()
 		res, err := accessor.GetAll(ctx)
+
+		expectation := []Vendor{{
+			Id:            1,
+			Name:          "name",
+			BpId:          1,
+			BpName:        "bp_name",
+			Rating:        1,
+			AreaGroupId:   1,
+			AreaGroupName: "group_name",
+			SapCode:       "sap_code",
+			ModifiedDate:  fixedTime,
+			ModifiedBy:    1,
+			Date:          fixedTime,
+		}}
+
 		g.Expect(err).To(gomega.BeNil())
-		g.Expect(res).To(gomega.Equal(sampleData))
+		g.Expect(res).To(gomega.Equal(expectation))
 	})
 
 	t.Run("success on empty result", func(t *testing.T) {

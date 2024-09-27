@@ -57,7 +57,7 @@ func TestVendorService_GetSomeStuff(t *testing.T) {
 }
 
 func TestVendorService_GetAll(t *testing.T) {
-	constant := []Vendor{
+	sampleData := []Vendor{
 		{
 			Id:            1,
 			Name:          "name",
@@ -94,7 +94,7 @@ func TestVendorService_GetAll(t *testing.T) {
 				mockVendorDBAccessor: NewMockvendorDBAccessor(ctrl),
 			},
 			args:    args{ctx: context.Background()},
-			want:    constant,
+			want:    sampleData,
 			wantErr: false,
 		},
 	}

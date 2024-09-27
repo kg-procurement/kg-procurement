@@ -17,7 +17,11 @@ func (v *VendorService) GetSomeStuff(ctx context.Context) ([]string, error) {
 }
 
 func (v *VendorService) GetAll(ctx context.Context) ([]Vendor, error) {
-	return v.vendorDBAccessor.GetAll(ctx)
+	vendors, err := v.vendorDBAccessor.GetAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return vendors, nil
 }
 
 func NewVendorService(vendorDBAccessor vendorDBAccessor) *VendorService {
