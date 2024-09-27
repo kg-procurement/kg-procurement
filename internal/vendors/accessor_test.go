@@ -3,6 +3,7 @@ package vendors
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"log"
 	"testing"
 
@@ -39,14 +40,50 @@ func Test_postgresVendorAccessor_GetSomeStuff(t *testing.T) {
 		g, db := setup(t)
 		defer db.Close()
 
-		mock.ExpectQuery(`SELECT name FROM users WHERE name = (?)`).
+		rows := sqlmock.NewRows([]string{"name"}).
+			AddRow("Alice")
+
+		mock.ExpectQuery(`SELECT name FROM users WHERE title = (?)`).
 			WithArgs("test").
-			WillReturnRows(sqlmock.NewRows([]string{"name"}).AddRow("test"))
+			WillReturnRows(rows)
 
 		ctx := context.Background()
 		res, err := accessor.GetSomeStuff(ctx)
 
 		g.Expect(err).To(gomega.BeNil())
-		g.Expect(res).To(gomega.Equal([]string{"test"}))
+		g.Expect(res).To(gomega.Equal([]string{"Alice"}))
+	})
+
+	t.Run("error on query", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		mock.ExpectQuery(`SELECT name FROM users WHERE title = (?)`).
+			WithArgs("test").
+			WillReturnError(errors.New("some error"))
+
+		ctx := context.Background()
+		res, err := accessor.GetSomeStuff(ctx)
+
+		g.Expect(err).ToNot(gomega.BeNil())
+		g.Expect(res).To(gomega.BeNil())
+	})
+
+	t.Run("error on row scan", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		rows := sqlmock.NewRows([]string{"name"}).
+			AddRow(nil)
+
+		mock.ExpectQuery(`SELECT name FROM users WHERE title = (?)`).
+			WithArgs("test").
+			WillReturnRows(rows)
+
+		ctx := context.Background()
+		res, err := accessor.GetSomeStuff(ctx)
+
+		g.Expect(err).ToNot(gomega.BeNil())
+		g.Expect(res).To(gomega.BeNil())
 	})
 }
