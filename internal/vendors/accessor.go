@@ -11,7 +11,13 @@ type postgresVendorAccessor struct {
 
 func (p *postgresVendorAccessor) GetSomeStuff(_ context.Context) error {
 	// db queries here
+
 	return nil
+}
+
+func (p *postgresVendorAccessor) GetAll(ctx context.Context) ([]Vendor, error) {
+	// db queries here
+	return nil, nil
 }
 
 // newPostgresVendorAccessor is only accessible by the vendor package
