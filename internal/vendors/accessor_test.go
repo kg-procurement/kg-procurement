@@ -12,6 +12,10 @@ import (
 	"github.com/onsi/gomega"
 )
 
+func Test_newPostgresVendorAccessor(t *testing.T) {
+	_ = newPostgresVendorAccessor(nil)
+}
+
 func Test_postgresVendorAccessor_GetSomeStuff(t *testing.T) {
 	t.Parallel()
 
@@ -120,6 +124,20 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 		"dt",
 	}
 
+	query := `SELECT 
+			"id",
+			"name",
+			"bp_id",
+			"bp_name",
+			"rating",
+			"area_group_id",
+			"area_group_name",
+			"sap_code",
+			"modified_date",
+			"modified_by",
+			"dt" 
+			FROM vendor`
+
 	fixedTime := time.Date(2024, time.September, 27, 12, 30, 0, 0, time.UTC)
 
 	t.Run("success", func(t *testing.T) {
@@ -141,26 +159,14 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 				fixedTime,
 			)
 
-		mock.ExpectQuery(`SELECT 
-			"id",
-			"name",
-			"bp_id",
-			"bp_name",
-			"rating",
-			"area_group_id",
-			"area_group_name",
-			"sap_code",
-			"modified_date",
-			"modified_by",
-			"dt" 
-			FROM vendor`).
+		mock.ExpectQuery(query).
 			WillReturnRows(rows)
 
 		ctx := context.Background()
 		res, err := accessor.GetAll(ctx)
 
 		expectation := []Vendor{{
-			Id:            1,
+			ID:            "1",
 			Name:          "name",
 			BpId:          1,
 			BpName:        "bp_name",
@@ -181,35 +187,9 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 		g, db := setup(t)
 		defer db.Close()
 
-		sampleData := []string{
-			"id",
-			"name",
-			"bp_id",
-			"bp_name",
-			"rating",
-			"area_group_id",
-			"area_group_name",
-			"sap_code",
-			"modified_date",
-			"modified_by",
-			"dt",
-		}
-
 		rows := sqlmock.NewRows(sampleData)
 
-		mock.ExpectQuery(`SELECT 
-			"id",
-			"name",
-			"bp_id",
-			"bp_name",
-			"rating",
-			"area_group_id",
-			"area_group_name",
-			"sap_code",
-			"modified_date",
-			"modified_by",
-			"dt" 
-			FROM vendor`).
+		mock.ExpectQuery(query).
 			WillReturnRows(rows)
 
 		ctx := context.Background()
@@ -221,20 +201,6 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 	t.Run("error on scanning row", func(t *testing.T) {
 		g, db := setup(t)
 		defer db.Close()
-
-		sampleData := []string{
-			"id",
-			"name",
-			"bp_id",
-			"bp_name",
-			"rating",
-			"area_group_id",
-			"area_group_name",
-			"sap_code",
-			"modified_date",
-			"modified_by",
-			"dt",
-		}
 
 		rows := sqlmock.NewRows(sampleData).AddRow(
 			nil,
@@ -250,19 +216,7 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 			nil,
 		)
 
-		mock.ExpectQuery(`SELECT 
-			"id",
-			"name",
-			"bp_id",
-			"bp_name",
-			"rating",
-			"area_group_id",
-			"area_group_name",
-			"sap_code",
-			"modified_date",
-			"modified_by",
-			"dt" 
-			FROM vendor`).
+		mock.ExpectQuery(query).
 			WillReturnRows(rows)
 
 		ctx := context.Background()

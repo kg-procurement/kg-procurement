@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
 )
 
@@ -59,7 +60,7 @@ func TestVendorService_GetSomeStuff(t *testing.T) {
 func TestVendorService_GetAll(t *testing.T) {
 	sampleData := []Vendor{
 		{
-			Id:            1,
+			ID:            "1",
 			Name:          "name",
 			BpId:          1,
 			BpName:        "bp_name",
@@ -89,7 +90,7 @@ func TestVendorService_GetAll(t *testing.T) {
 	}{
 		// TODO: Add test cases.
 		{
-			name: "Test_GetAllVendor Success",
+			name: "success",
 			fields: fields{
 				mockVendorDBAccessor: NewMockvendorDBAccessor(ctrl),
 			},
@@ -97,25 +98,29 @@ func TestVendorService_GetAll(t *testing.T) {
 			want:    sampleData,
 			wantErr: false,
 		},
+		{
+			name: "failure",
+			fields: fields{
+				mockVendorDBAccessor: NewMockvendorDBAccessor(ctrl),
+			},
+			args:    args{ctx: context.Background()},
+			want:    nil,
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			g := gomega.NewWithT(t)
 			v := NewVendorService(tt.fields.mockVendorDBAccessor)
 
 			tt.fields.mockVendorDBAccessor.EXPECT().
 				GetAll(tt.args.ctx).
 				Return(tt.want, nil)
 
-			vendors, err := v.GetAll(tt.args.ctx)
+			res, err := v.GetAll(tt.args.ctx)
 
-			if (err != nil) != tt.wantErr {
-				t.Errorf("GetAll() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-
-			if !reflect.DeepEqual(vendors, tt.want) {
-				t.Errorf("GetAll() = %v, wantErr %v", vendors, tt.wantErr)
-			}
+			g.Expect(err).To(gomega.BeNil())
+			g.Expect(res).To(gomega.Equal(tt.want))
 		})
 	}
 }

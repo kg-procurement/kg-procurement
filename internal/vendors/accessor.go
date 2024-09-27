@@ -61,7 +61,7 @@ func (p *postgresVendorAccessor) GetAll(ctx context.Context) ([]Vendor, error) {
 	for rows.Next() {
 		var vendor Vendor
 		err := rows.Scan(
-			&vendor.Id,
+			&vendor.ID,
 			&vendor.Name,
 			&vendor.BpId,
 			&vendor.BpName,
