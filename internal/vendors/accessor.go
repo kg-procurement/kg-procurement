@@ -82,7 +82,7 @@ func (p *postgresVendorAccessor) GetAll(ctx context.Context) ([]Vendor, error) {
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("Row iteration error: %w", err)
+		return nil, err
 	}
 
 	return vendors, nil

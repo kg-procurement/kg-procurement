@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"log"
 	"testing"
 	"time"
@@ -148,7 +149,7 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 
 		rows := sqlmock.NewRows(sampleData).
 			AddRow(
-				1,
+				"1",
 				"name",
 				"description",
 				1,
@@ -220,6 +221,93 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 			nil,
 			nil,
 		)
+
+		mock.ExpectQuery(query).
+			WillReturnRows(rows)
+
+		ctx := context.Background()
+		res, err := accessor.GetAll(ctx)
+
+		g.Expect(err).ToNot(gomega.BeNil())
+		g.Expect(res).To(gomega.BeNil())
+	})
+
+	t.Run("error on executing query", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		rows := sqlmock.NewRows(sampleData).
+			AddRow(
+				"1",
+				"name",
+				"description",
+				1,
+				"bp_name",
+				1,
+				1,
+				"group_name",
+				"sap_code",
+				fixedTime,
+				1,
+				fixedTime,
+			)
+
+		wrongQuery := `SELECT 
+			"name",
+			"description",
+			"bp_id",
+			"bp_name",
+			"rating",
+			"area_group_id",
+			"area_group_name",
+			"sap_code",
+			"modified_date",
+			"modified_by",
+			"dt" 
+			FROM user`
+
+		mock.ExpectQuery(wrongQuery).
+			WillReturnRows(rows)
+
+		ctx := context.Background()
+		res, err := accessor.GetAll(ctx)
+
+		g.Expect(err).ToNot(gomega.BeNil())
+		g.Expect(res).To(gomega.BeNil())
+	})
+
+	t.Run("error while iterating rows", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		rows := sqlmock.NewRows(sampleData).
+			AddRow(
+				"1",
+				"name",
+				"description",
+				1,
+				"bp_name",
+				1,
+				1,
+				"group_name",
+				"sap_code",
+				fixedTime,
+				1,
+				fixedTime,
+			).AddRow(
+			"1",
+			"name",
+			"description",
+			1,
+			"bp_name",
+			1,
+			1,
+			"group_name",
+			"sap_code",
+			fixedTime,
+			1,
+			fixedTime,
+		).RowError(1, fmt.Errorf("row error"))
 
 		mock.ExpectQuery(query).
 			WillReturnRows(rows)
