@@ -382,7 +382,7 @@ func TestVendorAccessor_GetByLocation(t *testing.T) {
 
 		rows := sqlmock.NewRows(sampleData).
 			AddRow(
-				1,
+				"1",
 				"name",
 				"description",
 				1,
@@ -459,6 +459,82 @@ func TestVendorAccessor_GetByLocation(t *testing.T) {
 
 		mock.ExpectQuery(query).
 			WithArgs(location).
+			WillReturnRows(rows)
+
+		ctx := context.Background()
+		res, err := accessor.GetByLocation(ctx, location)
+
+		g.Expect(err).ToNot(gomega.BeNil())
+		g.Expect(res).To(gomega.BeNil())
+	})
+
+	t.Run("error on executing query", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		rows := sqlmock.NewRows(sampleData).
+			AddRow(
+				"1",
+				"name",
+				"description",
+				1,
+				"bp_name",
+				1,
+				1,
+				"group_name",
+				"sap_code",
+				fixedTime,
+				1,
+				fixedTime,
+			)
+
+		wrongQuery := `SELECT 
+			"id",
+			"name",
+			"description",
+			"bp_id",
+			"bp_name",
+			"rating",
+			"area_group_id",
+			"area_group_name",
+			"sap_code",
+			"modified_date",
+			"modified_by",
+			"dt" 
+			FROM vendor
+			WHERE description = $1`
+
+		mock.ExpectQuery(wrongQuery).
+			WillReturnRows(rows)
+
+		ctx := context.Background()
+		res, err := accessor.GetByLocation(ctx, location)
+
+		g.Expect(err).ToNot(gomega.BeNil())
+		g.Expect(res).To(gomega.BeNil())
+	})
+
+	t.Run("error while iterating rows", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		rows := sqlmock.NewRows(sampleData).
+			AddRow(
+				"1",
+				"name",
+				"description",
+				1,
+				"bp_name",
+				1,
+				1,
+				"group_name",
+				"sap_code",
+				fixedTime,
+				1,
+				fixedTime,
+			).RowError(0, fmt.Errorf("row error"))
+
+		mock.ExpectQuery(query).
 			WillReturnRows(rows)
 
 		ctx := context.Background()
