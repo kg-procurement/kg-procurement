@@ -113,6 +113,7 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 	sampleData := []string{
 		"id",
 		"name",
+		"description",
 		"bp_id",
 		"bp_name",
 		"rating",
@@ -127,6 +128,7 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 	query := `SELECT 
 			"id",
 			"name",
+			"description",
 			"bp_id",
 			"bp_name",
 			"rating",
@@ -148,6 +150,7 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 			AddRow(
 				1,
 				"name",
+				"description",
 				1,
 				"bp_name",
 				1,
@@ -168,6 +171,7 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 		expectation := []Vendor{{
 			ID:            "1",
 			Name:          "name",
+			Description:   "description",
 			BpId:          1,
 			BpName:        "bp_name",
 			Rating:        1,
@@ -203,6 +207,7 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 		defer db.Close()
 
 		rows := sqlmock.NewRows(sampleData).AddRow(
+			nil,
 			nil,
 			nil,
 			nil,

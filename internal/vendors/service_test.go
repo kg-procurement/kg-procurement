@@ -62,6 +62,7 @@ func TestVendorService_GetAll(t *testing.T) {
 		{
 			ID:            "1",
 			Name:          "name",
+			Description:   "description",
 			BpId:          1,
 			BpName:        "bp_name",
 			Rating:        1,
@@ -88,7 +89,6 @@ func TestVendorService_GetAll(t *testing.T) {
 		want    []Vendor
 		wantErr bool
 	}{
-		// TODO: Add test cases.
 		{
 			name: "success",
 			fields: fields{

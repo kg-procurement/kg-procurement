@@ -38,6 +38,7 @@ func (p *postgresVendorAccessor) GetAll(ctx context.Context) ([]Vendor, error) {
 	query := `SELECT 
 		"id",
 		"name",
+		"description",
 		"bp_id",
 		"bp_name",
 		"rating",
@@ -63,6 +64,7 @@ func (p *postgresVendorAccessor) GetAll(ctx context.Context) ([]Vendor, error) {
 		err := rows.Scan(
 			&vendor.ID,
 			&vendor.Name,
+			&vendor.Description,
 			&vendor.BpId,
 			&vendor.BpName,
 			&vendor.Rating,

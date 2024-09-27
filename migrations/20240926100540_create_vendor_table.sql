@@ -3,6 +3,7 @@
 CREATE TABLE "vendor" (
   "id" int PRIMARY KEY,
   "name" varchar(255),
+  "description" varchar(255),
   "bp_id" int,
   "bp_name" varchar(255),
   "rating"  int,

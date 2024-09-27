@@ -7,6 +7,7 @@ import "time"
 type Vendor struct {
 	ID            string    `json:"id"`
 	Name          string    `json:"name"`
+	Description   string    `json:"description"`
 	BpId          int       `json:"bp_id"`
 	BpName        string    `json:"bp_name"`
 	Rating        int       `json:"rating"`
