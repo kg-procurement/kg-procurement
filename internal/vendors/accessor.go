@@ -11,7 +11,7 @@ type postgresVendorAccessor struct {
 
 // GetSomeStuff is just an example
 func (p *postgresVendorAccessor) GetSomeStuff(ctx context.Context) ([]string, error) {
-	rows, err := p.db.Query(`SELECT name FROM users WHERE name = (?)`, "test")
+	rows, err := p.db.Query(`SELECT name FROM users WHERE title = (?)`, "test")
 	if err != nil {
 		return nil, err
 	}
