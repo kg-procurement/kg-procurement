@@ -106,22 +106,23 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 		return g, db
 	}
 
+	sampleData := []string{
+		"id",
+		"name",
+		"bp_id",
+		"bp_name",
+		"rating",
+		"area_group_id",
+		"area_group_name",
+		"sap_code",
+		"modified_date",
+		"modified_by",
+		"dt",
+	}
+
 	t.Run("success", func(t *testing.T) {
 		g, db := setup(t)
 		defer db.Close()
-		sampleData := []string{
-			"id",
-			"name",
-			"bp_id",
-			"bp_name",
-			"rating",
-			"area_group_id",
-			"area_group_name",
-			"sap_code",
-			"modified_date",
-			"modified_by",
-			"dt",
-		}
 
 		rows := sqlmock.NewRows(sampleData).
 			AddRow(
@@ -138,12 +139,119 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 				time.Now(),
 			)
 
-		mock.ExpectQuery(`SELECT * FROM vendor`).
+		mock.ExpectQuery(`SELECT 
+			"id",
+			"name",
+			"bp_id",
+			"bp_name",
+			"rating",
+			"area_group_id",
+			"area_group_name",
+			"sap_code",
+			"modified_date",
+			"modified_by",
+			"dt" 
+			FROM vendor`).
 			WillReturnRows(rows)
 
 		ctx := context.Background()
 		res, err := accessor.GetAll(ctx)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(res).To(gomega.Equal(sampleData))
+	})
+
+	t.Run("success on empty result", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		sampleData := []string{
+			"id",
+			"name",
+			"bp_id",
+			"bp_name",
+			"rating",
+			"area_group_id",
+			"area_group_name",
+			"sap_code",
+			"modified_date",
+			"modified_by",
+			"dt",
+		}
+
+		rows := sqlmock.NewRows(sampleData)
+
+		mock.ExpectQuery(`SELECT 
+			"id",
+			"name",
+			"bp_id",
+			"bp_name",
+			"rating",
+			"area_group_id",
+			"area_group_name",
+			"sap_code",
+			"modified_date",
+			"modified_by",
+			"dt" 
+			FROM vendor`).
+			WillReturnRows(rows)
+
+		ctx := context.Background()
+		res, err := accessor.GetAll(ctx)
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(res).To(gomega.Equal([]Vendor{}))
+	})
+
+	t.Run("error on scanning row", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		sampleData := []string{
+			"id",
+			"name",
+			"bp_id",
+			"bp_name",
+			"rating",
+			"area_group_id",
+			"area_group_name",
+			"sap_code",
+			"modified_date",
+			"modified_by",
+			"dt",
+		}
+
+		rows := sqlmock.NewRows(sampleData).AddRow(
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+		)
+
+		mock.ExpectQuery(`SELECT 
+			"id",
+			"name",
+			"bp_id",
+			"bp_name",
+			"rating",
+			"area_group_id",
+			"area_group_name",
+			"sap_code",
+			"modified_date",
+			"modified_by",
+			"dt" 
+			FROM vendor`).
+			WillReturnRows(rows)
+
+		ctx := context.Background()
+		res, err := accessor.GetAll(ctx)
+
+		g.Expect(err).ToNot(gomega.BeNil())
+		g.Expect(res).To(gomega.BeNil())
 	})
 }
