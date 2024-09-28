@@ -5,6 +5,7 @@ import "context"
 
 type vendorDBAccessor interface {
 	GetSomeStuff(ctx context.Context) ([]string, error)
+	GetAll(ctx context.Context) ([]Vendor, error)
 }
 
 type VendorService struct {
@@ -13,6 +14,10 @@ type VendorService struct {
 
 func (v *VendorService) GetSomeStuff(ctx context.Context) ([]string, error) {
 	return v.vendorDBAccessor.GetSomeStuff(ctx)
+}
+
+func (v *VendorService) GetAll(ctx context.Context) ([]Vendor, error) {
+	return v.vendorDBAccessor.GetAll(ctx)
 }
 
 func NewVendorService(vendorDBAccessor vendorDBAccessor) *VendorService {
