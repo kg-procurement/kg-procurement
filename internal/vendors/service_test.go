@@ -2,6 +2,7 @@ package vendors
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -175,14 +176,25 @@ func TestVendorService_GetByLocation(t *testing.T) {
 			g := gomega.NewWithT(t)
 			v := NewVendorService(tt.fields.mockVendorDBAccessor)
 
-			tt.fields.mockVendorDBAccessor.EXPECT().
-				GetByLocation(tt.args.ctx, location).
-				Return(tt.want, nil)
+			if tt.wantErr {
+				tt.fields.mockVendorDBAccessor.EXPECT().
+					GetByLocation(tt.args.ctx, location).
+					Return(nil, fmt.Errorf("some error"))
+			} else {
+				tt.fields.mockVendorDBAccessor.EXPECT().
+					GetByLocation(tt.args.ctx, location).
+					Return(tt.want, nil)
+			}
 
 			res, err := v.GetByLocation(tt.args.ctx, location)
 
-			g.Expect(err).To(gomega.BeNil())
-			g.Expect(res).To(gomega.Equal(tt.want))
+			if tt.wantErr {
+				g.Expect(err).ToNot(gomega.BeNil())
+				g.Expect(res).To(gomega.BeNil())
+			} else {
+				g.Expect(err).To(gomega.BeNil())
+				g.Expect(res).To(gomega.Equal(tt.want))
+			}
 		})
 	}
 }
