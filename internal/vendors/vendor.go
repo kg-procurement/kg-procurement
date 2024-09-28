@@ -8,10 +8,10 @@ type Vendor struct {
 	ID            string    `json:"id"`
 	Name          string    `json:"name"`
 	Description   string    `json:"description"`
-	BpId          int       `json:"bp_id"`
+	BpID          string    `json:"bp_id"`
 	BpName        string    `json:"bp_name"`
 	Rating        int       `json:"rating"`
-	AreaGroupId   int       `json:"area_group_id"`
+	AreaGroupID   string    `json:"area_group_id"`
 	AreaGroupName string    `json:"area_group_name"`
 	SapCode       string    `json:"sap_code"`
 	ModifiedDate  time.Time `json:"modified_date"`

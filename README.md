@@ -25,6 +25,10 @@ Set the following on the `Connection` tab:
 
 ## Add schema migrations
 
-- Create migrations: goose create <migration_name> sql
-- Move migration to migrations directory (Manually): mv <"FILE_NAME">.sql migrations/<"FILE_NAME">.sql
-- run : `make migrate`
+- Create migrations: `goose create <migration_name> sql`
+- Move migration to migrations directory (Manually): `mv <"FILE_NAME">.sql migrations/<"FILE_NAME">.sql`
+
+## Execute migrations
+
+- Apply all available migrations: `make migrate-up`
+- Role back single migrations from the current version: `make migrate-down`

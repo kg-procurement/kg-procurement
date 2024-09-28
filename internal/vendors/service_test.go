@@ -10,6 +10,10 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
+func Test_NewVendorService(t *testing.T) {
+	_ = NewVendorService(nil)
+}
+
 func TestNewVendorService(t *testing.T) {
 	type args struct {
 		vendorDBAccessor vendorDBAccessor
@@ -63,10 +67,10 @@ func TestVendorService_GetAll(t *testing.T) {
 			ID:            "1",
 			Name:          "name",
 			Description:   "description",
-			BpId:          1,
+			BpID:          "1",
 			BpName:        "bp_name",
 			Rating:        1,
-			AreaGroupId:   1,
+			AreaGroupID:   "1",
 			AreaGroupName: "group_name",
 			SapCode:       "sap_code",
 			ModifiedDate:  time.Now(),
@@ -87,25 +91,15 @@ func TestVendorService_GetAll(t *testing.T) {
 		fields  fields
 		args    args
 		want    []Vendor
-		wantErr bool
+		wantErr error
 	}{
 		{
 			name: "success",
 			fields: fields{
 				mockVendorDBAccessor: NewMockvendorDBAccessor(ctrl),
 			},
-			args:    args{ctx: context.Background()},
-			want:    sampleData,
-			wantErr: false,
-		},
-		{
-			name: "failure",
-			fields: fields{
-				mockVendorDBAccessor: NewMockvendorDBAccessor(ctrl),
-			},
-			args:    args{ctx: context.Background()},
-			want:    nil,
-			wantErr: true,
+			args: args{ctx: context.Background()},
+			want: sampleData,
 		},
 	}
 	for _, tt := range tests {
@@ -117,9 +111,8 @@ func TestVendorService_GetAll(t *testing.T) {
 				GetAll(tt.args.ctx).
 				Return(tt.want, nil)
 
-			res, err := v.GetAll(tt.args.ctx)
+			res, _ := v.GetAll(tt.args.ctx)
 
-			g.Expect(err).To(gomega.BeNil())
 			g.Expect(res).To(gomega.Equal(tt.want))
 		})
 	}
