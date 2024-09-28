@@ -1,15 +1,15 @@
 -- +goose Up
 -- +goose StatementBegin
 CREATE TABLE "vendor" (
-  "id" int PRIMARY KEY,
-  "name" varchar,
-  "description" varchar,
-  "bp_id" int,
-  "bp_name" varchar,
+  "id" varchar(15) PRIMARY KEY,
+  "name" varchar(127),
+  "description" varchar(127),
+  "bp_id" varchar(15),
+  "bp_name" varchar(127),
   "rating"  int,
-  "area_group_id" int,
-  "area_group_name" varchar,
-  "sap_code" varchar,
+  "area_group_id" varchar(15),
+  "area_group_name" varchar(127),
+  "sap_code" varchar(127),
   "modified_date" timestamp,
   "modified_by" int,
   "dt" date
