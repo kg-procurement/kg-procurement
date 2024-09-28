@@ -1,7 +1,10 @@
 //go:generate mockgen -typed -source=service.go -destination=service_mock.go -package=vendors
 package vendors
 
-import "context"
+import (
+	"context"
+	"kg/procurement/internal/common/database"
+)
 
 type vendorDBAccessor interface {
 	GetSomeStuff(ctx context.Context) ([]string, error)
@@ -10,7 +13,7 @@ type vendorDBAccessor interface {
 }
 
 type VendorService struct {
-	vendorDBAccessor vendorDBAccessor
+	vendorDBAccessor
 }
 
 func (v *VendorService) GetSomeStuff(ctx context.Context) ([]string, error) {
@@ -25,8 +28,10 @@ func (v *VendorService) GetByLocation(ctx context.Context, location string) ([]V
 	return v.vendorDBAccessor.GetByLocation(ctx, location)
 }
 
-func NewVendorService(vendorDBAccessor vendorDBAccessor) *VendorService {
+func NewVendorService(
+	conn database.DBConnector,
+) *VendorService {
 	return &VendorService{
-		vendorDBAccessor: vendorDBAccessor,
+		vendorDBAccessor: newPostgresVendorAccessor(conn),
 	}
 }
