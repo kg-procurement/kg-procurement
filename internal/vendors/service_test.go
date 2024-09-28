@@ -2,6 +2,7 @@ package vendors
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -114,6 +115,86 @@ func TestVendorService_GetAll(t *testing.T) {
 			res, _ := v.GetAll(tt.args.ctx)
 
 			g.Expect(res).To(gomega.Equal(tt.want))
+		})
+	}
+}
+
+func TestVendorService_GetByLocation(t *testing.T) {
+	location := "Indonesia"
+	sampleData := []Vendor{
+		{
+			ID:            "1",
+			Name:          "name",
+			Description:   "description",
+			BpID:          "1",
+			BpName:        "bp_name",
+			Rating:        1,
+			AreaGroupID:   "1",
+			AreaGroupName: location,
+			SapCode:       "sap_code",
+			ModifiedDate:  time.Now(),
+			ModifiedBy:    1,
+			Date:          time.Now(),
+		},
+	}
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	type fields struct {
+		mockVendorDBAccessor *MockvendorDBAccessor
+	}
+	type args struct {
+		ctx context.Context
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    []Vendor
+		wantErr bool
+	}{
+		{
+			name: "success",
+			fields: fields{
+				mockVendorDBAccessor: NewMockvendorDBAccessor(ctrl),
+			},
+			args:    args{ctx: context.Background()},
+			want:    sampleData,
+			wantErr: false,
+		},
+		{
+			name: "failure",
+			fields: fields{
+				mockVendorDBAccessor: NewMockvendorDBAccessor(ctrl),
+			},
+			args:    args{ctx: context.Background()},
+			want:    nil,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := gomega.NewWithT(t)
+			v := NewVendorService(tt.fields.mockVendorDBAccessor)
+
+			if tt.wantErr {
+				tt.fields.mockVendorDBAccessor.EXPECT().
+					GetByLocation(tt.args.ctx, location).
+					Return(nil, fmt.Errorf("some error"))
+			} else {
+				tt.fields.mockVendorDBAccessor.EXPECT().
+					GetByLocation(tt.args.ctx, location).
+					Return(tt.want, nil)
+			}
+
+			res, err := v.GetByLocation(tt.args.ctx, location)
+
+			if tt.wantErr {
+				g.Expect(err).ToNot(gomega.BeNil())
+				g.Expect(res).To(gomega.BeNil())
+			} else {
+				g.Expect(err).To(gomega.BeNil())
+				g.Expect(res).To(gomega.Equal(tt.want))
+			}
 		})
 	}
 }
