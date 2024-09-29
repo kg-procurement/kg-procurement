@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strings"
 	"testing"
 	"time"
 
@@ -472,22 +473,6 @@ func TestVendorAccessor_GetByLocation(t *testing.T) {
 		g, db := setup(t)
 		defer db.Close()
 
-		rows := sqlmock.NewRows(sampleData).
-			AddRow(
-				"1",
-				"name",
-				"description",
-				"1",
-				"bp_name",
-				1,
-				"1",
-				location,
-				"sap_code",
-				fixedTime,
-				1,
-				fixedTime,
-			)
-
 		wrongQuery := `SELECT 
 			"id",
 			"name",
@@ -505,7 +490,8 @@ func TestVendorAccessor_GetByLocation(t *testing.T) {
 			WHERE description = $1`
 
 		mock.ExpectQuery(wrongQuery).
-			WillReturnRows(rows)
+			WithArgs(location).
+			WillReturnError(errors.New("some error"))
 
 		ctx := context.Background()
 		res, err := accessor.GetByLocation(ctx, location)
@@ -535,10 +521,270 @@ func TestVendorAccessor_GetByLocation(t *testing.T) {
 			).RowError(0, fmt.Errorf("row error"))
 
 		mock.ExpectQuery(query).
+			WithArgs(location).
 			WillReturnRows(rows)
 
 		ctx := context.Background()
 		res, err := accessor.GetByLocation(ctx, location)
+
+		g.Expect(err).ToNot(gomega.BeNil())
+		g.Expect(res).To(gomega.BeNil())
+	})
+}
+
+func TestVendorAccessor_GetByProduct(t *testing.T) {
+	t.Parallel()
+
+	var (
+		accessor *postgresVendorAccessor
+		mock     sqlmock.Sqlmock
+	)
+
+	setup := func(t *testing.T) (*gomega.GomegaWithT, *sql.DB) {
+		g := gomega.NewWithT(t)
+		db, sqlMock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+		if err != nil {
+			log.Fatal("error initializing mock:", err)
+		}
+
+		accessor = newPostgresVendorAccessor(db)
+		mock = sqlMock
+
+		return g, db
+	}
+
+	sampleData := []string{
+		"id",
+		"name",
+		"description",
+		"bp_id",
+		"bp_name",
+		"rating",
+		"area_group_id",
+		"area_group_name",
+		"sap_code",
+		"modified_date",
+		"modified_by",
+		"dt",
+	}
+
+	fixedTime := time.Date(2024, time.September, 27, 12, 30, 0, 0, time.UTC)
+	product := "test product"
+	productParts := strings.Fields(product)
+
+	t.Run("success", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		query := `SELECT 
+			"id",
+			"name",
+			"description",
+			"bp_id",
+			"bp_name",
+			"rating",
+			"area_group_id",
+			"area_group_name",
+			"sap_code",
+			"modified_date",
+			"modified_by",
+			"dt" 
+			FROM vendor
+			WHERE description LIKE $1 AND description LIKE $2`
+
+		rows := sqlmock.NewRows(sampleData).
+			AddRow(
+				"1",
+				"name",
+				"description",
+				"1",
+				"bp_name",
+				1,
+				"1",
+				"group_name",
+				"sap_code",
+				fixedTime,
+				1,
+				fixedTime,
+			)
+
+		mock.ExpectQuery(query).
+			WithArgs("%"+productParts[0]+"%", "%"+productParts[1]+"%").
+			WillReturnRows(rows)
+
+		ctx := context.Background()
+		res, err := accessor.GetByProduct(ctx, product)
+
+		expectation := []Vendor{{
+			ID:            "1",
+			Name:          "name",
+			Description:   "description",
+			BpID:          "1",
+			BpName:        "bp_name",
+			Rating:        1,
+			AreaGroupID:   "1",
+			AreaGroupName: "group_name",
+			SapCode:       "sap_code",
+			ModifiedDate:  fixedTime,
+			ModifiedBy:    1,
+			Date:          fixedTime,
+		}}
+
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(res).To(gomega.Equal(expectation))
+	})
+
+	t.Run("success on empty result", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		query := `SELECT 
+			"id",
+			"name",
+			"description",
+			"bp_id",
+			"bp_name",
+			"rating",
+			"area_group_id",
+			"area_group_name",
+			"sap_code",
+			"modified_date",
+			"modified_by",
+			"dt" 
+			FROM vendor
+			WHERE description LIKE $1 AND description LIKE $2`
+
+		rows := sqlmock.NewRows(sampleData)
+
+		mock.ExpectQuery(query).
+			WithArgs("%"+productParts[0]+"%", "%"+productParts[1]+"%").
+			WillReturnRows(rows)
+
+		ctx := context.Background()
+		res, err := accessor.GetByProduct(ctx, product)
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(res).To(gomega.Equal([]Vendor{}))
+	})
+
+	t.Run("error on scanning row", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		query := `SELECT 
+			"id",
+			"name",
+			"description",
+			"bp_id",
+			"bp_name",
+			"rating",
+			"area_group_id",
+			"area_group_name",
+			"sap_code",
+			"modified_date",
+			"modified_by",
+			"dt" 
+			FROM vendor
+			WHERE description LIKE $1 AND description LIKE $2`
+
+		rows := sqlmock.NewRows(sampleData).AddRow(
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+		)
+
+		mock.ExpectQuery(query).
+			WithArgs("%"+productParts[0]+"%", "%"+productParts[1]+"%").
+			WillReturnRows(rows)
+
+		ctx := context.Background()
+		res, err := accessor.GetByProduct(ctx, product)
+
+		g.Expect(err).ToNot(gomega.BeNil())
+		g.Expect(res).To(gomega.BeNil())
+	})
+
+	t.Run("error on executing query", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		query := `SELECT 
+			"id",
+			"name",
+			"description",
+			"bp_id",
+			"bp_name",
+			"rating",
+			"area_group_id",
+			"area_group_name",
+			"sap_code",
+			"modified_date",
+			"modified_by",
+			"dt" 
+			FROM vendor
+			WHERE description LIKE $1 AND description LIKE $2`
+
+		mock.ExpectQuery(query).
+			WithArgs("%"+productParts[0]+"%", "%"+productParts[1]+"%").
+			WillReturnError(errors.New("some error"))
+
+		ctx := context.Background()
+		res, err := accessor.GetByProduct(ctx, product)
+
+		g.Expect(err).ToNot(gomega.BeNil())
+		g.Expect(res).To(gomega.BeNil())
+	})
+
+	t.Run("error while iterating rows", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		query := `SELECT 
+			"id",
+			"name",
+			"description",
+			"bp_id",
+			"bp_name",
+			"rating",
+			"area_group_id",
+			"area_group_name",
+			"sap_code",
+			"modified_date",
+			"modified_by",
+			"dt" 
+			FROM vendor
+			WHERE description LIKE $1 AND description LIKE $2`
+
+		rows := sqlmock.NewRows(sampleData).
+			AddRow(
+				"1",
+				"name",
+				"description",
+				"1",
+				"bp_name",
+				1,
+				"1",
+				"group_name",
+				"sap_code",
+				fixedTime,
+				1,
+				fixedTime,
+			).RowError(0, fmt.Errorf("row error"))
+
+		mock.ExpectQuery(query).
+			WithArgs("%"+productParts[0]+"%", "%"+productParts[1]+"%").
+			WillReturnRows(rows)
+
+		ctx := context.Background()
+		res, err := accessor.GetByProduct(ctx, product)
 
 		g.Expect(err).ToNot(gomega.BeNil())
 		g.Expect(res).To(gomega.BeNil())
