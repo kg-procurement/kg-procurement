@@ -1,11 +1,14 @@
 package main
 
 import (
-	"fmt"
 	"kg/procurement/cmd/config"
 	"kg/procurement/cmd/dependency"
+	"kg/procurement/internal/vendors"
+	"kg/procurement/router"
 	"log"
 	"os"
+
+	"github.com/gin-gonic/gin"
 )
 
 // main is the entrypoint for the entire service
@@ -21,5 +24,13 @@ func main() {
 		_ = os.Stdout.Sync()
 	}()
 
-	fmt.Println("Welcomee")
+	vendorSvc := vendors.NewVendorService(conn)
+
+	r := gin.Default()
+
+	router.NewVendorEngine(r, cfg.Routes.Vendor, vendorSvc)
+
+	if err := r.Run(":8080"); err != nil {
+		log.Fatalf("failed to run server, err: %v", err)
+	}
 }

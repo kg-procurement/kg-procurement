@@ -8,6 +8,7 @@ import (
 
 type Application struct {
 	Common Common `mapstructure:"common" validate:"required"`
+	Routes Routes `mapstructure:"routes" validate:"required"`
 }
 
 type Common struct {
@@ -20,6 +21,15 @@ type PostgresConfig struct {
 	Username string `mapstructure:"username" validate:"required"`
 	Password string `mapstructure:"password" validate:"required"`
 	Port     string `mapstructure:"port" validate:"required"`
+}
+
+type Routes struct {
+	Vendor VendorRoutes `mapstructure:"vendor" validate:"required"`
+}
+
+type VendorRoutes struct {
+	GetAll        string `mapstructure:"get-all" validate:"required"`
+	GetByLocation string `mapstructure:"get-by-location" validate:"required"`
 }
 
 func Load() Application {

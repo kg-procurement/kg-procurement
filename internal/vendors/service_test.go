@@ -3,6 +3,7 @@ package vendors
 import (
 	"context"
 	"fmt"
+	"kg/procurement/internal/common/database"
 	"reflect"
 	"testing"
 	"time"
@@ -17,7 +18,7 @@ func Test_NewVendorService(t *testing.T) {
 
 func TestNewVendorService(t *testing.T) {
 	type args struct {
-		vendorDBAccessor vendorDBAccessor
+		mockDBConnector *database.MockDBConnector
 	}
 	tests := []struct {
 		name string
@@ -28,7 +29,7 @@ func TestNewVendorService(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewVendorService(tt.args.vendorDBAccessor); !reflect.DeepEqual(got, tt.want) {
+			if got := NewVendorService(tt.args.mockDBConnector); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewVendorService() = %v, want %v", got, tt.want)
 			}
 		})
@@ -83,6 +84,7 @@ func TestVendorService_GetAll(t *testing.T) {
 	defer ctrl.Finish()
 	type fields struct {
 		mockVendorDBAccessor *MockvendorDBAccessor
+		mockDBConnector      *database.MockDBConnector
 	}
 	type args struct {
 		ctx context.Context
@@ -106,7 +108,9 @@ func TestVendorService_GetAll(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewWithT(t)
-			v := NewVendorService(tt.fields.mockVendorDBAccessor)
+			v := &VendorService{
+				vendorDBAccessor: tt.fields.mockVendorDBAccessor,
+			}
 
 			tt.fields.mockVendorDBAccessor.EXPECT().
 				GetAll(tt.args.ctx).
@@ -174,7 +178,9 @@ func TestVendorService_GetByLocation(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewWithT(t)
-			v := NewVendorService(tt.fields.mockVendorDBAccessor)
+			v := &VendorService{
+				vendorDBAccessor: tt.fields.mockVendorDBAccessor,
+			}
 
 			if tt.wantErr {
 				tt.fields.mockVendorDBAccessor.EXPECT().
