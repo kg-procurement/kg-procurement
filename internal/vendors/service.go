@@ -10,6 +10,7 @@ type vendorDBAccessor interface {
 	GetSomeStuff(ctx context.Context) ([]string, error)
 	GetAll(ctx context.Context) ([]Vendor, error)
 	GetByLocation(ctx context.Context, location string) ([]Vendor, error)
+	GetByProduct(ctx context.Context, product string) ([]Vendor, error)
 }
 
 type VendorService struct {
@@ -26,6 +27,10 @@ func (v *VendorService) GetAll(ctx context.Context) ([]Vendor, error) {
 
 func (v *VendorService) GetByLocation(ctx context.Context, location string) ([]Vendor, error) {
 	return v.vendorDBAccessor.GetByLocation(ctx, location)
+}
+
+func (v *VendorService) GetByProduct(ctx context.Context, product string) ([]Vendor, error) {
+	return v.vendorDBAccessor.GetByProduct(ctx, product)
 }
 
 func NewVendorService(
