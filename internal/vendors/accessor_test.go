@@ -358,20 +358,20 @@ func TestVendorAccessor_GetByLocation(t *testing.T) {
 	}
 
 	query := `SELECT 
-	"id",
-	"name",
-	"description",
-	"bp_id",
-	"bp_name",
-	"rating",
-	"area_group_id",
-	"area_group_name",
-	"sap_code",
-	"modified_date",
-	"modified_by",
-	"dt" 
-	FROM vendor
-	WHERE area_group_name = $1`
+			"id",
+			"name",
+			"description",
+			"bp_id",
+			"bp_name",
+			"rating",
+			"area_group_id",
+			"area_group_name",
+			"sap_code",
+			"modified_date",
+			"modified_by",
+			"dt" 
+			FROM vendor
+			WHERE area_group_name = $1`
 
 	fixedTime := time.Date(2024, time.September, 27, 12, 30, 0, 0, time.UTC)
 
@@ -473,23 +473,7 @@ func TestVendorAccessor_GetByLocation(t *testing.T) {
 		g, db := setup(t)
 		defer db.Close()
 
-		wrongQuery := `SELECT 
-			"id",
-			"name",
-			"description",
-			"bp_id",
-			"bp_name",
-			"rating",
-			"area_group_id",
-			"area_group_name",
-			"sap_code",
-			"modified_date",
-			"modified_by",
-			"dt" 
-			FROM vendor
-			WHERE description = $1`
-
-		mock.ExpectQuery(wrongQuery).
+		mock.ExpectQuery(query).
 			WithArgs(location).
 			WillReturnError(errors.New("some error"))
 
@@ -568,15 +552,7 @@ func TestVendorAccessor_GetByProduct(t *testing.T) {
 		"dt",
 	}
 
-	fixedTime := time.Date(2024, time.September, 27, 12, 30, 0, 0, time.UTC)
-	product := "test product"
-	productParts := strings.Fields(product)
-
-	t.Run("success", func(t *testing.T) {
-		g, db := setup(t)
-		defer db.Close()
-
-		query := `SELECT 
+	query := `SELECT 
 			"id",
 			"name",
 			"description",
@@ -591,6 +567,14 @@ func TestVendorAccessor_GetByProduct(t *testing.T) {
 			"dt" 
 			FROM vendor
 			WHERE description LIKE $1 AND description LIKE $2`
+
+	fixedTime := time.Date(2024, time.September, 27, 12, 30, 0, 0, time.UTC)
+	product := "test product"
+	productParts := strings.Fields(product)
+
+	t.Run("success", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
 
 		rows := sqlmock.NewRows(sampleData).
 			AddRow(
@@ -638,22 +622,6 @@ func TestVendorAccessor_GetByProduct(t *testing.T) {
 		g, db := setup(t)
 		defer db.Close()
 
-		query := `SELECT 
-			"id",
-			"name",
-			"description",
-			"bp_id",
-			"bp_name",
-			"rating",
-			"area_group_id",
-			"area_group_name",
-			"sap_code",
-			"modified_date",
-			"modified_by",
-			"dt" 
-			FROM vendor
-			WHERE description LIKE $1 AND description LIKE $2`
-
 		rows := sqlmock.NewRows(sampleData)
 
 		mock.ExpectQuery(query).
@@ -669,22 +637,6 @@ func TestVendorAccessor_GetByProduct(t *testing.T) {
 	t.Run("error on scanning row", func(t *testing.T) {
 		g, db := setup(t)
 		defer db.Close()
-
-		query := `SELECT 
-			"id",
-			"name",
-			"description",
-			"bp_id",
-			"bp_name",
-			"rating",
-			"area_group_id",
-			"area_group_name",
-			"sap_code",
-			"modified_date",
-			"modified_by",
-			"dt" 
-			FROM vendor
-			WHERE description LIKE $1 AND description LIKE $2`
 
 		rows := sqlmock.NewRows(sampleData).AddRow(
 			nil,
@@ -716,22 +668,6 @@ func TestVendorAccessor_GetByProduct(t *testing.T) {
 		g, db := setup(t)
 		defer db.Close()
 
-		query := `SELECT 
-			"id",
-			"name",
-			"description",
-			"bp_id",
-			"bp_name",
-			"rating",
-			"area_group_id",
-			"area_group_name",
-			"sap_code",
-			"modified_date",
-			"modified_by",
-			"dt" 
-			FROM vendor
-			WHERE description LIKE $1 AND description LIKE $2`
-
 		mock.ExpectQuery(query).
 			WithArgs("%"+productParts[0]+"%", "%"+productParts[1]+"%").
 			WillReturnError(errors.New("some error"))
@@ -746,22 +682,6 @@ func TestVendorAccessor_GetByProduct(t *testing.T) {
 	t.Run("error while iterating rows", func(t *testing.T) {
 		g, db := setup(t)
 		defer db.Close()
-
-		query := `SELECT 
-			"id",
-			"name",
-			"description",
-			"bp_id",
-			"bp_name",
-			"rating",
-			"area_group_id",
-			"area_group_name",
-			"sap_code",
-			"modified_date",
-			"modified_by",
-			"dt" 
-			FROM vendor
-			WHERE description LIKE $1 AND description LIKE $2`
 
 		rows := sqlmock.NewRows(sampleData).
 			AddRow(
