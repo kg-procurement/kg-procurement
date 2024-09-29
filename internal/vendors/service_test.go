@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"kg/procurement/internal/common/database"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -271,13 +272,14 @@ func TestVendorService_GetByProduct(t *testing.T) {
 				vendorDBAccessor: tt.fields.mockVendorDBAccessor,
 			}
 
+			productWords := strings.Fields(tt.args.product)
 			if tt.wantErr {
 				tt.fields.mockVendorDBAccessor.EXPECT().
-					GetByProduct(tt.args.ctx, tt.args.product).
+					GetByProductWords(tt.args.ctx, productWords).
 					Return(nil, fmt.Errorf("some error"))
 			} else {
 				tt.fields.mockVendorDBAccessor.EXPECT().
-					GetByProduct(tt.args.ctx, tt.args.product).
+					GetByProductWords(tt.args.ctx, productWords).
 					Return(tt.want, nil)
 			}
 

@@ -516,7 +516,7 @@ func TestVendorAccessor_GetByLocation(t *testing.T) {
 	})
 }
 
-func TestVendorAccessor_GetByProduct(t *testing.T) {
+func TestVendorAccessor_GetByProductWords(t *testing.T) {
 	t.Parallel()
 
 	var (
@@ -570,7 +570,7 @@ func TestVendorAccessor_GetByProduct(t *testing.T) {
 
 	fixedTime := time.Date(2024, time.September, 27, 12, 30, 0, 0, time.UTC)
 	product := "test product"
-	productParts := strings.Fields(product)
+	productWords := strings.Fields(product)
 
 	t.Run("success", func(t *testing.T) {
 		g, db := setup(t)
@@ -593,11 +593,11 @@ func TestVendorAccessor_GetByProduct(t *testing.T) {
 			)
 
 		mock.ExpectQuery(query).
-			WithArgs("%"+productParts[0]+"%", "%"+productParts[1]+"%").
+			WithArgs("%"+productWords[0]+"%", "%"+productWords[1]+"%").
 			WillReturnRows(rows)
 
 		ctx := context.Background()
-		res, err := accessor.GetByProduct(ctx, product)
+		res, err := accessor.GetByProductWords(ctx, productWords)
 
 		expectation := []Vendor{{
 			ID:            "1",
@@ -625,11 +625,11 @@ func TestVendorAccessor_GetByProduct(t *testing.T) {
 		rows := sqlmock.NewRows(sampleData)
 
 		mock.ExpectQuery(query).
-			WithArgs("%"+productParts[0]+"%", "%"+productParts[1]+"%").
+			WithArgs("%"+productWords[0]+"%", "%"+productWords[1]+"%").
 			WillReturnRows(rows)
 
 		ctx := context.Background()
-		res, err := accessor.GetByProduct(ctx, product)
+		res, err := accessor.GetByProductWords(ctx, productWords)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(res).To(gomega.Equal([]Vendor{}))
 	})
@@ -654,11 +654,11 @@ func TestVendorAccessor_GetByProduct(t *testing.T) {
 		)
 
 		mock.ExpectQuery(query).
-			WithArgs("%"+productParts[0]+"%", "%"+productParts[1]+"%").
+			WithArgs("%"+productWords[0]+"%", "%"+productWords[1]+"%").
 			WillReturnRows(rows)
 
 		ctx := context.Background()
-		res, err := accessor.GetByProduct(ctx, product)
+		res, err := accessor.GetByProductWords(ctx, productWords)
 
 		g.Expect(err).ToNot(gomega.BeNil())
 		g.Expect(res).To(gomega.BeNil())
@@ -669,11 +669,11 @@ func TestVendorAccessor_GetByProduct(t *testing.T) {
 		defer db.Close()
 
 		mock.ExpectQuery(query).
-			WithArgs("%"+productParts[0]+"%", "%"+productParts[1]+"%").
+			WithArgs("%"+productWords[0]+"%", "%"+productWords[1]+"%").
 			WillReturnError(errors.New("some error"))
 
 		ctx := context.Background()
-		res, err := accessor.GetByProduct(ctx, product)
+		res, err := accessor.GetByProductWords(ctx, productWords)
 
 		g.Expect(err).ToNot(gomega.BeNil())
 		g.Expect(res).To(gomega.BeNil())
@@ -700,11 +700,11 @@ func TestVendorAccessor_GetByProduct(t *testing.T) {
 			).RowError(0, fmt.Errorf("row error"))
 
 		mock.ExpectQuery(query).
-			WithArgs("%"+productParts[0]+"%", "%"+productParts[1]+"%").
+			WithArgs("%"+productWords[0]+"%", "%"+productWords[1]+"%").
 			WillReturnRows(rows)
 
 		ctx := context.Background()
-		res, err := accessor.GetByProduct(ctx, product)
+		res, err := accessor.GetByProductWords(ctx, productWords)
 
 		g.Expect(err).ToNot(gomega.BeNil())
 		g.Expect(res).To(gomega.BeNil())
