@@ -36,4 +36,17 @@ func NewVendorEngine(
 
 		ctx.JSON(http.StatusOK, res)
 	})
+
+	r.GET(cfg.GetByProduct, func(ctx *gin.Context) {
+		product := ctx.Query("product")
+
+		res, err := vendorSvc.GetByProduct(ctx, product)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
+		}
+
+		ctx.JSON(http.StatusOK, res)
+	})
 }
