@@ -2,6 +2,7 @@ package inventory
 
 import (
 	"context"
+	"fmt"
 	"kg/procurement/internal/common/database"
 )
 
@@ -10,6 +11,22 @@ type postgresInventoryAccessor struct {
 }
 
 func (p *postgresInventoryAccessor) UpdateInventory(ctx context.Context, id string, updatedItem Item) error {
+	query := `UPDATE inventory SET 
+		name = $1, 
+		description = $2, 
+		price = $3
+		WHERE id = $4`
+
+	_, err := p.db.Exec(query, 
+		updatedItem.Name, 
+		updatedItem.Description, 
+		updatedItem.Price, 
+		id)
+	
+	if err != nil {
+		return fmt.Errorf("failed to update inventory item with id %s: %w", id, err)
+	}
+	
 	return nil
 }
 

@@ -96,7 +96,7 @@ func TestUpdateInventory(t *testing.T) {
 			Price:       150.00,
 		}
 
-		mock.ExpectExec(`UPDATE inventory SET name = ?, description = ?, price = ? WHERE id = ?`).
+		mock.ExpectExec(`UPDATE inventory SET name = $1, description = $2, price = $3 WHERE id = $4`).
 			WithArgs(updatedInventory.Name, updatedInventory.Description, updatedInventory.Price, updatedInventory.ID).
 			WillReturnError(errors.New("some database error"))
 
@@ -118,7 +118,7 @@ func TestUpdateInventory(t *testing.T) {
 			Price:       0.00,
 		}
 
-		mock.ExpectExec(`UPDATE inventory SET name = ?, description = ?, price = ? WHERE id = ?`).
+		mock.ExpectExec(`UPDATE inventory SET name = $1, description = $2, price = $3 WHERE id = $4`).
 			WithArgs(updatedInventory.Name, updatedInventory.Description, updatedInventory.Price, updatedInventory.ID).
 			WillReturnError(errors.New("inventory item not found"))
 
