@@ -77,7 +77,7 @@ func (p *postgresVendorAccessor) GetAll(ctx context.Context) ([]Vendor, error) {
 			&vendor.Date,
 		)
 		if err != nil {
-			return nil, fmt.Errorf("Failed while scanning row: %w", err)
+			return nil, err
 		}
 		vendors = append(vendors, vendor)
 	}
@@ -132,7 +132,7 @@ func (p *postgresVendorAccessor) GetByLocation(ctx context.Context, location str
 			&vendor.Date,
 		)
 		if err != nil {
-			return nil, fmt.Errorf("Failed while scanning row: %w", err)
+			return nil, err
 		}
 		vendors = append(vendors, vendor)
 	}
@@ -197,7 +197,7 @@ func (p *postgresVendorAccessor) GetByProductWords(ctx context.Context, productW
 			&vendor.Date,
 		)
 		if err != nil {
-			return nil, fmt.Errorf("Failed while scanning row: %w", err)
+			return nil, err
 		}
 		vendors = append(vendors, vendor)
 	}
