@@ -143,6 +143,11 @@ func (p *postgresVendorAccessor) GetByLocation(ctx context.Context, location str
 	return vendors, nil
 }
 
+func (p *postgresVendorAccessor) GetByProduct(ctx context.Context, product string) ([]Vendor, error) {
+	vendors := []Vendor{}
+	return vendors, nil
+}
+
 // newPostgresVendorAccessor is only accessible by the vendor package
 // entrypoint for other verticals should refer to the interface declared on service
 func newPostgresVendorAccessor(db database.DBConnector) *postgresVendorAccessor {
