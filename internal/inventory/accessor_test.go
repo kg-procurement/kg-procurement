@@ -54,7 +54,7 @@ func TestUpdateInventory(t *testing.T) {
 		return g, db
 	}
 
-	t.Run("success", func(t *testing.T) {
+	t.Run("When updating inventory successfully, should return no error", func(t *testing.T) {
 		g, db := setup(t)
 		defer db.Close()
 
@@ -84,7 +84,7 @@ func TestUpdateInventory(t *testing.T) {
 		g.Expect(err).To(gomega.BeNil())
 	})
 
-	t.Run("error on update", func(t *testing.T) {
+	t.Run("When updating inventory fails due to database error, should return error", func(t *testing.T) {
 		g, db := setup(t)
 		defer db.Close()
 
@@ -106,7 +106,7 @@ func TestUpdateInventory(t *testing.T) {
 		g.Expect(err).ToNot(gomega.BeNil())
 	})
 
-	t.Run("inventory not found", func(t *testing.T) {
+	t.Run("When updating inventory and item not found, should return error", func(t *testing.T) {
 		g, db := setup(t)
 		defer db.Close()
 
