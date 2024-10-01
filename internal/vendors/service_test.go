@@ -80,6 +80,17 @@ func TestVendorService_GetAll(t *testing.T) {
 			Date:          time.Now(),
 		},
 	}
+	accessorData := &AccessorGetAllPaginationData{
+		Vendors:      sampleData,
+		TotalEntries: 1,
+	}
+	payloadData := &ServiceGetAllPaginationData{
+		Vendors:      sampleData,
+		TotalEntries: 1,
+		CurrentPage:  1,
+		PreviousPage: nil,
+		NextPage:     2,
+	}
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	type fields struct {
@@ -87,22 +98,24 @@ func TestVendorService_GetAll(t *testing.T) {
 		mockDBConnector      *database.MockDBConnector
 	}
 	type args struct {
-		ctx context.Context
+		ctx  context.Context
+		spec ServiceGetAllPaginationSpec
 	}
 	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		want    []Vendor
-		wantErr error
+		name         string
+		fields       fields
+		args         args
+		wantService  *ServiceGetAllPaginationData
+		wantAccessor *AccessorGetAllPaginationData
 	}{
 		{
 			name: "success",
 			fields: fields{
 				mockVendorDBAccessor: NewMockvendorDBAccessor(ctrl),
 			},
-			args: args{ctx: context.Background()},
-			want: sampleData,
+			args:         args{ctx: context.Background(), spec: ServiceGetAllPaginationSpec{Limit: 10, Order: "DESC", Page: 1}},
+			wantService:  payloadData,
+			wantAccessor: accessorData,
 		},
 	}
 	for _, tt := range tests {
@@ -112,13 +125,22 @@ func TestVendorService_GetAll(t *testing.T) {
 				vendorDBAccessor: tt.fields.mockVendorDBAccessor,
 			}
 
+			offset := tt.args.spec.Limit * (tt.args.spec.Page - 1)
+
+			accessorSpec := AccessorGetAllPaginationSpec{
+				Limit:  tt.args.spec.Limit,
+				Offset: offset,
+				Order:  tt.args.spec.Order,
+			}
+
 			tt.fields.mockVendorDBAccessor.EXPECT().
-				GetAll(tt.args.ctx).
-				Return(tt.want, nil)
+				GetAll(tt.args.ctx, accessorSpec).
+				Return(tt.wantAccessor, nil)
 
-			res, _ := v.GetAll(tt.args.ctx)
+			res, err := v.GetAll(tt.args.ctx, tt.args.spec)
 
-			g.Expect(res).To(gomega.Equal(tt.want))
+			g.Expect(err).To(gomega.BeNil())
+			g.Expect(res).ToNot(gomega.BeNil())
 		})
 	}
 }

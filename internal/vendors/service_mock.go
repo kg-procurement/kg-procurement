@@ -40,18 +40,18 @@ func (m *MockvendorDBAccessor) EXPECT() *MockvendorDBAccessorMockRecorder {
 }
 
 // GetAll mocks base method.
-func (m *MockvendorDBAccessor) GetAll(ctx context.Context) ([]Vendor, error) {
+func (m *MockvendorDBAccessor) GetAll(ctx context.Context, spec AccessorGetAllPaginationSpec) (*AccessorGetAllPaginationData, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAll", ctx)
-	ret0, _ := ret[0].([]Vendor)
+	ret := m.ctrl.Call(m, "GetAll", ctx, spec)
+	ret0, _ := ret[0].(*AccessorGetAllPaginationData)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetAll indicates an expected call of GetAll.
-func (mr *MockvendorDBAccessorMockRecorder) GetAll(ctx any) *MockvendorDBAccessorGetAllCall {
+func (mr *MockvendorDBAccessorMockRecorder) GetAll(ctx, spec any) *MockvendorDBAccessorGetAllCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockvendorDBAccessor)(nil).GetAll), ctx)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockvendorDBAccessor)(nil).GetAll), ctx, spec)
 	return &MockvendorDBAccessorGetAllCall{Call: call}
 }
 
@@ -61,19 +61,19 @@ type MockvendorDBAccessorGetAllCall struct {
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockvendorDBAccessorGetAllCall) Return(arg0 []Vendor, arg1 error) *MockvendorDBAccessorGetAllCall {
+func (c *MockvendorDBAccessorGetAllCall) Return(arg0 *AccessorGetAllPaginationData, arg1 error) *MockvendorDBAccessorGetAllCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockvendorDBAccessorGetAllCall) Do(f func(context.Context) ([]Vendor, error)) *MockvendorDBAccessorGetAllCall {
+func (c *MockvendorDBAccessorGetAllCall) Do(f func(context.Context, AccessorGetAllPaginationSpec) (*AccessorGetAllPaginationData, error)) *MockvendorDBAccessorGetAllCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockvendorDBAccessorGetAllCall) DoAndReturn(f func(context.Context) ([]Vendor, error)) *MockvendorDBAccessorGetAllCall {
+func (c *MockvendorDBAccessorGetAllCall) DoAndReturn(f func(context.Context, AccessorGetAllPaginationSpec) (*AccessorGetAllPaginationData, error)) *MockvendorDBAccessorGetAllCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
