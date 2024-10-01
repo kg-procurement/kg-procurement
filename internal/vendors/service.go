@@ -28,12 +28,10 @@ func (v *VendorService) GetAll(ctx context.Context, spec ServiceGetAllPagination
 
 	offset := spec.Limit * (spec.Page - 1)
 
-	order := database.ValidateOrderString(spec.Order)
-
 	accessorSpec := AccessorGetAllPaginationSpec{
 		Limit:  limit,
 		Offset: offset,
-		Order:  order,
+		Order:  spec.Order,
 	}
 
 	result, err := v.vendorDBAccessor.GetAll(ctx, accessorSpec)
