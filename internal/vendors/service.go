@@ -22,17 +22,10 @@ func (v *VendorService) GetSomeStuff(ctx context.Context) ([]string, error) {
 
 func (v *VendorService) GetAll(ctx context.Context, spec ServiceGetAllPaginationSpec) (*ServiceGetAllPaginationData, error) {
 
-	limit := 10
-	if spec.Limit > 0 {
-		limit = spec.Limit
-	}
-
-	offset := spec.Limit * (spec.Page - 1)
-
-	accessorSpec := AccessorGetAllPaginationSpec{
-		Limit:  limit,
-		Offset: offset,
-		Order:  spec.Order,
+	accessorSpec := database.GetAllPaginationSpec{
+		Limit: spec.Limit,
+		Page:  spec.Page,
+		Order: spec.Order,
 	}
 
 	result, err := v.vendorDBAccessor.GetAll(ctx, accessorSpec)
@@ -40,18 +33,9 @@ func (v *VendorService) GetAll(ctx context.Context, spec ServiceGetAllPagination
 		return nil, err
 	}
 
-	var previousPage *int = nil
-	if spec.Page > 1 {
-		previousPage = new(int)
-		*previousPage = spec.Page - 1
-	}
-
 	payload := ServiceGetAllPaginationData{
-		Vendors:      result.Vendors,
-		TotalEntries: result.TotalEntries,
-		CurrentPage:  spec.Page,
-		PreviousPage: previousPage,
-		NextPage:     spec.Page + 1,
+		Vendors:  result.Vendors,
+		Metadata: result.Metadata,
 	}
 
 	return &payload, nil

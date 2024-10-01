@@ -265,8 +265,6 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 			Date:          fixedTime,
 		}}
 
-		// fmt.Println("hai valencius: ", *res)
-
 		expectation := &AccessorGetAllPaginationData{
 			Vendors:  vendorsExpectation,
 			Metadata: res.Metadata,

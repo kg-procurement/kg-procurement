@@ -1,7 +1,6 @@
 package database
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -56,9 +55,6 @@ func GeneratePaginationMetadata(spec GetAllPaginationSpec, totalEntries int) Pag
 	if totalEntries%spec.Limit != 0 {
 		totalPage += 1
 	}
-
-	fmt.Println("berapa banyak nih: ", totalPage)
-	fmt.Println("page nih: ", spec.Page)
 
 	metadata := PaginationMetadata{
 		TotalPage:   totalPage,
