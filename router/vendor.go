@@ -24,7 +24,7 @@ func NewVendorEngine(
 			})
 		}
 
-		res, err := vendorSvc.GetAll(ctx, *spec)
+		res, err := vendorSvc.GetAll(ctx, spec)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
@@ -48,28 +48,22 @@ func NewVendorEngine(
 	})
 }
 
-func getPaginationSpec(r *http.Request) (*vendors.ServiceGetAllPaginationSpec, error) {
+func getPaginationSpec(r *http.Request) (database.PaginationSpec, error) {
 	queryParam := r.URL.Query()
-
-	limitString := queryParam.Get("limit")
-	limit, err := strconv.Atoi(limitString)
-	if err != nil {
-		return nil, err
-	}
 
 	pageString := queryParam.Get("page")
 	page, err := strconv.Atoi(pageString)
 	if err != nil {
-		return nil, err
+		page = 1
 	}
 
-	order := database.ValidateOrderString(queryParam.Get("order"))
+	order := queryParam.Get("order")
 
-	spec := vendors.ServiceGetAllPaginationSpec{
-		Limit: limit,
+	spec := database.PaginationSpec{
+		Limit: 10,
 		Order: order,
 		Page:  page,
 	}
 
-	return &spec, nil
+	return spec, nil
 }

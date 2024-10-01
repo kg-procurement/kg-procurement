@@ -150,7 +150,7 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 
 	fixedTime := time.Date(2024, time.September, 27, 12, 30, 0, 0, time.UTC)
 
-	spec := database.GetAllPaginationSpec{
+	spec := database.PaginationSpec{
 		Order: "DESC",
 		Limit: 10,
 		Page:  1,
@@ -176,7 +176,7 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 				fixedTime,
 			)
 
-		args := database.GeneratePaginationArgs(spec)
+		args := database.BuildPaginationArgs(spec)
 
 		mock.ExpectQuery(dataQuery).
 			WithArgs(args.Order, args.Limit, args.Offset).
@@ -233,7 +233,7 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 				fixedTime,
 			)
 
-		customSpec := database.GetAllPaginationSpec{
+		customSpec := database.PaginationSpec{
 			Order: "DESC",
 			Limit: 1,
 			Page:  1,
@@ -280,7 +280,7 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 
 		rows := sqlmock.NewRows(vendorFields)
 
-		args := database.GeneratePaginationArgs(spec)
+		args := database.BuildPaginationArgs(spec)
 
 		mock.ExpectQuery(dataQuery).
 			WithArgs(args.Order, args.Limit, args.Offset).
@@ -322,7 +322,7 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 			nil,
 		)
 
-		args := database.GeneratePaginationArgs(spec)
+		args := database.BuildPaginationArgs(spec)
 
 		mock.ExpectQuery(dataQuery).
 			WithArgs(args.Order, args.Limit, args.Offset).
@@ -377,7 +377,7 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 			OFFSET $3
 			`
 
-		args := database.GeneratePaginationArgs(spec)
+		args := database.BuildPaginationArgs(spec)
 
 		mock.ExpectQuery(wrongQuery).
 			WithArgs(args.Order, args.Limit, args.Offset).
@@ -427,7 +427,7 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 			fixedTime,
 		).RowError(1, fmt.Errorf("row error"))
 
-		args := database.GeneratePaginationArgs(spec)
+		args := database.BuildPaginationArgs(spec)
 
 		mock.ExpectQuery(dataQuery).
 			WithArgs(args.Order, args.Limit, args.Offset).
@@ -464,7 +464,7 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 				fixedTime,
 			)
 
-		args := database.GeneratePaginationArgs(spec)
+		args := database.BuildPaginationArgs(spec)
 
 		mock.ExpectQuery(dataQuery).
 			WithArgs(args.Order, args.Limit, args.Offset).

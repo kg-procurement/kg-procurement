@@ -109,7 +109,7 @@ func TestVendorService_GetAll(t *testing.T) {
 
 	type args struct {
 		ctx  context.Context
-		spec ServiceGetAllPaginationSpec
+		spec database.PaginationSpec
 	}
 
 	tests := []struct {
@@ -125,7 +125,7 @@ func TestVendorService_GetAll(t *testing.T) {
 			fields: fields{
 				mockVendorDBAccessor: NewMockvendorDBAccessor(ctrl),
 			},
-			args:         args{ctx: context.Background(), spec: ServiceGetAllPaginationSpec{Limit: 10, Order: "DESC", Page: 1}},
+			args:         args{ctx: context.Background(), spec: database.PaginationSpec{Limit: 10, Order: "DESC", Page: 1}},
 			wantService:  serviceData,
 			wantAccessor: accessorData,
 			err:          nil,
@@ -135,7 +135,7 @@ func TestVendorService_GetAll(t *testing.T) {
 			fields: fields{
 				mockVendorDBAccessor: NewMockvendorDBAccessor(ctrl),
 			},
-			args:         args{ctx: context.Background(), spec: ServiceGetAllPaginationSpec{Limit: 10, Order: "DESC", Page: 1}},
+			args:         args{ctx: context.Background(), spec: database.PaginationSpec{Limit: 10, Order: "DESC", Page: 1}},
 			wantService:  nil,
 			wantAccessor: nil,
 			err:          errors.New("error"),
@@ -145,7 +145,7 @@ func TestVendorService_GetAll(t *testing.T) {
 			fields: fields{
 				mockVendorDBAccessor: NewMockvendorDBAccessor(ctrl),
 			},
-			args:         args{ctx: context.Background(), spec: ServiceGetAllPaginationSpec{Limit: 10, Order: "DESC", Page: 2}},
+			args:         args{ctx: context.Background(), spec: database.PaginationSpec{Limit: 10, Order: "DESC", Page: 2}},
 			wantService:  serviceData,
 			wantAccessor: accessorData,
 			err:          nil,
@@ -158,7 +158,7 @@ func TestVendorService_GetAll(t *testing.T) {
 				vendorDBAccessor: tt.fields.mockVendorDBAccessor,
 			}
 
-			accessorSpec := database.GetAllPaginationSpec{
+			accessorSpec := database.PaginationSpec{
 				Limit: tt.args.spec.Limit,
 				Page:  tt.args.spec.Page,
 				Order: tt.args.spec.Order,

@@ -4,24 +4,25 @@ import (
 	"strings"
 )
 
-type GetAllPaginationSpec struct {
+type PaginationSpec struct {
 	Limit int
 	Page  int
 	Order string
 }
 
-type GetAllPaginationArgs struct {
+type PaginationArgs struct {
 	Limit  int
 	Offset int
 	Order  string
 }
 
 type PaginationMetadata struct {
-	TotalPage   int
-	CurrentPage int
+	TotalPage    int
+	CurrentPage  int
+	TotalEntries int
 }
 
-func ValidateOrderString(order string) string {
+func validateOrderString(order string) string {
 	uppercaseOrder := strings.ToUpper(order)
 	switch uppercaseOrder {
 	case "ASC":
@@ -33,7 +34,7 @@ func ValidateOrderString(order string) string {
 	}
 }
 
-func GeneratePaginationArgs(spec GetAllPaginationSpec) GetAllPaginationArgs {
+func BuildPaginationArgs(spec PaginationSpec) PaginationArgs {
 	limit := 10
 	if spec.Limit > 0 {
 		limit = spec.Limit
@@ -41,25 +42,24 @@ func GeneratePaginationArgs(spec GetAllPaginationSpec) GetAllPaginationArgs {
 
 	offset := spec.Limit * (spec.Page - 1)
 
-	paginationArgs := GetAllPaginationArgs{
+	return PaginationArgs{
 		Limit:  limit,
 		Offset: offset,
-		Order:  spec.Order,
+		Order:  validateOrderString(spec.Order),
 	}
 
-	return paginationArgs
 }
 
-func GeneratePaginationMetadata(spec GetAllPaginationSpec, totalEntries int) PaginationMetadata {
+func GeneratePaginationMetadata(spec PaginationSpec, totalEntries int) PaginationMetadata {
 	totalPage := (totalEntries / spec.Limit)
 	if totalEntries%spec.Limit != 0 {
 		totalPage += 1
 	}
 
-	metadata := PaginationMetadata{
-		TotalPage:   totalPage,
-		CurrentPage: spec.Page,
+	return PaginationMetadata{
+		TotalPage:    totalPage,
+		CurrentPage:  spec.Page,
+		TotalEntries: totalEntries,
 	}
 
-	return metadata
 }

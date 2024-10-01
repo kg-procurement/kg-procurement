@@ -34,8 +34,8 @@ func (p *postgresVendorAccessor) GetSomeStuff(ctx context.Context) ([]string, er
 	return results, nil
 }
 
-func (p *postgresVendorAccessor) GetAll(ctx context.Context, spec database.GetAllPaginationSpec) (*AccessorGetAllPaginationData, error) {
-	args := database.GeneratePaginationArgs(spec)
+func (p *postgresVendorAccessor) GetAll(ctx context.Context, spec database.PaginationSpec) (*AccessorGetAllPaginationData, error) {
+	args := database.BuildPaginationArgs(spec)
 
 	dataQuery := `SELECT 
 		"id",
