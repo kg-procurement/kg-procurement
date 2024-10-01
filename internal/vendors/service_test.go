@@ -82,15 +82,7 @@ func TestVendorService_GetAll(t *testing.T) {
 		},
 	}
 
-	accessorData := &AccessorGetAllPaginationData{
-		Vendors: sampleData,
-		Metadata: database.PaginationMetadata{
-			TotalPage:   1,
-			CurrentPage: 1,
-		},
-	}
-
-	serviceData := &ServiceGetAllPaginationData{
+	data := &AccessorGetAllPaginationData{
 		Vendors: sampleData,
 		Metadata: database.PaginationMetadata{
 			TotalPage:   1,
@@ -113,42 +105,38 @@ func TestVendorService_GetAll(t *testing.T) {
 	}
 
 	tests := []struct {
-		name         string
-		fields       fields
-		args         args
-		wantService  *ServiceGetAllPaginationData
-		wantAccessor *AccessorGetAllPaginationData
-		err          error
+		name   string
+		fields fields
+		args   args
+		want   *AccessorGetAllPaginationData
+		err    error
 	}{
 		{
 			name: "success",
 			fields: fields{
 				mockVendorDBAccessor: NewMockvendorDBAccessor(ctrl),
 			},
-			args:         args{ctx: context.Background(), spec: database.PaginationSpec{Limit: 10, Order: "DESC", Page: 1}},
-			wantService:  serviceData,
-			wantAccessor: accessorData,
-			err:          nil,
+			args: args{ctx: context.Background(), spec: database.PaginationSpec{Limit: 10, Order: "DESC", Page: 1}},
+			want: data,
+			err:  nil,
 		},
 		{
 			name: "error on calling accessor",
 			fields: fields{
 				mockVendorDBAccessor: NewMockvendorDBAccessor(ctrl),
 			},
-			args:         args{ctx: context.Background(), spec: database.PaginationSpec{Limit: 10, Order: "DESC", Page: 1}},
-			wantService:  nil,
-			wantAccessor: nil,
-			err:          errors.New("error"),
+			args: args{ctx: context.Background(), spec: database.PaginationSpec{Limit: 10, Order: "DESC", Page: 1}},
+			want: nil,
+			err:  errors.New("error"),
 		},
 		{
 			name: "success on navigating to to other page",
 			fields: fields{
 				mockVendorDBAccessor: NewMockvendorDBAccessor(ctrl),
 			},
-			args:         args{ctx: context.Background(), spec: database.PaginationSpec{Limit: 10, Order: "DESC", Page: 2}},
-			wantService:  serviceData,
-			wantAccessor: accessorData,
-			err:          nil,
+			args: args{ctx: context.Background(), spec: database.PaginationSpec{Limit: 10, Order: "DESC", Page: 2}},
+			want: nil,
+			err:  nil,
 		},
 	}
 	for _, tt := range tests {
@@ -166,13 +154,13 @@ func TestVendorService_GetAll(t *testing.T) {
 
 			tt.fields.mockVendorDBAccessor.EXPECT().
 				GetAll(tt.args.ctx, accessorSpec).
-				Return(tt.wantAccessor, tt.err)
+				Return(tt.want, tt.err)
 
 			res, err := v.GetAll(tt.args.ctx, tt.args.spec)
 
 			if tt.err == nil {
 				g.Expect(err).To(gomega.BeNil())
-				g.Expect(res).To(gomega.Equal(tt.wantService))
+				g.Expect(res).To(gomega.Equal(tt.want))
 			} else {
 				g.Expect(err).ToNot(gomega.BeNil())
 				g.Expect(res).To(gomega.BeNil())

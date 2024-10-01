@@ -17,12 +17,7 @@ func NewVendorEngine(
 ) {
 	r.GET(cfg.GetAll, func(ctx *gin.Context) {
 
-		spec, err := getPaginationSpec(ctx.Request)
-		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{
-				"error": err.Error(),
-			})
-		}
+		spec := getPaginationSpec(ctx.Request)
 
 		res, err := vendorSvc.GetAll(ctx, spec)
 		if err != nil {
@@ -48,7 +43,7 @@ func NewVendorEngine(
 	})
 }
 
-func getPaginationSpec(r *http.Request) (database.PaginationSpec, error) {
+func getPaginationSpec(r *http.Request) database.PaginationSpec {
 	queryParam := r.URL.Query()
 
 	pageString := queryParam.Get("page")
@@ -65,5 +60,5 @@ func getPaginationSpec(r *http.Request) (database.PaginationSpec, error) {
 		Page:  page,
 	}
 
-	return spec, nil
+	return spec
 }
