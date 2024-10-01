@@ -21,8 +21,40 @@ func (v *VendorService) GetSomeStuff(ctx context.Context) ([]string, error) {
 }
 
 func (v *VendorService) GetAll(ctx context.Context, spec ServiceGetAllPaginationSpec) (*ServiceGetAllPaginationData, error) {
-	_, _ = v.vendorDBAccessor.GetAll(ctx, AccessorGetAllPaginationSpec{})
-	return &ServiceGetAllPaginationData{}, nil
+	limit := 10
+	if spec.Limit > 0 {
+		limit = spec.Limit
+	}
+
+	offset := spec.Limit * (spec.Page - 1)
+
+	order := database.ValidateOrderString(spec.Order)
+
+	accessorSpec := AccessorGetAllPaginationSpec{
+		Limit:  limit,
+		Offset: offset,
+		Order:  order,
+	}
+
+	result, err := v.vendorDBAccessor.GetAll(ctx, accessorSpec)
+	if err != nil {
+		return nil, err
+	}
+
+	previousPage := new(int)
+	if spec.Page > 1 {
+		*previousPage = spec.Page - 1
+	}
+
+	payload := ServiceGetAllPaginationData{
+		Vendors:      result.Vendors,
+		TotalEntries: result.TotalEntries,
+		CurrentPage:  spec.Page,
+		PreviousPage: previousPage,
+		NextPage:     spec.Page + 1,
+	}
+
+	return &payload, nil
 }
 
 func (v *VendorService) GetByLocation(ctx context.Context, location string) ([]Vendor, error) {

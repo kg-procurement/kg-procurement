@@ -217,12 +217,12 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 		rows := sqlmock.NewRows(vendorFields)
 
 		mock.ExpectQuery(dataQuery).
+			WithArgs(spec.Order, spec.Limit, spec.Offset).
 			WillReturnRows(rows)
 
 		totalRows := sqlmock.NewRows([]string{"count"}).AddRow(0)
 
 		mock.ExpectQuery(countQuery).
-			WithArgs(spec.Order, spec.Limit, spec.Offset).
 			WillReturnRows(totalRows)
 
 		ctx := context.Background()
