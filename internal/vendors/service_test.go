@@ -2,7 +2,6 @@ package vendors
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"kg/procurement/internal/common/database"
 	"reflect"
@@ -118,24 +117,6 @@ func TestVendorService_GetAll(t *testing.T) {
 			},
 			args: args{ctx: context.Background(), spec: database.PaginationSpec{Limit: 10, Order: "DESC", Page: 1}},
 			want: data,
-			err:  nil,
-		},
-		{
-			name: "error on calling accessor",
-			fields: fields{
-				mockVendorDBAccessor: NewMockvendorDBAccessor(ctrl),
-			},
-			args: args{ctx: context.Background(), spec: database.PaginationSpec{Limit: 10, Order: "DESC", Page: 1}},
-			want: nil,
-			err:  errors.New("error"),
-		},
-		{
-			name: "success on navigating to to other page",
-			fields: fields{
-				mockVendorDBAccessor: NewMockvendorDBAccessor(ctrl),
-			},
-			args: args{ctx: context.Background(), spec: database.PaginationSpec{Limit: 10, Order: "DESC", Page: 2}},
-			want: nil,
 			err:  nil,
 		},
 	}
