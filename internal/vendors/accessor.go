@@ -144,11 +144,11 @@ func (p *postgresVendorAccessor) GetByLocation(ctx context.Context, location str
 	return vendors, nil
 }
 
-func (p *postgresVendorAccessor) GetByProductWords(ctx context.Context, productWords []string) ([]Vendor, error) {
+func (p *postgresVendorAccessor) GetByProductDescription(ctx context.Context, productDescription []string) ([]Vendor, error) {
 	// Build the WHERE clause dynamically
 	var whereClauses []string
 	var args []interface{}
-	for i, word := range productWords {
+	for i, word := range productDescription {
 		whereClauses = append(whereClauses, fmt.Sprintf("description LIKE $%d", i+1))
 		args = append(args, "%"+word+"%")
 	}

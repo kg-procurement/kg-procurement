@@ -117,41 +117,41 @@ func (c *MockvendorDBAccessorGetByLocationCall) DoAndReturn(f func(context.Conte
 	return c
 }
 
-// GetByProductWords mocks base method.
-func (m *MockvendorDBAccessor) GetByProductWords(ctx context.Context, productWords []string) ([]Vendor, error) {
+// GetByProductDescription mocks base method.
+func (m *MockvendorDBAccessor) GetByProductDescription(ctx context.Context, productDescription []string) ([]Vendor, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetByProductWords", ctx, productWords)
+	ret := m.ctrl.Call(m, "GetByProductDescription", ctx, productDescription)
 	ret0, _ := ret[0].([]Vendor)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetByProductWords indicates an expected call of GetByProductWords.
-func (mr *MockvendorDBAccessorMockRecorder) GetByProductWords(ctx, productWords any) *MockvendorDBAccessorGetByProductWordsCall {
+// GetByProductDescription indicates an expected call of GetByProductDescription.
+func (mr *MockvendorDBAccessorMockRecorder) GetByProductDescription(ctx, productDescription any) *MockvendorDBAccessorGetByProductDescriptionCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByProductWords", reflect.TypeOf((*MockvendorDBAccessor)(nil).GetByProductWords), ctx, productWords)
-	return &MockvendorDBAccessorGetByProductWordsCall{Call: call}
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByProductDescription", reflect.TypeOf((*MockvendorDBAccessor)(nil).GetByProductDescription), ctx, productDescription)
+	return &MockvendorDBAccessorGetByProductDescriptionCall{Call: call}
 }
 
-// MockvendorDBAccessorGetByProductWordsCall wrap *gomock.Call
-type MockvendorDBAccessorGetByProductWordsCall struct {
+// MockvendorDBAccessorGetByProductDescriptionCall wrap *gomock.Call
+type MockvendorDBAccessorGetByProductDescriptionCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockvendorDBAccessorGetByProductWordsCall) Return(arg0 []Vendor, arg1 error) *MockvendorDBAccessorGetByProductWordsCall {
+func (c *MockvendorDBAccessorGetByProductDescriptionCall) Return(arg0 []Vendor, arg1 error) *MockvendorDBAccessorGetByProductDescriptionCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockvendorDBAccessorGetByProductWordsCall) Do(f func(context.Context, []string) ([]Vendor, error)) *MockvendorDBAccessorGetByProductWordsCall {
+func (c *MockvendorDBAccessorGetByProductDescriptionCall) Do(f func(context.Context, []string) ([]Vendor, error)) *MockvendorDBAccessorGetByProductDescriptionCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockvendorDBAccessorGetByProductWordsCall) DoAndReturn(f func(context.Context, []string) ([]Vendor, error)) *MockvendorDBAccessorGetByProductWordsCall {
+func (c *MockvendorDBAccessorGetByProductDescriptionCall) DoAndReturn(f func(context.Context, []string) ([]Vendor, error)) *MockvendorDBAccessorGetByProductDescriptionCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

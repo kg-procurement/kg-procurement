@@ -272,14 +272,14 @@ func TestVendorService_GetByProduct(t *testing.T) {
 				vendorDBAccessor: tt.fields.mockVendorDBAccessor,
 			}
 
-			productWords := strings.Fields(tt.args.product)
+			productDescription := strings.Fields(tt.args.product)
 			if tt.wantErr {
 				tt.fields.mockVendorDBAccessor.EXPECT().
-					GetByProductWords(tt.args.ctx, productWords).
+					GetByProductDescription(tt.args.ctx, productDescription).
 					Return(nil, fmt.Errorf("some error"))
 			} else {
 				tt.fields.mockVendorDBAccessor.EXPECT().
-					GetByProductWords(tt.args.ctx, productWords).
+					GetByProductDescription(tt.args.ctx, productDescription).
 					Return(tt.want, nil)
 			}
 
