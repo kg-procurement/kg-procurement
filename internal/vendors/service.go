@@ -39,8 +39,9 @@ func (v *VendorService) GetAll(ctx context.Context, spec ServiceGetAllPagination
 		return nil, err
 	}
 
-	previousPage := new(int)
+	var previousPage *int = nil
 	if spec.Page > 1 {
+		previousPage = new(int)
 		*previousPage = spec.Page - 1
 	}
 
