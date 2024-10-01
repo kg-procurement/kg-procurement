@@ -11,7 +11,8 @@
   "routes": {
     "vendor": {
       "get-all": "/vendor",
-      "get-by-location": "/vendor/location"
+      "get-by-location": "/vendor/location",
+      "get-by-product": "/vendor/product"
     }
   }
 }
