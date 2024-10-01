@@ -83,25 +83,19 @@ func TestVendorService_GetAll(t *testing.T) {
 	}
 
 	accessorData := &AccessorGetAllPaginationData{
-		Vendors:      sampleData,
-		TotalEntries: 1,
+		Vendors: sampleData,
+		Metadata: database.PaginationMetadata{
+			TotalPage:   1,
+			CurrentPage: 1,
+		},
 	}
 
-	paginationData := &ServiceGetAllPaginationData{
-		Vendors:      sampleData,
-		TotalEntries: 1,
-		CurrentPage:  1,
-		PreviousPage: nil,
-		NextPage:     2,
-	}
-
-	prevPage := 1
-	nextPagePaginationData := &ServiceGetAllPaginationData{
-		Vendors:      sampleData,
-		TotalEntries: 1,
-		CurrentPage:  2,
-		PreviousPage: &prevPage,
-		NextPage:     3,
+	serviceData := &ServiceGetAllPaginationData{
+		Vendors: sampleData,
+		Metadata: database.PaginationMetadata{
+			TotalPage:   1,
+			CurrentPage: 1,
+		},
 	}
 
 	ctrl := gomock.NewController(t)
@@ -132,7 +126,7 @@ func TestVendorService_GetAll(t *testing.T) {
 				mockVendorDBAccessor: NewMockvendorDBAccessor(ctrl),
 			},
 			args:         args{ctx: context.Background(), spec: ServiceGetAllPaginationSpec{Limit: 10, Order: "DESC", Page: 1}},
-			wantService:  paginationData,
+			wantService:  serviceData,
 			wantAccessor: accessorData,
 			err:          nil,
 		},
@@ -152,7 +146,7 @@ func TestVendorService_GetAll(t *testing.T) {
 				mockVendorDBAccessor: NewMockvendorDBAccessor(ctrl),
 			},
 			args:         args{ctx: context.Background(), spec: ServiceGetAllPaginationSpec{Limit: 10, Order: "DESC", Page: 2}},
-			wantService:  nextPagePaginationData,
+			wantService:  serviceData,
 			wantAccessor: accessorData,
 			err:          nil,
 		},
@@ -164,12 +158,10 @@ func TestVendorService_GetAll(t *testing.T) {
 				vendorDBAccessor: tt.fields.mockVendorDBAccessor,
 			}
 
-			offset := tt.args.spec.Limit * (tt.args.spec.Page - 1)
-
-			accessorSpec := AccessorGetAllPaginationSpec{
-				Limit:  tt.args.spec.Limit,
-				Offset: offset,
-				Order:  tt.args.spec.Order,
+			accessorSpec := database.GetAllPaginationSpec{
+				Limit: tt.args.spec.Limit,
+				Page:  tt.args.spec.Page,
+				Order: tt.args.spec.Order,
 			}
 
 			tt.fields.mockVendorDBAccessor.EXPECT().

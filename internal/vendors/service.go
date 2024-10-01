@@ -8,7 +8,7 @@ import (
 
 type vendorDBAccessor interface {
 	GetSomeStuff(ctx context.Context) ([]string, error)
-	GetAll(ctx context.Context, spec AccessorGetAllPaginationSpec) (*AccessorGetAllPaginationData, error)
+	GetAll(ctx context.Context, spec database.GetAllPaginationSpec) (*AccessorGetAllPaginationData, error)
 	GetByLocation(ctx context.Context, location string) ([]Vendor, error)
 }
 
@@ -21,6 +21,7 @@ func (v *VendorService) GetSomeStuff(ctx context.Context) ([]string, error) {
 }
 
 func (v *VendorService) GetAll(ctx context.Context, spec ServiceGetAllPaginationSpec) (*ServiceGetAllPaginationData, error) {
+
 	limit := 10
 	if spec.Limit > 0 {
 		limit = spec.Limit

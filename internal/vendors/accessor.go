@@ -34,7 +34,7 @@ func (p *postgresVendorAccessor) GetSomeStuff(ctx context.Context) ([]string, er
 	return results, nil
 }
 
-func (p *postgresVendorAccessor) GetAll(ctx context.Context, spec AccessorGetAllPaginationSpec) (*AccessorGetAllPaginationData, error) {
+func (p *postgresVendorAccessor) GetAll(ctx context.Context, spec database.GetAllPaginationSpec) (*AccessorGetAllPaginationData, error) {
 	dataQuery := `SELECT 
 		"id",
 		"name",
@@ -54,7 +54,7 @@ func (p *postgresVendorAccessor) GetAll(ctx context.Context, spec AccessorGetAll
 		OFFSET $3
 		`
 
-	rows, err := p.db.Query(dataQuery, spec.Order, spec.Limit, spec.Offset)
+	rows, err := p.db.Query(dataQuery, spec.Order, spec.Limit, spec.Page)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +96,7 @@ func (p *postgresVendorAccessor) GetAll(ctx context.Context, spec AccessorGetAll
 		return nil, err
 	}
 
-	return &AccessorGetAllPaginationData{Vendors: vendors, TotalEntries: *totalEntries}, nil
+	return &AccessorGetAllPaginationData{}, nil
 }
 
 func (p *postgresVendorAccessor) GetByLocation(ctx context.Context, location string) ([]Vendor, error) {

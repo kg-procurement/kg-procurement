@@ -1,12 +1,8 @@
 package vendors
 
-type AccessorGetAllPaginationSpec struct {
-	Limit  int
-	Offset int
-	Order  string
-}
+import "kg/procurement/internal/common/database"
 
 type AccessorGetAllPaginationData struct {
-	Vendors      []Vendor
-	TotalEntries int
+	Vendors  []Vendor
+	Metadata database.PaginationMetadata
 }

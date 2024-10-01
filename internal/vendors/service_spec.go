@@ -1,5 +1,7 @@
 package vendors
 
+import "kg/procurement/internal/common/database"
+
 type ServiceGetAllPaginationSpec struct {
 	Limit int
 	Order string
@@ -7,9 +9,6 @@ type ServiceGetAllPaginationSpec struct {
 }
 
 type ServiceGetAllPaginationData struct {
-	Vendors      []Vendor
-	TotalEntries int
-	CurrentPage  int
-	PreviousPage *int
-	NextPage     int
+	Vendors  []Vendor
+	Metadata database.PaginationMetadata
 }

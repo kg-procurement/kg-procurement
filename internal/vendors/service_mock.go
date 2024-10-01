@@ -11,6 +11,7 @@ package vendors
 
 import (
 	context "context"
+	database "kg/procurement/internal/common/database"
 	reflect "reflect"
 
 	gomock "go.uber.org/mock/gomock"
@@ -40,7 +41,7 @@ func (m *MockvendorDBAccessor) EXPECT() *MockvendorDBAccessorMockRecorder {
 }
 
 // GetAll mocks base method.
-func (m *MockvendorDBAccessor) GetAll(ctx context.Context, spec AccessorGetAllPaginationSpec) (*AccessorGetAllPaginationData, error) {
+func (m *MockvendorDBAccessor) GetAll(ctx context.Context, spec database.GetAllPaginationSpec) (*AccessorGetAllPaginationData, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAll", ctx, spec)
 	ret0, _ := ret[0].(*AccessorGetAllPaginationData)
@@ -67,13 +68,13 @@ func (c *MockvendorDBAccessorGetAllCall) Return(arg0 *AccessorGetAllPaginationDa
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockvendorDBAccessorGetAllCall) Do(f func(context.Context, AccessorGetAllPaginationSpec) (*AccessorGetAllPaginationData, error)) *MockvendorDBAccessorGetAllCall {
+func (c *MockvendorDBAccessorGetAllCall) Do(f func(context.Context, database.GetAllPaginationSpec) (*AccessorGetAllPaginationData, error)) *MockvendorDBAccessorGetAllCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockvendorDBAccessorGetAllCall) DoAndReturn(f func(context.Context, AccessorGetAllPaginationSpec) (*AccessorGetAllPaginationData, error)) *MockvendorDBAccessorGetAllCall {
+func (c *MockvendorDBAccessorGetAllCall) DoAndReturn(f func(context.Context, database.GetAllPaginationSpec) (*AccessorGetAllPaginationData, error)) *MockvendorDBAccessorGetAllCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
