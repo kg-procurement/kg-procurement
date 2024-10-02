@@ -145,6 +145,23 @@ func Test_GetProductsByVendor(t *testing.T) {
 		c.g.Expect(res).To(gomega.BeComparableTo(products))
 	})
 
+	t.Run("error on query execution", func(t *testing.T) {
+		var (
+			ctx = context.Background()
+			c   = setupProductAccessorTestComponent(t)
+		)
+		defer c.db.Close()
+
+		c.mock.ExpectQuery(getProductsByVendorQuery).
+			WithArgs(vendorID).
+			WillReturnError(errors.New("error"))
+
+		res, err := c.accessor.GetProductsByVendor(ctx, vendorID)
+
+		c.g.Expect(err).ShouldNot(gomega.BeNil())
+		c.g.Expect(res).To(gomega.BeNil())
+	})
+
 	t.Run("error on scanning data row", func(t *testing.T) {
 		var (
 			ctx            = context.Background()

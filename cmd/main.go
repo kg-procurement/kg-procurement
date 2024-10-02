@@ -33,7 +33,7 @@ func main() {
 	router.NewVendorEngine(r, cfg.Routes.Vendor, vendorSvc)
 	router.NewProductEngine(r, cfg.Routes.Product, productSvc)
 
-	if err := r.Run(":8000"); err != nil {
+	if err := r.Run(":8080"); err != nil {
 		log.Fatalf("failed to run server, err: %v", err)
 	}
 }
