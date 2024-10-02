@@ -90,6 +90,26 @@ func Test_postgresVendorAccessor_GetSomeStuff(t *testing.T) {
 		g.Expect(err).ToNot(gomega.BeNil())
 		g.Expect(res).To(gomega.BeNil())
 	})
+
+	t.Run("error on iterating row", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		rows := sqlmock.NewRows([]string{"name"}).
+			AddRow("FERRY").
+			AddRow("VALE").
+			RowError(1, fmt.Errorf("row error"))
+
+		mock.ExpectQuery(`SELECT name FROM users WHERE title = (?)`).
+			WithArgs("test").
+			WillReturnRows(rows)
+
+		ctx := context.Background()
+		res, err := accessor.GetSomeStuff(ctx)
+
+		g.Expect(err).ToNot(gomega.BeNil())
+		g.Expect(res).To(gomega.BeNil())
+	})
 }
 
 func TestVendorAccessor_GetAll(t *testing.T) {
