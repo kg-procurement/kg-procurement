@@ -12,6 +12,8 @@ type vendorDBAccessor interface {
 	GetAll(ctx context.Context, spec database.PaginationSpec) (*AccessorGetAllPaginationData, error)
 	GetByLocation(ctx context.Context, location string) ([]Vendor, error)
 	GetByProductDescription(ctx context.Context, productDescription []string) ([]Vendor, error)
+	GetById(ctx context.Context, id string) (*Vendor, error)
+	Put(ctx context.Context, spec Vendor) (*Vendor, error)
 }
 
 type VendorService struct {
@@ -41,6 +43,10 @@ func (v *VendorService) GetByLocation(ctx context.Context, location string) ([]V
 func (v *VendorService) GetByProduct(ctx context.Context, product string) ([]Vendor, error) {
 	productDescription := strings.Fields(product)
 	return v.vendorDBAccessor.GetByProductDescription(ctx, productDescription)
+}
+
+func (v *VendorService) Put(ctx context.Context, vendor Vendor) (*Vendor, error) {
+	return &Vendor{}, nil
 }
 
 func NewVendorService(

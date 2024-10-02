@@ -11,7 +11,7 @@ CREATE TABLE "vendor" (
   "area_group_name" varchar(127),
   "sap_code" varchar(127),
   "modified_date" timestamp,
-  "modified_by" int,
+  "modified_by" varchar(15),
   "dt" date
 );
 -- +goose StatementEnd

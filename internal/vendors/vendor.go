@@ -15,6 +15,6 @@ type Vendor struct {
 	AreaGroupName string    `json:"area_group_name"`
 	SapCode       string    `json:"sap_code"`
 	ModifiedDate  time.Time `json:"modified_date"`
-	ModifiedBy    int       `json:"modified_by"`
+	ModifiedBy    string    `json:"modified_by"`
 	Date          time.Time `json:"dt"`
 }

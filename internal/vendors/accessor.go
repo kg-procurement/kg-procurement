@@ -224,6 +224,14 @@ func (p *postgresVendorAccessor) GetByProductDescription(ctx context.Context, pr
 	return vendors, nil
 }
 
+func (p *postgresVendorAccessor) GetById(ctx context.Context, id string) (*Vendor, error) {
+	return &Vendor{}, nil
+}
+
+func (p *postgresVendorAccessor) Put(ctx context.Context, vendor Vendor) (*Vendor, error) {
+	return &Vendor{}, nil
+}
+
 // newPostgresVendorAccessor is only accessible by the vendor package
 // entrypoint for other verticals should refer to the interface declared on service
 func newPostgresVendorAccessor(db database.DBConnector) *postgresVendorAccessor {

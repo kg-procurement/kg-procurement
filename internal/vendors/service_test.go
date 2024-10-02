@@ -77,7 +77,7 @@ func TestVendorService_GetAll(t *testing.T) {
 			AreaGroupName: "group_name",
 			SapCode:       "sap_code",
 			ModifiedDate:  time.Now(),
-			ModifiedBy:    1,
+			ModifiedBy:    "1",
 			Date:          time.Now(),
 		},
 	}
@@ -165,7 +165,7 @@ func TestVendorService_GetByLocation(t *testing.T) {
 			AreaGroupName: location,
 			SapCode:       "sap_code",
 			ModifiedDate:  time.Now(),
-			ModifiedBy:    1,
+			ModifiedBy:    "1",
 			Date:          time.Now(),
 		},
 	}
@@ -247,7 +247,7 @@ func TestVendorService_GetByProduct(t *testing.T) {
 			AreaGroupName: "group_name",
 			SapCode:       "sap_code",
 			ModifiedDate:  time.Now(),
-			ModifiedBy:    1,
+			ModifiedBy:    "1",
 			Date:          time.Now(),
 		},
 	}
@@ -320,5 +320,119 @@ func TestVendorService_GetByProduct(t *testing.T) {
 				g.Expect(res).To(gomega.Equal(tt.want))
 			}
 		})
+	}
+}
+
+func TestVendorService_Put(t *testing.T) {
+	fixedTime := time.Date(2024, time.September, 27, 12, 30, 0, 0, time.UTC)
+
+	existingVendorData := Vendor{
+		ID:            "ID",
+		Name:          "name",
+		Description:   "description",
+		BpID:          "BpID",
+		BpName:        "BpName",
+		Rating:        1,
+		AreaGroupID:   "AreaGroupID",
+		AreaGroupName: "AreaGroupName",
+		SapCode:       "SapCode",
+		ModifiedDate:  fixedTime,
+		ModifiedBy:    "ID",
+		Date:          fixedTime,
+	}
+	updateSpec := Vendor{
+		ID:            "ID",
+		Name:          "udpate",
+		Description:   "udpate",
+		BpID:          "udpate",
+		BpName:        "udpate",
+		Rating:        2,
+		AreaGroupID:   "udpate",
+		AreaGroupName: "udpate",
+		SapCode:       "udpate",
+		ModifiedDate:  time.Time{},
+		ModifiedBy:    "",
+		Date:          time.Time{},
+	}
+
+	UpdatedVendorData := Vendor{
+		ID:            "ID",
+		Name:          "udpate",
+		Description:   "udpate",
+		BpID:          "udpate",
+		BpName:        "udpate",
+		Rating:        2,
+		AreaGroupID:   "udpate",
+		AreaGroupName: "udpate",
+		SapCode:       "udpate",
+		ModifiedDate:  time.Now(),
+		ModifiedBy:    "UpdatedID",
+		Date:          fixedTime,
+	}
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	type fields struct {
+		mockvendorDBAccessor *MockvendorDBAccessor
+	}
+
+	type args struct {
+		ctx  context.Context
+		spec Vendor
+	}
+	tests := []struct {
+		name        string
+		fields      fields
+		args        args
+		wantGetById *Vendor
+		wantPut     *Vendor
+		wantErr     error
+	}{
+		{
+			name: "success",
+			fields: fields{
+				mockvendorDBAccessor: NewMockvendorDBAccessor(ctrl),
+			},
+			args: args{
+				ctx:  context.Background(),
+				spec: updateSpec,
+			},
+			wantGetById: &existingVendorData,
+			wantPut:     &UpdatedVendorData,
+			wantErr:     nil,
+		},
+	}
+	for _, tt := range tests {
+		g := gomega.NewWithT(t)
+		v := VendorService{
+			vendorDBAccessor: tt.fields.mockvendorDBAccessor,
+		}
+
+		tt.fields.mockvendorDBAccessor.
+			EXPECT().
+			GetById(tt.args.ctx, tt.args.spec.ID).
+			Return(tt.wantGetById, nil)
+
+		existingVendor, err := v.vendorDBAccessor.GetById(tt.args.ctx, tt.args.spec.ID)
+
+		newVendor := Vendor(*existingVendor)
+		newVendor.Name = tt.args.spec.Name
+		newVendor.Description = tt.args.spec.Description
+		newVendor.BpID = tt.args.spec.BpID
+		newVendor.BpName = tt.args.spec.BpName
+		newVendor.Rating = tt.args.spec.Rating
+		newVendor.AreaGroupID = tt.args.spec.AreaGroupID
+		newVendor.AreaGroupName = tt.args.spec.AreaGroupName
+		newVendor.SapCode = tt.args.spec.SapCode
+
+		tt.fields.mockvendorDBAccessor.
+			EXPECT().
+			Put(tt.args.ctx, newVendor).
+			Return(tt.wantPut, nil)
+
+		updatedVendor, err := v.vendorDBAccessor.Put(tt.args.ctx, newVendor)
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(updatedVendor).To(gomega.Equal(tt.wantPut))
 	}
 }
