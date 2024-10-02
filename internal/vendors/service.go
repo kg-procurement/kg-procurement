@@ -9,7 +9,7 @@ import (
 
 type vendorDBAccessor interface {
 	GetSomeStuff(ctx context.Context) ([]string, error)
-	GetAll(ctx context.Context, spec database.PaginationSpec) (*AccessorGetAllPaginationData, error)
+	GetAll(ctx context.Context, spec GetAllVendorSpec) (*AccessorGetAllPaginationData, error)
 	GetByLocation(ctx context.Context, location string) ([]Vendor, error)
 	GetByProductDescription(ctx context.Context, productDescription []string) ([]Vendor, error)
 }
@@ -22,15 +22,8 @@ func (v *VendorService) GetSomeStuff(ctx context.Context) ([]string, error) {
 	return v.vendorDBAccessor.GetSomeStuff(ctx)
 }
 
-func (v *VendorService) GetAll(ctx context.Context, spec database.PaginationSpec) (*AccessorGetAllPaginationData, error) {
-
-	accessorSpec := database.PaginationSpec{
-		Limit: spec.Limit,
-		Page:  spec.Page,
-		Order: spec.Order,
-	}
-
-	return v.vendorDBAccessor.GetAll(ctx, accessorSpec)
+func (v *VendorService) GetAll(ctx context.Context, spec GetAllVendorSpec) (*AccessorGetAllPaginationData, error) {
+	return v.vendorDBAccessor.GetAll(ctx, spec)
 
 }
 

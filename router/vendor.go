@@ -15,7 +15,12 @@ func NewVendorEngine(
 ) {
 	r.GET(cfg.GetAll, func(ctx *gin.Context) {
 
-		spec := GetPaginationSpec(ctx.Request)
+		paginationSpec := GetPaginationSpec(ctx.Request)
+		spec := vendors.GetAllVendorSpec{
+			Location:       ctx.Query("location"),
+			Product:        ctx.Query("product"),
+			PaginationSpec: paginationSpec,
+		}
 
 		res, err := vendorSvc.GetAll(ctx, spec)
 		if err != nil {
