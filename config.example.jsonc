@@ -13,6 +13,9 @@
       "get-all": "/vendor",
       "get-by-location": "/vendor/location",
       "get-by-product": "/vendor/product"
+    },
+    "product": {
+      "get-products-by-vendor": "/product/vendor/:vendor_id"
     }
   }
 }

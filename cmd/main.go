@@ -3,6 +3,7 @@ package main
 import (
 	"kg/procurement/cmd/config"
 	"kg/procurement/cmd/dependency"
+	"kg/procurement/internal/product"
 	"kg/procurement/internal/vendors"
 	"kg/procurement/router"
 	"log"
@@ -25,10 +26,12 @@ func main() {
 	}()
 
 	vendorSvc := vendors.NewVendorService(conn)
+	productSvc := product.NewProductService(conn)
 
 	r := gin.Default()
 
 	router.NewVendorEngine(r, cfg.Routes.Vendor, vendorSvc)
+	router.NewProductEngine(r, cfg.Routes.Product, productSvc)
 
 	if err := r.Run(":8080"); err != nil {
 		log.Fatalf("failed to run server, err: %v", err)
