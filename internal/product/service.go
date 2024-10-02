@@ -3,7 +3,6 @@ package product
 
 import (
 	"context"
-	"errors"
 	"kg/procurement/internal/common/database"
 )
 
@@ -15,8 +14,8 @@ type ProductService struct {
 	productDBAccessor
 }
 
-func (p *ProductService) GetProductsByVendor(_ context.Context, _ string) ([]Product, error) {
-	return nil, errors.New("implement me")
+func (p *ProductService) GetProductsByVendor(ctx context.Context, vendorID string) ([]Product, error) {
+	return p.productDBAccessor.GetProductsByVendor(ctx, vendorID)
 }
 
 func NewProductService(

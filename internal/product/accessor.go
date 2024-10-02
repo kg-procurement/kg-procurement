@@ -2,7 +2,6 @@ package product
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"kg/procurement/internal/common/database"
 )
@@ -15,12 +14,43 @@ type postgresProductAccessor struct {
 	db database.DBConnector
 }
 
-func (p *postgresProductAccessor) GetProductsByVendor(_ context.Context, _ string) ([]Product, error) {
-	return nil, errors.New("implement me")
+func (p *postgresProductAccessor) GetProductsByVendor(ctx context.Context, vendorID string) ([]Product, error) {
+	rows, err := p.db.Query(getProductsByVendorQuery, vendorID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	res := []Product{}
+
+	for rows.Next() {
+		var product Product
+		err := rows.Scan(
+			&product.ID,
+			&product.ProductCategoryID,
+			&product.UOMID,
+			&product.IncomeTaxID,
+			&product.ProductTypeID,
+			&product.Name,
+			&product.Description,
+			&product.ModifiedDate,
+			&product.ModifiedBy,
+		)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, product)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }
 
 func (p *postgresProductAccessor) UpdateProduct(_ context.Context, productID ProductID, payload Product) error {
-	query := `UPDATE product SET 
+	query := `UPDATE product SET
 		name = $1 
 		description = $2
 		WHERE id = $3`
