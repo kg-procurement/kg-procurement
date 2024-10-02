@@ -7,14 +7,31 @@ import (
 )
 
 const (
-	getProductsByVendorQuery = `SELECT id, product_category_id, uom_id, income_tax_id, product_type_id, name, description, modified_date, modified_by FROM product_vendor WHERE vendor_id = (?)`
+	getProductsByVendorQuery = `
+		SELECT 
+			p.id, 
+			p.product_category_id, 
+			p.uom_id, 
+			p.income_tax_id, 
+			p.product_type_id, 
+			p.name, 
+			p.description, 
+			p.modified_date, 
+			p.modified_by 
+		FROM 
+			product p
+		JOIN 
+			product_vendor pv ON pv.product_id = p.id
+		WHERE 
+			pv.vendor_id = $1
+	`
 )
 
 type postgresProductAccessor struct {
 	db database.DBConnector
 }
 
-func (p *postgresProductAccessor) GetProductsByVendor(ctx context.Context, vendorID string) ([]Product, error) {
+func (p *postgresProductAccessor) GetProductsByVendor(_ context.Context, vendorID string) ([]Product, error) {
 	rows, err := p.db.Query(getProductsByVendorQuery, vendorID)
 	if err != nil {
 		return nil, err
