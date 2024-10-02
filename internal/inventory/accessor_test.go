@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"kg/procurement/internal/vendors"
+
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/onsi/gomega"
 )
@@ -24,14 +25,13 @@ var mockVendor = vendors.Vendor{
 	AreaGroupName: "Area Group 1",
 	SapCode:       "sap1",
 	ModifiedDate:  time.Now(),
-	ModifiedBy:    1,
+	ModifiedBy:    "1",
 	Date:          time.Now(),
 }
 
 func Test_newPostgresInventoryAccessor(t *testing.T) {
 	_ = newPostgresInventoryAccessor(nil)
 }
-
 
 func TestUpdateInventory(t *testing.T) {
 	t.Parallel()
@@ -65,7 +65,7 @@ func TestUpdateInventory(t *testing.T) {
 			Vendor:      mockVendor,
 			Price:       100.00,
 		}
-		
+
 		updatedInventory := Item{
 			ID:          "inv1",
 			Name:        "Item A Updated",
