@@ -954,7 +954,7 @@ func TestVendorAccessor_GetById(t *testing.T) {
 		ctx := context.Background()
 		res, err := accessor.GetById(ctx, "ID")
 
-		expectation := Vendor{
+		expectation := &Vendor{
 			ID:            "ID",
 			Name:          "name",
 			Description:   "description",

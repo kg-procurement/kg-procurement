@@ -46,7 +46,22 @@ func (v *VendorService) GetByProduct(ctx context.Context, product string) ([]Ven
 }
 
 func (v *VendorService) Put(ctx context.Context, vendor Vendor) (*Vendor, error) {
-	return &Vendor{}, nil
+	currentVendor, err := v.vendorDBAccessor.GetById(ctx, vendor.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	newVendor := Vendor(*currentVendor)
+	newVendor.Name = vendor.Name
+	newVendor.Description = vendor.Description
+	newVendor.BpID = vendor.BpID
+	newVendor.BpName = vendor.BpName
+	newVendor.Rating = vendor.Rating
+	newVendor.AreaGroupID = vendor.AreaGroupID
+	newVendor.AreaGroupName = vendor.AreaGroupName
+	newVendor.SapCode = vendor.SapCode
+
+	return v.vendorDBAccessor.Put(ctx, newVendor)
 }
 
 func NewVendorService(

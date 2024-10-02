@@ -225,11 +225,107 @@ func (p *postgresVendorAccessor) GetByProductDescription(ctx context.Context, pr
 }
 
 func (p *postgresVendorAccessor) GetById(ctx context.Context, id string) (*Vendor, error) {
-	return &Vendor{}, nil
+	query := `SELECT 
+		"id",
+        "name",
+        "description",
+        "bp_id",
+        "bp_name",
+        "rating",
+        "area_group_id",
+        "area_group_name",
+        "sap_code",
+        "modified_date",
+        "modified_by",
+        "dt"
+		FROM vendor 
+		WHERE id = $1`
+
+	vendor := Vendor{}
+	row := p.db.QueryRow(query, id)
+	if err := row.Scan(
+		&vendor.ID,
+		&vendor.Name,
+		&vendor.Description,
+		&vendor.BpID,
+		&vendor.BpName,
+		&vendor.Rating,
+		&vendor.AreaGroupID,
+		&vendor.AreaGroupName,
+		&vendor.SapCode,
+		&vendor.ModifiedDate,
+		&vendor.ModifiedBy,
+		&vendor.Date,
+	); err != nil {
+		return nil, err
+	}
+
+	return &vendor, nil
 }
 
 func (p *postgresVendorAccessor) Put(ctx context.Context, vendor Vendor) (*Vendor, error) {
-	return &Vendor{}, nil
+	query := `UPDATE vendor
+		SET 
+			name = $2,
+			description = $3,
+			bp_id = $4,
+			bp_name = $5,
+			rating = $6,
+			area_group_id = $7,
+			area_group_name = $8,
+			sap_code = $9,
+			modified_date = $10,
+			modified_by = $11,
+			dt = $12,
+		WHERE 
+			id = $1
+		RETURNING 
+			id, 
+			name, 
+			description, 
+			bp_id, 
+			bp_name, 
+			rating, 
+			area_group_id, 
+			area_group_name, 
+			sap_code, 
+			modified_date, 
+			modified_by, 
+			dt
+	`
+
+	updatedVendor := Vendor{}
+	row := p.db.QueryRow(query,
+		vendor.ID,
+		vendor.Name,
+		vendor.Description,
+		vendor.BpID,
+		vendor.BpName,
+		vendor.Rating,
+		vendor.AreaGroupID,
+		vendor.AreaGroupName,
+		vendor.SapCode,
+		vendor.ModifiedDate,
+		vendor.ModifiedBy,
+		vendor.Date)
+
+	if err := row.Scan(
+		&updatedVendor.ID,
+		&updatedVendor.Name,
+		&updatedVendor.Description,
+		&updatedVendor.BpID,
+		&updatedVendor.BpName,
+		&updatedVendor.Rating,
+		&updatedVendor.AreaGroupID,
+		&updatedVendor.AreaGroupName,
+		&updatedVendor.SapCode,
+		&updatedVendor.ModifiedDate,
+		&updatedVendor.ModifiedBy,
+		&updatedVendor.Date); err != nil {
+		return nil, err
+	}
+
+	return &updatedVendor, nil
 }
 
 // newPostgresVendorAccessor is only accessible by the vendor package
