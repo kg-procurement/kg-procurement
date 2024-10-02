@@ -1143,7 +1143,21 @@ func TestVendorAccessor_Put(t *testing.T) {
 		g, db := setup(t)
 		defer db.Close()
 
-		rows := sqlmock.NewRows(vendorFields).RowError(1, fmt.Errorf("error"))
+		rows := sqlmock.NewRows(vendorFields).
+			AddRow(
+				"ID",
+				"updated",
+				"updated",
+				"updated",
+				"updated",
+				"2",
+				"updated",
+				"updated",
+				"updated",
+				updatedFixedTime,
+				"updatedID",
+				fixedTime,
+			)
 
 		mock.ExpectQuery(query).
 			WithArgs("ID",
@@ -1151,7 +1165,7 @@ func TestVendorAccessor_Put(t *testing.T) {
 				"updated",
 				"updated",
 				"updated",
-				2,
+				"2",
 				"updated",
 				"updated",
 				"updated",
