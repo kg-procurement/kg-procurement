@@ -47,6 +47,7 @@ func (v *VendorService) GetByProduct(ctx context.Context, product string) ([]Ven
 
 func (v *VendorService) Put(ctx context.Context, vendor Vendor) (*Vendor, error) {
 	currentVendor, err := v.vendorDBAccessor.GetById(ctx, vendor.ID)
+
 	if err != nil {
 		return nil, err
 	}

@@ -356,6 +356,21 @@ func TestVendorService_Put(t *testing.T) {
 		Date:          time.Time{},
 	}
 
+	wrongUpdateSpec := Vendor{
+		ID:            "id",
+		Name:          "udpate",
+		Description:   "udpate",
+		BpID:          "udpate",
+		BpName:        "udpate",
+		Rating:        2,
+		AreaGroupID:   "udpate",
+		AreaGroupName: "udpate",
+		SapCode:       "udpate",
+		ModifiedDate:  time.Time{},
+		ModifiedBy:    "",
+		Date:          time.Time{},
+	}
+
 	UpdatedVendorData := Vendor{
 		ID:            "ID",
 		Name:          "udpate",
@@ -383,12 +398,13 @@ func TestVendorService_Put(t *testing.T) {
 		spec Vendor
 	}
 	tests := []struct {
-		name        string
-		fields      fields
-		args        args
-		wantGetById *Vendor
-		wantPut     *Vendor
-		wantErr     error
+		name           string
+		fields         fields
+		args           args
+		wantGetById    *Vendor
+		wantPut        *Vendor
+		wantGetByIdErr error
+		wantPutErr     error
 	}{
 		{
 			name: "success",
@@ -399,9 +415,24 @@ func TestVendorService_Put(t *testing.T) {
 				ctx:  context.Background(),
 				spec: updateSpec,
 			},
-			wantGetById: &existingVendorData,
-			wantPut:     &UpdatedVendorData,
-			wantErr:     nil,
+			wantGetById:    &existingVendorData,
+			wantPut:        &UpdatedVendorData,
+			wantGetByIdErr: nil,
+			wantPutErr:     nil,
+		},
+		{
+			name: "failed while getting vendor by id",
+			fields: fields{
+				mockvendorDBAccessor: NewMockvendorDBAccessor(ctrl),
+			},
+			args: args{
+				ctx:  context.Background(),
+				spec: wrongUpdateSpec,
+			},
+			wantGetById:    nil,
+			wantPut:        nil,
+			wantGetByIdErr: fmt.Errorf("error"),
+			wantPutErr:     fmt.Errorf("error"),
 		},
 	}
 	for _, tt := range tests {
@@ -413,26 +444,33 @@ func TestVendorService_Put(t *testing.T) {
 		tt.fields.mockvendorDBAccessor.
 			EXPECT().
 			GetById(tt.args.ctx, tt.args.spec.ID).
-			Return(tt.wantGetById, nil)
+			Return(tt.wantGetById, tt.wantGetByIdErr)
 
-		newVendor := Vendor(*tt.wantGetById)
-		newVendor.Name = tt.args.spec.Name
-		newVendor.Description = tt.args.spec.Description
-		newVendor.BpID = tt.args.spec.BpID
-		newVendor.BpName = tt.args.spec.BpName
-		newVendor.Rating = tt.args.spec.Rating
-		newVendor.AreaGroupID = tt.args.spec.AreaGroupID
-		newVendor.AreaGroupName = tt.args.spec.AreaGroupName
-		newVendor.SapCode = tt.args.spec.SapCode
+		if tt.wantGetByIdErr != nil {
+			updatedVendor, err := v.Put(tt.args.ctx, Vendor{ID: tt.args.spec.ID})
+			g.Expect(err).ToNot(gomega.BeNil())
+			g.Expect(updatedVendor).To(gomega.BeNil())
+		} else {
+			newVendor := Vendor(*tt.wantGetById)
+			newVendor.Name = tt.args.spec.Name
+			newVendor.Description = tt.args.spec.Description
+			newVendor.BpID = tt.args.spec.BpID
+			newVendor.BpName = tt.args.spec.BpName
+			newVendor.Rating = tt.args.spec.Rating
+			newVendor.AreaGroupID = tt.args.spec.AreaGroupID
+			newVendor.AreaGroupName = tt.args.spec.AreaGroupName
+			newVendor.SapCode = tt.args.spec.SapCode
 
-		tt.fields.mockvendorDBAccessor.
-			EXPECT().
-			Put(tt.args.ctx, newVendor).
-			Return(tt.wantPut, nil)
+			tt.fields.mockvendorDBAccessor.
+				EXPECT().
+				Put(tt.args.ctx, newVendor).
+				Return(tt.wantPut, tt.wantPutErr)
 
-		updatedVendor, err := v.Put(tt.args.ctx, newVendor)
+			updatedVendor, err := v.Put(tt.args.ctx, newVendor)
 
-		g.Expect(err).To(gomega.BeNil())
-		g.Expect(updatedVendor).To(gomega.Equal(tt.wantPut))
+			g.Expect(err).To(gomega.BeNil())
+			g.Expect(updatedVendor).To(gomega.Equal(tt.wantPut))
+		}
+
 	}
 }
