@@ -1103,6 +1103,7 @@ func TestVendorAccessor_Put(t *testing.T) {
 			)
 
 		ctx := context.Background()
+
 		updatedVendor := &Vendor{
 			ID:            "ID",
 			Name:          "updated",
@@ -1174,8 +1175,23 @@ func TestVendorAccessor_Put(t *testing.T) {
 				fixedTime).
 			WillReturnRows(rows)
 
+		updatedVendor := &Vendor{
+			ID:            "ID",
+			Name:          "updated",
+			Description:   "updated",
+			BpID:          "updated",
+			BpName:        "updated",
+			Rating:        2,
+			AreaGroupID:   "updated",
+			AreaGroupName: "updated",
+			SapCode:       "updated",
+			ModifiedDate:  updatedFixedTime,
+			ModifiedBy:    "updatedID",
+			Date:          fixedTime,
+		}
+
 		ctx := context.Background()
-		res, err := accessor.GetById(ctx, "ID")
+		res, err := accessor.Put(ctx, *updatedVendor)
 
 		g.Expect(err).ToNot(gomega.BeNil())
 		g.Expect(res).To(gomega.BeNil())
