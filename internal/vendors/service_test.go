@@ -81,29 +81,44 @@ func TestVendorService_GetAll(t *testing.T) {
 			Date:          time.Now(),
 		},
 	}
+
+	data := &AccessorGetAllPaginationData{
+		Vendors: sampleData,
+		Metadata: database.PaginationMetadata{
+			TotalPage:   1,
+			CurrentPage: 1,
+		},
+	}
+
 	ctrl := gomock.NewController(t)
+
 	defer ctrl.Finish()
+
 	type fields struct {
 		mockVendorDBAccessor *MockvendorDBAccessor
 		mockDBConnector      *database.MockDBConnector
 	}
+
 	type args struct {
-		ctx context.Context
+		ctx  context.Context
+		spec database.PaginationSpec
 	}
+
 	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		want    []Vendor
-		wantErr error
+		name   string
+		fields fields
+		args   args
+		want   *AccessorGetAllPaginationData
+		err    error
 	}{
 		{
 			name: "success",
 			fields: fields{
 				mockVendorDBAccessor: NewMockvendorDBAccessor(ctrl),
 			},
-			args: args{ctx: context.Background()},
-			want: sampleData,
+			args: args{ctx: context.Background(), spec: database.PaginationSpec{Limit: 10, Order: "DESC", Page: 1}},
+			want: data,
+			err:  nil,
 		},
 	}
 	for _, tt := range tests {
@@ -113,13 +128,25 @@ func TestVendorService_GetAll(t *testing.T) {
 				vendorDBAccessor: tt.fields.mockVendorDBAccessor,
 			}
 
+			accessorSpec := database.PaginationSpec{
+				Limit: tt.args.spec.Limit,
+				Page:  tt.args.spec.Page,
+				Order: tt.args.spec.Order,
+			}
+
 			tt.fields.mockVendorDBAccessor.EXPECT().
-				GetAll(tt.args.ctx).
-				Return(tt.want, nil)
+				GetAll(tt.args.ctx, accessorSpec).
+				Return(tt.want, tt.err)
 
-			res, _ := v.GetAll(tt.args.ctx)
+			res, err := v.GetAll(tt.args.ctx, tt.args.spec)
 
-			g.Expect(res).To(gomega.Equal(tt.want))
+			if tt.err == nil {
+				g.Expect(err).To(gomega.BeNil())
+				g.Expect(res).To(gomega.Equal(tt.want))
+			} else {
+				g.Expect(err).ToNot(gomega.BeNil())
+				g.Expect(res).To(gomega.BeNil())
+			}
 		})
 	}
 }

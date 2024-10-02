@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"kg/procurement/internal/common/database"
 	"log"
 	"strings"
 	"testing"
@@ -112,7 +113,7 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 		return g, db
 	}
 
-	sampleData := []string{
+	vendorFields := []string{
 		"id",
 		"name",
 		"description",
@@ -127,28 +128,40 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 		"dt",
 	}
 
-	query := `SELECT 
-			"id",
-			"name",
-			"description",
-			"bp_id",
-			"bp_name",
-			"rating",
-			"area_group_id",
-			"area_group_name",
-			"sap_code",
-			"modified_date",
-			"modified_by",
-			"dt" 
-			FROM vendor`
+	dataQuery := `SELECT 
+		"id",
+		"name",
+		"description",
+		"bp_id",
+		"bp_name",
+		"rating",
+		"area_group_id",
+		"area_group_name",
+		"sap_code",
+		"modified_date",
+		"modified_by",
+		"dt" 
+		FROM vendor
+		ORDER BY created_at $1
+		LIMIT $2
+		OFFSET $3
+		`
+
+	countQuery := "SELECT COUNT(*) from vendor"
 
 	fixedTime := time.Date(2024, time.September, 27, 12, 30, 0, 0, time.UTC)
+
+	spec := database.PaginationSpec{
+		Order: "DESC",
+		Limit: 10,
+		Page:  1,
+	}
 
 	t.Run("success", func(t *testing.T) {
 		g, db := setup(t)
 		defer db.Close()
 
-		rows := sqlmock.NewRows(sampleData).
+		rows := sqlmock.NewRows(vendorFields).
 			AddRow(
 				"1",
 				"name",
@@ -164,13 +177,20 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 				fixedTime,
 			)
 
-		mock.ExpectQuery(query).
+		args := database.BuildPaginationArgs(spec)
+
+		mock.ExpectQuery(dataQuery).
+			WithArgs(args.Order, args.Limit, args.Offset).
 			WillReturnRows(rows)
 
-		ctx := context.Background()
-		res, err := accessor.GetAll(ctx)
+		totalRows := sqlmock.NewRows([]string{"count"}).AddRow(1)
 
-		expectation := []Vendor{{
+		mock.ExpectQuery(countQuery).WillReturnRows(totalRows)
+
+		ctx := context.Background()
+		res, err := accessor.GetAll(ctx, spec)
+
+		vendorsExpectation := []Vendor{{
 			ID:            "1",
 			Name:          "name",
 			Description:   "description",
@@ -185,59 +205,20 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 			Date:          fixedTime,
 		}}
 
+		expectation := &AccessorGetAllPaginationData{
+			Vendors:  vendorsExpectation,
+			Metadata: res.Metadata,
+		}
+
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(res).To(gomega.Equal(expectation))
 	})
 
-	t.Run("success on empty result", func(t *testing.T) {
+	t.Run("success with all pages fully filled", func(t *testing.T) {
 		g, db := setup(t)
 		defer db.Close()
 
-		rows := sqlmock.NewRows(sampleData)
-
-		mock.ExpectQuery(query).
-			WillReturnRows(rows)
-
-		ctx := context.Background()
-		res, err := accessor.GetAll(ctx)
-		g.Expect(err).To(gomega.BeNil())
-		g.Expect(res).To(gomega.Equal([]Vendor{}))
-	})
-
-	t.Run("error on scanning row", func(t *testing.T) {
-		g, db := setup(t)
-		defer db.Close()
-
-		rows := sqlmock.NewRows(sampleData).AddRow(
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-		)
-
-		mock.ExpectQuery(query).
-			WillReturnRows(rows)
-
-		ctx := context.Background()
-		res, err := accessor.GetAll(ctx)
-
-		g.Expect(err).ToNot(gomega.BeNil())
-		g.Expect(res).To(gomega.BeNil())
-	})
-
-	t.Run("error on executing query", func(t *testing.T) {
-		g, db := setup(t)
-		defer db.Close()
-
-		rows := sqlmock.NewRows(sampleData).
+		rows := sqlmock.NewRows(vendorFields).
 			AddRow(
 				"1",
 				"name",
@@ -253,7 +234,133 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 				fixedTime,
 			)
 
-		wrongQuery := `SELECT 
+		customSpec := database.PaginationSpec{
+			Order: "DESC",
+			Limit: 1,
+			Page:  1,
+		}
+
+		mock.ExpectQuery(dataQuery).
+			WithArgs("DESC", 1, 0).
+			WillReturnRows(rows)
+
+		totalRows := sqlmock.NewRows([]string{"count"}).AddRow(1)
+
+		mock.ExpectQuery(countQuery).WillReturnRows(totalRows)
+
+		ctx := context.Background()
+		res, err := accessor.GetAll(ctx, customSpec)
+
+		vendorsExpectation := []Vendor{{
+			ID:            "1",
+			Name:          "name",
+			Description:   "description",
+			BpID:          "1",
+			BpName:        "bp_name",
+			Rating:        1,
+			AreaGroupID:   "1",
+			AreaGroupName: "group_name",
+			SapCode:       "sap_code",
+			ModifiedDate:  fixedTime,
+			ModifiedBy:    1,
+			Date:          fixedTime,
+		}}
+
+		expectation := &AccessorGetAllPaginationData{
+			Vendors:  vendorsExpectation,
+			Metadata: res.Metadata,
+		}
+
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(res).To(gomega.Equal(expectation))
+	})
+
+	t.Run("success on empty result", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		rows := sqlmock.NewRows(vendorFields)
+
+		args := database.BuildPaginationArgs(spec)
+
+		mock.ExpectQuery(dataQuery).
+			WithArgs(args.Order, args.Limit, args.Offset).
+			WillReturnRows(rows)
+
+		totalRows := sqlmock.NewRows([]string{"count"}).AddRow(0)
+
+		mock.ExpectQuery(countQuery).
+			WillReturnRows(totalRows)
+
+		ctx := context.Background()
+		res, err := accessor.GetAll(ctx, spec)
+
+		expectation := &AccessorGetAllPaginationData{
+			Vendors:  []Vendor{},
+			Metadata: res.Metadata,
+		}
+
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(res).To(gomega.Equal(expectation))
+	})
+
+	t.Run("error on scanning vendor data rows", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		rows := sqlmock.NewRows(vendorFields).AddRow(
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+		)
+
+		args := database.BuildPaginationArgs(spec)
+
+		mock.ExpectQuery(dataQuery).
+			WithArgs(args.Order, args.Limit, args.Offset).
+			WillReturnRows(rows)
+
+		totalRows := sqlmock.NewRows([]string{"count"}).AddRow(nil)
+
+		mock.ExpectQuery(countQuery).WillReturnRows(totalRows)
+
+		ctx := context.Background()
+		res, err := accessor.GetAll(ctx, spec)
+
+		g.Expect(err).ToNot(gomega.BeNil())
+		g.Expect(res).To(gomega.BeNil())
+	})
+
+	t.Run("error on executing vendor data query", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		rows := sqlmock.NewRows(vendorFields).
+			AddRow(
+				"1",
+				"name",
+				"description",
+				1,
+				"bp_name",
+				1,
+				1,
+				"group_name",
+				"sap_code",
+				fixedTime,
+				1,
+				fixedTime,
+			)
+
+		wrongQuery := `SELECT
 			"name",
 			"description",
 			"bp_id",
@@ -264,14 +371,25 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 			"sap_code",
 			"modified_date",
 			"modified_by",
-			"dt" 
-			FROM user`
+			"dt"
+			FROM vendor
+			ORDER BY created_at $1
+			LIMIT $2
+			OFFSET $3
+			`
+
+		args := database.BuildPaginationArgs(spec)
 
 		mock.ExpectQuery(wrongQuery).
+			WithArgs(args.Order, args.Limit, args.Offset).
 			WillReturnRows(rows)
 
+		totalRows := sqlmock.NewRows([]string{"count"}).AddRow(1)
+
+		mock.ExpectQuery(countQuery).WillReturnRows(totalRows)
+
 		ctx := context.Background()
-		res, err := accessor.GetAll(ctx)
+		res, err := accessor.GetAll(ctx, spec)
 
 		g.Expect(err).ToNot(gomega.BeNil())
 		g.Expect(res).To(gomega.BeNil())
@@ -281,7 +399,7 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 		g, db := setup(t)
 		defer db.Close()
 
-		rows := sqlmock.NewRows(sampleData).
+		rows := sqlmock.NewRows(vendorFields).
 			AddRow(
 				"1",
 				"name",
@@ -310,11 +428,55 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 			fixedTime,
 		).RowError(1, fmt.Errorf("row error"))
 
-		mock.ExpectQuery(query).
+		args := database.BuildPaginationArgs(spec)
+
+		mock.ExpectQuery(dataQuery).
+			WithArgs(args.Order, args.Limit, args.Offset).
 			WillReturnRows(rows)
 
+		totalRows := sqlmock.NewRows([]string{"count"}).AddRow(1)
+
+		mock.ExpectQuery(countQuery).WillReturnRows(totalRows)
+
 		ctx := context.Background()
-		res, err := accessor.GetAll(ctx)
+		res, err := accessor.GetAll(ctx, spec)
+
+		g.Expect(err).ToNot(gomega.BeNil())
+		g.Expect(res).To(gomega.BeNil())
+	})
+
+	t.Run("error on scanning total entry row", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		rows := sqlmock.NewRows(vendorFields).
+			AddRow(
+				"1",
+				"name",
+				"description",
+				1,
+				"bp_name",
+				1,
+				1,
+				"group_name",
+				"sap_code",
+				fixedTime,
+				1,
+				fixedTime,
+			)
+
+		args := database.BuildPaginationArgs(spec)
+
+		mock.ExpectQuery(dataQuery).
+			WithArgs(args.Order, args.Limit, args.Offset).
+			WillReturnRows(rows)
+
+		totalRows := sqlmock.NewRows([]string{"count"}).RowError(1, fmt.Errorf("row error"))
+
+		mock.ExpectQuery(countQuery).WillReturnRows(totalRows)
+
+		ctx := context.Background()
+		res, err := accessor.GetAll(ctx, spec)
 
 		g.Expect(err).ToNot(gomega.BeNil())
 		g.Expect(res).To(gomega.BeNil())

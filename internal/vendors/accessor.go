@@ -35,8 +35,10 @@ func (p *postgresVendorAccessor) GetSomeStuff(ctx context.Context) ([]string, er
 	return results, nil
 }
 
-func (p *postgresVendorAccessor) GetAll(ctx context.Context) ([]Vendor, error) {
-	query := `SELECT 
+func (p *postgresVendorAccessor) GetAll(ctx context.Context, spec database.PaginationSpec) (*AccessorGetAllPaginationData, error) {
+	args := database.BuildPaginationArgs(spec)
+
+	dataQuery := `SELECT 
 		"id",
 		"name",
 		"description",
@@ -49,9 +51,13 @@ func (p *postgresVendorAccessor) GetAll(ctx context.Context) ([]Vendor, error) {
 		"modified_date",
 		"modified_by",
 		"dt" 
-		FROM vendor`
+		FROM vendor
+		ORDER BY created_at $1
+		LIMIT $2
+		OFFSET $3
+		`
 
-	rows, err := p.db.Query(query)
+	rows, err := p.db.Query(dataQuery, args.Order, args.Limit, args.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +92,16 @@ func (p *postgresVendorAccessor) GetAll(ctx context.Context) ([]Vendor, error) {
 		return nil, err
 	}
 
-	return vendors, nil
+	countQuery := "SELECT COUNT(*) from vendor"
+	totalEntries := new(int)
+	row := p.db.QueryRow(countQuery)
+	if err = row.Scan(&totalEntries); err != nil {
+		return nil, err
+	}
+
+	metadata := database.GeneratePaginationMetadata(spec, *totalEntries)
+
+	return &AccessorGetAllPaginationData{Vendors: vendors, Metadata: metadata}, nil
 }
 
 func (p *postgresVendorAccessor) GetByLocation(ctx context.Context, location string) ([]Vendor, error) {

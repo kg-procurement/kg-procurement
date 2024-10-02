@@ -14,7 +14,10 @@ func NewVendorEngine(
 	vendorSvc *vendors.VendorService,
 ) {
 	r.GET(cfg.GetAll, func(ctx *gin.Context) {
-		res, err := vendorSvc.GetAll(ctx)
+
+		spec := GetPaginationSpec(ctx.Request)
+
+		res, err := vendorSvc.GetAll(ctx, spec)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
