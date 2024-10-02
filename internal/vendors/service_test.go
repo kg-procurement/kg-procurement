@@ -325,6 +325,7 @@ func TestVendorService_GetByProduct(t *testing.T) {
 
 func TestVendorService_Put(t *testing.T) {
 	fixedTime := time.Date(2024, time.September, 27, 12, 30, 0, 0, time.UTC)
+	updatedFixedTime := time.Date(2024, time.September, 27, 12, 30, 0, 1, time.UTC)
 
 	existingVendorData := Vendor{
 		ID:            "ID",
@@ -365,7 +366,7 @@ func TestVendorService_Put(t *testing.T) {
 		AreaGroupID:   "udpate",
 		AreaGroupName: "udpate",
 		SapCode:       "udpate",
-		ModifiedDate:  time.Now(),
+		ModifiedDate:  updatedFixedTime,
 		ModifiedBy:    "UpdatedID",
 		Date:          fixedTime,
 	}
@@ -414,9 +415,7 @@ func TestVendorService_Put(t *testing.T) {
 			GetById(tt.args.ctx, tt.args.spec.ID).
 			Return(tt.wantGetById, nil)
 
-		existingVendor, err := v.vendorDBAccessor.GetById(tt.args.ctx, tt.args.spec.ID)
-
-		newVendor := Vendor(*existingVendor)
+		newVendor := Vendor(*tt.wantGetById)
 		newVendor.Name = tt.args.spec.Name
 		newVendor.Description = tt.args.spec.Description
 		newVendor.BpID = tt.args.spec.BpID
@@ -431,7 +430,8 @@ func TestVendorService_Put(t *testing.T) {
 			Put(tt.args.ctx, newVendor).
 			Return(tt.wantPut, nil)
 
-		updatedVendor, err := v.vendorDBAccessor.Put(tt.args.ctx, newVendor)
+		updatedVendor, err := v.Put(tt.args.ctx, newVendor)
+
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(updatedVendor).To(gomega.Equal(tt.wantPut))
 	}
