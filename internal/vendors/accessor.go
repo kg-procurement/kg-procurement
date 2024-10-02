@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"kg/procurement/internal/common/database"
+	"strings"
 )
 
 type postgresVendorAccessor struct {
@@ -34,8 +35,10 @@ func (p *postgresVendorAccessor) GetSomeStuff(ctx context.Context) ([]string, er
 	return results, nil
 }
 
-func (p *postgresVendorAccessor) GetAll(ctx context.Context) ([]Vendor, error) {
-	query := `SELECT 
+func (p *postgresVendorAccessor) GetAll(ctx context.Context, spec database.PaginationSpec) (*AccessorGetAllPaginationData, error) {
+	args := database.BuildPaginationArgs(spec)
+
+	dataQuery := `SELECT 
 		"id",
 		"name",
 		"description",
@@ -48,9 +51,13 @@ func (p *postgresVendorAccessor) GetAll(ctx context.Context) ([]Vendor, error) {
 		"modified_date",
 		"modified_by",
 		"dt" 
-		FROM vendor`
+		FROM vendor
+		ORDER BY created_at $1
+		LIMIT $2
+		OFFSET $3
+		`
 
-	rows, err := p.db.Query(query)
+	rows, err := p.db.Query(dataQuery, args.Order, args.Limit, args.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +83,7 @@ func (p *postgresVendorAccessor) GetAll(ctx context.Context) ([]Vendor, error) {
 			&vendor.Date,
 		)
 		if err != nil {
-			return nil, fmt.Errorf("Failed while scanning row: %w", err)
+			return nil, err
 		}
 		vendors = append(vendors, vendor)
 	}
@@ -85,7 +92,16 @@ func (p *postgresVendorAccessor) GetAll(ctx context.Context) ([]Vendor, error) {
 		return nil, err
 	}
 
-	return vendors, nil
+	countQuery := "SELECT COUNT(*) from vendor"
+	totalEntries := new(int)
+	row := p.db.QueryRow(countQuery)
+	if err = row.Scan(&totalEntries); err != nil {
+		return nil, err
+	}
+
+	metadata := database.GeneratePaginationMetadata(spec, *totalEntries)
+
+	return &AccessorGetAllPaginationData{Vendors: vendors, Metadata: metadata}, nil
 }
 
 func (p *postgresVendorAccessor) GetByLocation(ctx context.Context, location string) ([]Vendor, error) {
@@ -131,7 +147,72 @@ func (p *postgresVendorAccessor) GetByLocation(ctx context.Context, location str
 			&vendor.Date,
 		)
 		if err != nil {
-			return nil, fmt.Errorf("Failed while scanning row: %w", err)
+			return nil, err
+		}
+		vendors = append(vendors, vendor)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return vendors, nil
+}
+
+func (p *postgresVendorAccessor) GetByProductDescription(ctx context.Context, productDescription []string) ([]Vendor, error) {
+	// Build the WHERE clause dynamically
+	var whereClauses []string
+	var args []interface{}
+	for i, word := range productDescription {
+		whereClauses = append(whereClauses, fmt.Sprintf("description LIKE $%d", i+1))
+		args = append(args, "%"+word+"%")
+	}
+	whereClause := strings.Join(whereClauses, " AND ")
+
+	// Construct the final query
+	query := fmt.Sprintf(`SELECT 
+        "id",
+        "name",
+        "description",
+        "bp_id",
+        "bp_name",
+        "rating",
+        "area_group_id",
+        "area_group_name",
+        "sap_code",
+        "modified_date",
+        "modified_by",
+        "dt" 
+        FROM vendor
+        WHERE %s`, whereClause)
+
+	rows, err := p.db.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	vendors := []Vendor{}
+
+	for rows.Next() {
+		var vendor Vendor
+		err := rows.Scan(
+			&vendor.ID,
+			&vendor.Name,
+			&vendor.Description,
+			&vendor.BpID,
+			&vendor.BpName,
+			&vendor.Rating,
+			&vendor.AreaGroupID,
+			&vendor.AreaGroupName,
+			&vendor.SapCode,
+			&vendor.ModifiedDate,
+			&vendor.ModifiedBy,
+			&vendor.Date,
+		)
+		if err != nil {
+			return nil, err
 		}
 		vendors = append(vendors, vendor)
 	}
