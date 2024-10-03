@@ -33,7 +33,10 @@ func (v *VendorService) GetAll(ctx context.Context, spec database.PaginationSpec
 	}
 
 	return v.vendorDBAccessor.GetAll(ctx, accessorSpec)
+}
 
+func (v *VendorService) GetById(ctx context.Context, id string) (*Vendor, error) {
+	return &Vendor{}, nil
 }
 
 func (v *VendorService) GetByLocation(ctx context.Context, location string) ([]Vendor, error) {

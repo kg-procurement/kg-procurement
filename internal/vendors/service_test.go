@@ -13,6 +13,11 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
+var (
+	fixedTime        = time.Date(2024, time.September, 27, 12, 30, 0, 0, time.UTC)
+	updatedFixedTime = time.Date(2024, time.September, 27, 12, 30, 0, 1, time.UTC)
+)
+
 func Test_NewVendorService(t *testing.T) {
 	_ = NewVendorService(nil)
 }
@@ -139,6 +144,77 @@ func TestVendorService_GetAll(t *testing.T) {
 				Return(tt.want, tt.err)
 
 			res, err := v.GetAll(tt.args.ctx, tt.args.spec)
+
+			if tt.err == nil {
+				g.Expect(err).To(gomega.BeNil())
+				g.Expect(res).To(gomega.Equal(tt.want))
+			} else {
+				g.Expect(err).ToNot(gomega.BeNil())
+				g.Expect(res).To(gomega.BeNil())
+			}
+		})
+	}
+}
+
+func TestVendorService_GetById(t *testing.T) {
+	data := &Vendor{
+		ID:            "1",
+		Name:          "name",
+		Description:   "description",
+		BpID:          "1",
+		BpName:        "bp_name",
+		Rating:        1,
+		AreaGroupID:   "1",
+		AreaGroupName: "group_name",
+		SapCode:       "sap_code",
+		ModifiedDate:  fixedTime,
+		ModifiedBy:    "1",
+		Date:          fixedTime,
+	}
+
+	ctrl := gomock.NewController(t)
+
+	defer ctrl.Finish()
+
+	type fields struct {
+		mockVendorDBAccessor *MockvendorDBAccessor
+		mockDBConnector      *database.MockDBConnector
+	}
+
+	type args struct {
+		ctx context.Context
+		id  string
+	}
+
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   *Vendor
+		err    error
+	}{
+		{
+			name: "success",
+			fields: fields{
+				mockVendorDBAccessor: NewMockvendorDBAccessor(ctrl),
+			},
+			args: args{ctx: context.Background(), id: "ID"},
+			want: data,
+			err:  nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := gomega.NewWithT(t)
+			v := &VendorService{
+				vendorDBAccessor: tt.fields.mockVendorDBAccessor,
+			}
+
+			tt.fields.mockVendorDBAccessor.EXPECT().
+				GetById(tt.args.ctx, tt.args.id).
+				Return(tt.want, tt.err)
+
+			res, err := v.GetById(tt.args.ctx, tt.args.id)
 
 			if tt.err == nil {
 				g.Expect(err).To(gomega.BeNil())
@@ -324,9 +400,6 @@ func TestVendorService_GetByProduct(t *testing.T) {
 }
 
 func TestVendorService_Put(t *testing.T) {
-	fixedTime := time.Date(2024, time.September, 27, 12, 30, 0, 0, time.UTC)
-	updatedFixedTime := time.Date(2024, time.September, 27, 12, 30, 0, 1, time.UTC)
-
 	existingVendorData := Vendor{
 		ID:            "ID",
 		Name:          "name",
