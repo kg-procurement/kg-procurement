@@ -184,7 +184,7 @@ func Test_GetProductsByVendor(t *testing.T) {
 		)
 		defer c.db.Close()
 
-		c.mock.ExpectQuery(getProductsByVendorQuery + " ORDER BY name").
+		c.mock.ExpectQuery(getProductsByVendorQuery + " ORDER BY name ASC").
 			WithArgs(vendorID).
 			WillReturnRows(expectedResult)
 
@@ -209,7 +209,7 @@ func Test_GetProductsByVendor(t *testing.T) {
 
 		productNameList := strings.Fields(customSpec.Name)
 		c.mock.ExpectQuery(getProductsByVendorQuery+
-			" AND p.name iLIKE $2 AND p.name iLIKE $3 ORDER BY name").
+			" AND p.name iLIKE $2 AND p.name iLIKE $3 ORDER BY name ASC").
 			WithArgs(vendorID, "%"+productNameList[0]+"%", "%"+productNameList[1]+"%").
 			WillReturnRows(expectedResult)
 
