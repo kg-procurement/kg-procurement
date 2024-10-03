@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"kg/procurement/internal/common/database"
+	"strings"
 )
 
 const (
@@ -32,7 +33,39 @@ type postgresProductAccessor struct {
 }
 
 func (p *postgresProductAccessor) GetProductsByVendor(_ context.Context, spec GetProductsByVendorSpec) ([]Product, error) {
-	rows, err := p.db.Query(getProductsByVendorQuery, spec.VendorID)
+	// Initialize clauses and arguments
+	var (
+		whereClauses []string
+		extraClauses []string
+		args         = []interface{}{spec.VendorID}
+		i            = 2
+	)
+
+	// Build WHERE clauses for product
+	if spec.Name != "" {
+		productNameList := strings.Fields(spec.Name)
+		for _, word := range productNameList {
+			whereClauses = append(whereClauses, fmt.Sprintf("p.name iLIKE $%d", i))
+			args = append(args, "%"+word+"%")
+			i++
+		}
+	}
+
+	// Build extra clauses
+	if spec.OrderBy != "" {
+		extraClauses = append(extraClauses, fmt.Sprintf("ORDER BY %s", spec.OrderBy))
+	}
+
+	// Build the query
+	query := getProductsByVendorQuery
+	if len(whereClauses) > 0 {
+		query += " AND " + strings.Join(whereClauses, " AND ")
+	}
+	if len(extraClauses) > 0 {
+		query += " " + strings.Join(extraClauses, " ")
+	}
+
+	rows, err := p.db.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}
