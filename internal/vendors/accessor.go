@@ -35,37 +35,99 @@ func (p *postgresVendorAccessor) GetSomeStuff(ctx context.Context) ([]string, er
 	return results, nil
 }
 
-func (p *postgresVendorAccessor) GetAll(ctx context.Context, spec database.PaginationSpec) (*AccessorGetAllPaginationData, error) {
-	args := database.BuildPaginationArgs(spec)
+func (p *postgresVendorAccessor) GetAll(ctx context.Context, spec GetAllVendorSpec) (*AccessorGetAllPaginationData, error) {
+	paginationArgs := database.BuildPaginationArgs(spec.PaginationSpec)
 
-	dataQuery := `SELECT 
-		"id",
-		"name",
-		"description",
-		"bp_id",
-		"bp_name",
-		"rating",
-		"area_group_id",
-		"area_group_name",
-		"sap_code",
-		"modified_date",
-		"modified_by",
-		"dt" 
-		FROM vendor
-		ORDER BY created_at $1
-		LIMIT $2
-		OFFSET $3
-		`
+	// Initialize clauses and arguments
+	var (
+		joinClauses     []string
+		whereClauses    []string
+		extraClauses    []string
+		args            []interface{}
+		argsIndex       = 1
+		extraClausesRaw = []string{
+			"LIMIT $%d",
+			"OFFSET $%d",
+		}
+	)
 
-	rows, err := p.db.Query(dataQuery, args.Order, args.Limit, args.Offset)
+	// Build WHERE clause for location
+	if spec.Location != "" {
+		whereClauses = append(whereClauses, fmt.Sprintf("area_group_name = $%d", argsIndex))
+		args = append(args, spec.Location)
+		argsIndex++
+	}
+
+	// Build JOIN and WHERE clauses for product
+	if spec.Product != "" {
+		joinClauses = append(joinClauses, "JOIN product_vendor pv ON pv.vendor_id = v.id")
+		joinClauses = append(joinClauses, "JOIN product p ON p.id = pv.product_id")
+
+		productNameList := strings.Fields(spec.Product)
+		for _, word := range productNameList {
+			whereClauses = append(whereClauses, fmt.Sprintf("p.name iLIKE $%d", argsIndex))
+			args = append(args, "%"+word+"%")
+			argsIndex++
+		}
+	}
+
+	// Set order by default value
+	if paginationArgs.OrderBy == "" {
+		paginationArgs.OrderBy = "v.dt"
+	} else {
+		paginationArgs.OrderBy = "v." + paginationArgs.OrderBy
+	}
+
+	// Populate extra clauses
+	extraClauses = append(
+		extraClauses,
+		fmt.Sprintf("ORDER BY %s %s", paginationArgs.OrderBy, paginationArgs.Order),
+	)
+	for _, clause := range extraClausesRaw {
+		extraClauses = append(extraClauses, fmt.Sprintf(clause, argsIndex))
+		argsIndex++
+	}
+
+	// Append pagination arguments to args
+	args = append(args, paginationArgs.Limit, paginationArgs.Offset)
+
+	// Construct the final query
+	joinClause := strings.Join(joinClauses, "\n")
+	whereClause := ""
+	if len(whereClauses) > 0 {
+		whereClause = "WHERE " + strings.Join(whereClauses, " AND ")
+	}
+	extraClause := strings.Join(extraClauses, "\n")
+
+	dataQuery := fmt.Sprintf(`
+		SELECT DISTINCT
+			v.id,
+			v.name,
+			v.description,
+			v.bp_id,
+			v.bp_name,
+			v.rating,
+			v.area_group_id,
+			v.area_group_name,
+			v.sap_code,
+			v.modified_date,
+			v.modified_by,
+			v.dt
+		FROM vendor v
+		%s
+		%s
+		%s
+	`, joinClause, whereClause, extraClause)
+
+	// Execute the query
+	rows, err := p.db.Query(dataQuery, args...)
 	if err != nil {
 		return nil, err
 	}
-
 	defer rows.Close()
 
+	// Process the results
 	vendors := []Vendor{}
-
 	for rows.Next() {
 		var vendor Vendor
 		err := rows.Scan(
@@ -87,11 +149,11 @@ func (p *postgresVendorAccessor) GetAll(ctx context.Context, spec database.Pagin
 		}
 		vendors = append(vendors, vendor)
 	}
-
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 
+	// Get the total count of entries
 	countQuery := "SELECT COUNT(*) from vendor"
 	totalEntries := new(int)
 	row := p.db.QueryRow(countQuery)
@@ -99,129 +161,10 @@ func (p *postgresVendorAccessor) GetAll(ctx context.Context, spec database.Pagin
 		return nil, err
 	}
 
-	metadata := database.GeneratePaginationMetadata(spec, *totalEntries)
+	// Generate pagination metadata
+	metadata := database.GeneratePaginationMetadata(spec.PaginationSpec, *totalEntries)
 
 	return &AccessorGetAllPaginationData{Vendors: vendors, Metadata: metadata}, nil
-}
-
-func (p *postgresVendorAccessor) GetByLocation(ctx context.Context, location string) ([]Vendor, error) {
-	query := `SELECT 
-		"id",
-		"name",
-		"description",
-		"bp_id",
-		"bp_name",
-		"rating",
-		"area_group_id",
-		"area_group_name",
-		"sap_code",
-		"modified_date",
-		"modified_by",
-		"dt" 
-		FROM vendor
-		WHERE area_group_name = $1`
-
-	rows, err := p.db.Query(query, location)
-	if err != nil {
-		return nil, err
-	}
-
-	defer rows.Close()
-
-	vendors := []Vendor{}
-
-	for rows.Next() {
-		var vendor Vendor
-		err := rows.Scan(
-			&vendor.ID,
-			&vendor.Name,
-			&vendor.Description,
-			&vendor.BpID,
-			&vendor.BpName,
-			&vendor.Rating,
-			&vendor.AreaGroupID,
-			&vendor.AreaGroupName,
-			&vendor.SapCode,
-			&vendor.ModifiedDate,
-			&vendor.ModifiedBy,
-			&vendor.Date,
-		)
-		if err != nil {
-			return nil, err
-		}
-		vendors = append(vendors, vendor)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-
-	return vendors, nil
-}
-
-func (p *postgresVendorAccessor) GetByProductDescription(ctx context.Context, productDescription []string) ([]Vendor, error) {
-	// Build the WHERE clause dynamically
-	var whereClauses []string
-	var args []interface{}
-	for i, word := range productDescription {
-		whereClauses = append(whereClauses, fmt.Sprintf("description LIKE $%d", i+1))
-		args = append(args, "%"+word+"%")
-	}
-	whereClause := strings.Join(whereClauses, " AND ")
-
-	// Construct the final query
-	query := fmt.Sprintf(`SELECT 
-        "id",
-        "name",
-        "description",
-        "bp_id",
-        "bp_name",
-        "rating",
-        "area_group_id",
-        "area_group_name",
-        "sap_code",
-        "modified_date",
-        "modified_by",
-        "dt" 
-        FROM vendor
-        WHERE %s`, whereClause)
-
-	rows, err := p.db.Query(query, args...)
-	if err != nil {
-		return nil, err
-	}
-
-	defer rows.Close()
-
-	vendors := []Vendor{}
-
-	for rows.Next() {
-		var vendor Vendor
-		err := rows.Scan(
-			&vendor.ID,
-			&vendor.Name,
-			&vendor.Description,
-			&vendor.BpID,
-			&vendor.BpName,
-			&vendor.Rating,
-			&vendor.AreaGroupID,
-			&vendor.AreaGroupName,
-			&vendor.SapCode,
-			&vendor.ModifiedDate,
-			&vendor.ModifiedBy,
-			&vendor.Date,
-		)
-		if err != nil {
-			return nil, err
-		}
-		vendors = append(vendors, vendor)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-
-	return vendors, nil
 }
 
 // newPostgresVendorAccessor is only accessible by the vendor package

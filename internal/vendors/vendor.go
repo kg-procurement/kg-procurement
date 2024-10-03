@@ -1,6 +1,9 @@
 package vendors
 
-import "time"
+import (
+	"kg/procurement/internal/common/database"
+	"time"
+)
 
 // Vendor defines the metadata related to a vendor
 // i.e. name, etc
@@ -17,4 +20,11 @@ type Vendor struct {
 	ModifiedDate  time.Time `json:"modified_date"`
 	ModifiedBy    int       `json:"modified_by"`
 	Date          time.Time `json:"dt"`
+}
+
+type GetAllVendorSpec struct {
+	Location string `json:"location"`
+	Product  string `json:"product"`
+
+	database.PaginationSpec
 }
