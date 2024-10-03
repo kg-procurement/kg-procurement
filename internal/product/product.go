@@ -1,6 +1,7 @@
 package product
 
 import (
+	"kg/procurement/internal/common/database"
 	"kg/procurement/internal/vendors"
 	"time"
 )
@@ -25,7 +26,7 @@ type ProductVendor struct {
 }
 
 type GetProductsByVendorSpec struct {
-	VendorID string `json:"vendor_id"`
 	Name     string `json:"name"`
-	OrderBy  string `json:"order_by"`
+
+	database.PaginationSpec
 }

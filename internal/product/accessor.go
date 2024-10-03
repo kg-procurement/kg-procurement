@@ -32,28 +32,31 @@ type postgresProductAccessor struct {
 	db database.DBConnector
 }
 
-func (p *postgresProductAccessor) GetProductsByVendor(_ context.Context, spec GetProductsByVendorSpec) ([]Product, error) {
+func (p *postgresProductAccessor) GetProductsByVendor(
+	_ context.Context, vendorID string, spec GetProductsByVendorSpec) ([]Product, error) {
+	paginationArgs := database.BuildPaginationArgs(spec.PaginationSpec)
+
 	// Initialize clauses and arguments
 	var (
 		whereClauses []string
 		extraClauses []string
-		args         = []interface{}{spec.VendorID}
-		i            = 2
+		args         = []interface{}{vendorID}
+		argsIndex    = 2 // start at 2 because the query already have $1
 	)
 
 	// Build WHERE clauses for product
 	if spec.Name != "" {
 		productNameList := strings.Fields(spec.Name)
 		for _, word := range productNameList {
-			whereClauses = append(whereClauses, fmt.Sprintf("p.name iLIKE $%d", i))
+			whereClauses = append(whereClauses, fmt.Sprintf("p.name iLIKE $%d", argsIndex))
 			args = append(args, "%"+word+"%")
-			i++
+			argsIndex++
 		}
 	}
 
 	// Build extra clauses
-	if spec.OrderBy != "" {
-		extraClauses = append(extraClauses, fmt.Sprintf("ORDER BY %s", spec.OrderBy))
+	if paginationArgs.OrderBy != "" {
+		extraClauses = append(extraClauses, fmt.Sprintf("ORDER BY %s", paginationArgs.OrderBy))
 	}
 
 	// Build the query
