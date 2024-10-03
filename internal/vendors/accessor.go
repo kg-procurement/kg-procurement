@@ -65,7 +65,7 @@ func (p *postgresVendorAccessor) GetAll(ctx context.Context, spec GetAllVendorSp
 
 		productNameList := strings.Fields(spec.Product)
 		for _, word := range productNameList {
-			whereClauses = append(whereClauses, fmt.Sprintf("p.name LIKE $%d", i))
+			whereClauses = append(whereClauses, fmt.Sprintf("p.name iLIKE $%d", i))
 			args = append(args, "%"+word+"%")
 			i++
 		}
