@@ -56,7 +56,8 @@ func (p *postgresProductAccessor) GetProductsByVendor(
 
 	// Build extra clauses
 	if paginationArgs.OrderBy != "" {
-		extraClauses = append(extraClauses, fmt.Sprintf("ORDER BY %s", paginationArgs.OrderBy))
+		extraClauses = append(extraClauses, fmt.Sprintf("ORDER BY %s %s",
+			paginationArgs.OrderBy, paginationArgs.Order))
 	}
 
 	// Build the query
