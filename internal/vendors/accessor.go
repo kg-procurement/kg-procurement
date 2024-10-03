@@ -44,7 +44,7 @@ func (p *postgresVendorAccessor) GetAll(ctx context.Context, spec GetAllVendorSp
 		whereClauses    []string
 		extraClauses    []string
 		args            []interface{}
-		i               = 1
+		argsIndex       = 1
 		extraClausesRaw = []string{
 			"LIMIT $%d",
 			"OFFSET $%d",
@@ -53,9 +53,9 @@ func (p *postgresVendorAccessor) GetAll(ctx context.Context, spec GetAllVendorSp
 
 	// Build WHERE clause for location
 	if spec.Location != "" {
-		whereClauses = append(whereClauses, fmt.Sprintf("area_group_name = $%d", i))
+		whereClauses = append(whereClauses, fmt.Sprintf("area_group_name = $%d", argsIndex))
 		args = append(args, spec.Location)
-		i++
+		argsIndex++
 	}
 
 	// Build JOIN and WHERE clauses for product
@@ -65,9 +65,9 @@ func (p *postgresVendorAccessor) GetAll(ctx context.Context, spec GetAllVendorSp
 
 		productNameList := strings.Fields(spec.Product)
 		for _, word := range productNameList {
-			whereClauses = append(whereClauses, fmt.Sprintf("p.name iLIKE $%d", i))
+			whereClauses = append(whereClauses, fmt.Sprintf("p.name iLIKE $%d", argsIndex))
 			args = append(args, "%"+word+"%")
-			i++
+			argsIndex++
 		}
 	}
 
@@ -84,8 +84,8 @@ func (p *postgresVendorAccessor) GetAll(ctx context.Context, spec GetAllVendorSp
 		fmt.Sprintf("ORDER BY %s %s", paginationArgs.OrderBy, paginationArgs.Order),
 	)
 	for _, clause := range extraClausesRaw {
-		extraClauses = append(extraClauses, fmt.Sprintf(clause, i))
-		i++
+		extraClauses = append(extraClauses, fmt.Sprintf(clause, argsIndex))
+		argsIndex++
 	}
 
 	// Append pagination arguments to args
