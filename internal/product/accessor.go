@@ -84,6 +84,10 @@ func (p *postgresProductAccessor) UpdateProduct(_ context.Context, productID Pro
 	return nil
 }
 
+func (p *postgresProductAccessor) UpdatePrice(ctx context.Context, product Price) (*Price, error) {
+	return nil, nil
+}
+
 // newPostgresProductAccessor is only accessible by the Product package
 // entrypoint for other verticals should refer to the interface declared on service
 func newPostgresProductAccessor(db database.DBConnector) *postgresProductAccessor {
