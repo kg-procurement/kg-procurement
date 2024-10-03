@@ -1,6 +1,9 @@
 package vendors
 
-import "time"
+import (
+	"kg/procurement/internal/common/database"
+	"time"
+)
 
 // Vendor defines the metadata related to a vendor
 // i.e. name, etc
@@ -28,4 +31,11 @@ type PutVendorSpec struct {
 	AreaGroupID   string `json:"area_group_id"`
 	AreaGroupName string `json:"area_group_name"`
 	SapCode       string `json:"sap_code"`
+}
+
+type GetAllVendorSpec struct {
+	Location string `json:"location"`
+	Product  string `json:"product"`
+
+	database.PaginationSpec
 }

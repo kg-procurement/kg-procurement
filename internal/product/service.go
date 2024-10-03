@@ -7,15 +7,16 @@ import (
 )
 
 type productDBAccessor interface {
-	GetProductsByVendor(ctx context.Context, vendorID string) ([]Product, error)
+	GetProductsByVendor(ctx context.Context, vendorID string, spec GetProductsByVendorSpec) ([]Product, error)
 }
 
 type ProductService struct {
 	productDBAccessor
 }
 
-func (p *ProductService) GetProductsByVendor(ctx context.Context, vendorID string) ([]Product, error) {
-	return p.productDBAccessor.GetProductsByVendor(ctx, vendorID)
+func (p *ProductService) GetProductsByVendor(
+	ctx context.Context, vendorID string, spec GetProductsByVendorSpec) ([]Product, error) {
+	return p.productDBAccessor.GetProductsByVendor(ctx, vendorID, spec)
 }
 
 func NewProductService(

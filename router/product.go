@@ -23,7 +23,14 @@ func NewProductEngine(
 			return
 		}
 
-		res, err := productSvc.GetProductsByVendor(ctx, vendorID)
+		paginationSpec := GetPaginationSpec(ctx.Request)
+
+		spec := product.GetProductsByVendorSpec{
+			Name:           ctx.Query("name"),
+			PaginationSpec: paginationSpec,
+		}
+
+		res, err := productSvc.GetProductsByVendor(ctx, vendorID, spec)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
