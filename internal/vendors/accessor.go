@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"kg/procurement/internal/common/database"
 	"strings"
+
+	"github.com/benbjohnson/clock"
 )
 
 type postgresVendorAccessor struct {
-	db database.DBConnector
+	db    database.DBConnector
+	clock clock.Clock
 }
 
 // GetSomeStuff is just an example
@@ -330,8 +333,9 @@ func (p *postgresVendorAccessor) Put(ctx context.Context, vendor Vendor) (*Vendo
 
 // newPostgresVendorAccessor is only accessible by the vendor package
 // entrypoint for other verticals should refer to the interface declared on service
-func newPostgresVendorAccessor(db database.DBConnector) *postgresVendorAccessor {
+func newPostgresVendorAccessor(db database.DBConnector, clock clock.Clock) *postgresVendorAccessor {
 	return &postgresVendorAccessor{
-		db: db,
+		db:    db,
+		clock: clock,
 	}
 }

@@ -5,6 +5,8 @@ import (
 	"context"
 	"kg/procurement/internal/common/database"
 	"strings"
+
+	"github.com/benbjohnson/clock"
 )
 
 type vendorDBAccessor interface {
@@ -70,8 +72,9 @@ func (v *VendorService) Put(ctx context.Context, vendor Vendor) (*Vendor, error)
 
 func NewVendorService(
 	conn database.DBConnector,
+	clock clock.Clock,
 ) *VendorService {
 	return &VendorService{
-		vendorDBAccessor: newPostgresVendorAccessor(conn),
+		vendorDBAccessor: newPostgresVendorAccessor(conn, clock),
 	}
 }
