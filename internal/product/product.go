@@ -1,6 +1,7 @@
 package product
 
 import (
+	"kg/procurement/internal/common/database"
 	"kg/procurement/internal/vendors"
 	"time"
 )
@@ -22,4 +23,10 @@ type Product struct {
 type ProductVendor struct {
 	Product
 	vendors.Vendor
+}
+
+type GetProductsByVendorSpec struct {
+	Name     string `json:"name"`
+
+	database.PaginationSpec
 }

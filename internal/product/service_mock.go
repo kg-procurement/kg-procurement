@@ -40,18 +40,18 @@ func (m *MockproductDBAccessor) EXPECT() *MockproductDBAccessorMockRecorder {
 }
 
 // GetProductsByVendor mocks base method.
-func (m *MockproductDBAccessor) GetProductsByVendor(ctx context.Context, vendorID string) ([]Product, error) {
+func (m *MockproductDBAccessor) GetProductsByVendor(ctx context.Context, vendorID string, spec GetProductsByVendorSpec) ([]Product, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetProductsByVendor", ctx, vendorID)
+	ret := m.ctrl.Call(m, "GetProductsByVendor", ctx, vendorID, spec)
 	ret0, _ := ret[0].([]Product)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetProductsByVendor indicates an expected call of GetProductsByVendor.
-func (mr *MockproductDBAccessorMockRecorder) GetProductsByVendor(ctx, vendorID any) *MockproductDBAccessorGetProductsByVendorCall {
+func (mr *MockproductDBAccessorMockRecorder) GetProductsByVendor(ctx, vendorID, spec any) *MockproductDBAccessorGetProductsByVendorCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProductsByVendor", reflect.TypeOf((*MockproductDBAccessor)(nil).GetProductsByVendor), ctx, vendorID)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProductsByVendor", reflect.TypeOf((*MockproductDBAccessor)(nil).GetProductsByVendor), ctx, vendorID, spec)
 	return &MockproductDBAccessorGetProductsByVendorCall{Call: call}
 }
 
@@ -67,13 +67,13 @@ func (c *MockproductDBAccessorGetProductsByVendorCall) Return(arg0 []Product, ar
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockproductDBAccessorGetProductsByVendorCall) Do(f func(context.Context, string) ([]Product, error)) *MockproductDBAccessorGetProductsByVendorCall {
+func (c *MockproductDBAccessorGetProductsByVendorCall) Do(f func(context.Context, string, GetProductsByVendorSpec) ([]Product, error)) *MockproductDBAccessorGetProductsByVendorCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockproductDBAccessorGetProductsByVendorCall) DoAndReturn(f func(context.Context, string) ([]Product, error)) *MockproductDBAccessorGetProductsByVendorCall {
+func (c *MockproductDBAccessorGetProductsByVendorCall) DoAndReturn(f func(context.Context, string, GetProductsByVendorSpec) ([]Product, error)) *MockproductDBAccessorGetProductsByVendorCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
