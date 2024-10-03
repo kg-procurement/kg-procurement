@@ -46,7 +46,6 @@ func (p *postgresVendorAccessor) GetAll(ctx context.Context, spec GetAllVendorSp
 		args            []interface{}
 		i               = 1
 		extraClausesRaw = []string{
-			fmt.Sprintf("ORDER BY $%s %s", "%d", paginationArgs.Order),
 			"LIMIT $%d",
 			"OFFSET $%d",
 		}
@@ -74,17 +73,23 @@ func (p *postgresVendorAccessor) GetAll(ctx context.Context, spec GetAllVendorSp
 
 	// Set order by default value
 	if spec.OrderBy == "" {
-		spec.OrderBy = "dt"
+		spec.OrderBy = "v.dt"
+	} else {
+		spec.OrderBy = "v." + spec.OrderBy
 	}
 
 	// Populate extra clauses
+	extraClauses = append(
+		extraClauses,
+		fmt.Sprintf("ORDER BY %s %s", spec.OrderBy, paginationArgs.Order),
+	)
 	for _, clause := range extraClausesRaw {
 		extraClauses = append(extraClauses, fmt.Sprintf(clause, i))
 		i++
 	}
 
 	// Append pagination arguments to args
-	args = append(args, spec.OrderBy, paginationArgs.Limit, paginationArgs.Offset)
+	args = append(args, paginationArgs.Limit, paginationArgs.Offset)
 
 	// Construct the final query
 	joinClause := strings.Join(joinClauses, "\n")
