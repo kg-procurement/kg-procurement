@@ -124,7 +124,7 @@ func TestVendorService_GetAll(t *testing.T) {
 			err:  nil,
 		},
 		{
-			name: "success with location and product",
+			name: "success with order by, location and product",
 			fields: fields{
 				mockVendorDBAccessor: NewMockvendorDBAccessor(ctrl),
 			},
@@ -132,6 +132,7 @@ func TestVendorService_GetAll(t *testing.T) {
 				ctx: context.Background(),
 				spec: GetAllVendorSpec{
 					PaginationSpec: database.PaginationSpec{Limit: 10, Order: "DESC", Page: 1},
+					OrderBy:        "rating",
 					Location:       "Indonesia",
 					Product:        "test product",
 				},
@@ -153,6 +154,7 @@ func TestVendorService_GetAll(t *testing.T) {
 					Page:  tt.args.spec.Page,
 					Order: tt.args.spec.Order,
 				},
+				OrderBy:  tt.args.spec.OrderBy,
 				Location: tt.args.spec.Location,
 				Product:  tt.args.spec.Product,
 			}

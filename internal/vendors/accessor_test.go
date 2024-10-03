@@ -221,8 +221,6 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 		g, db := setup(t)
 		defer db.Close()
 
-		spec.OrderBy = "rating"
-
 		rows := sqlmock.NewRows(vendorFields).
 			AddRow(
 				"1",
@@ -239,10 +237,19 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 				fixedTime,
 			)
 
-		args := database.BuildPaginationArgs(spec.PaginationSpec)
+		customSpec := GetAllVendorSpec{
+			PaginationSpec: database.PaginationSpec{
+				Order: "DESC",
+				Limit: 10,
+				Page:  1,
+			},
+			OrderBy: "rating",
+		}
+
+		args := database.BuildPaginationArgs(customSpec.PaginationSpec)
 
 		mock.ExpectQuery(dataQuery).
-			WithArgs(spec.OrderBy, args.Limit, args.Offset).
+			WithArgs(customSpec.OrderBy, args.Limit, args.Offset).
 			WillReturnRows(rows)
 
 		totalRows := sqlmock.NewRows([]string{"count"}).AddRow(1)
@@ -250,7 +257,7 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 		mock.ExpectQuery(countQuery).WillReturnRows(totalRows)
 
 		ctx := context.Background()
-		res, err := accessor.GetAll(ctx, spec)
+		res, err := accessor.GetAll(ctx, customSpec)
 
 		vendorsExpectation := []Vendor{{
 			ID:            "1",
@@ -305,7 +312,7 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 		}
 
 		mock.ExpectQuery(dataQuery).
-			WithArgs(1, 0).
+			WithArgs("dt", 1, 0).
 			WillReturnRows(rows)
 
 		totalRows := sqlmock.NewRows([]string{"count"}).AddRow(1)
@@ -348,7 +355,7 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 		args := database.BuildPaginationArgs(spec.PaginationSpec)
 
 		mock.ExpectQuery(dataQuery).
-			WithArgs(args.Limit, args.Offset).
+			WithArgs("dt", args.Limit, args.Offset).
 			WillReturnRows(rows)
 
 		totalRows := sqlmock.NewRows([]string{"count"}).AddRow(0)
@@ -390,7 +397,7 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 		args := database.BuildPaginationArgs(spec.PaginationSpec)
 
 		mock.ExpectQuery(dataQuery).
-			WithArgs(args.Limit, args.Offset).
+			WithArgs("dt", args.Limit, args.Offset).
 			WillReturnRows(rows)
 
 		totalRows := sqlmock.NewRows([]string{"count"}).AddRow(nil)
@@ -445,7 +452,7 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 		args := database.BuildPaginationArgs(spec.PaginationSpec)
 
 		mock.ExpectQuery(wrongQuery).
-			WithArgs(args.Limit, args.Offset).
+			WithArgs("dt", args.Limit, args.Offset).
 			WillReturnRows(rows)
 
 		totalRows := sqlmock.NewRows([]string{"count"}).AddRow(1)
@@ -495,7 +502,7 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 		args := database.BuildPaginationArgs(spec.PaginationSpec)
 
 		mock.ExpectQuery(dataQuery).
-			WithArgs(args.Limit, args.Offset).
+			WithArgs("dt", args.Limit, args.Offset).
 			WillReturnRows(rows)
 
 		totalRows := sqlmock.NewRows([]string{"count"}).AddRow(1)
@@ -532,7 +539,7 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 		args := database.BuildPaginationArgs(spec.PaginationSpec)
 
 		mock.ExpectQuery(dataQuery).
-			WithArgs(args.Limit, args.Offset).
+			WithArgs("dt", args.Limit, args.Offset).
 			WillReturnRows(rows)
 
 		totalRows := sqlmock.NewRows([]string{"count"}).RowError(1, fmt.Errorf("row error"))
@@ -616,9 +623,9 @@ func Test_postgresVendorAccessor_GetAll_WithLocationAndProduct(t *testing.T) {
 		JOIN product_vendor pv ON pv.vendor_id = v.id
 		JOIN product p ON p.id = pv.product_id
 		WHERE area_group_name = $1 AND p.name LIKE $2 AND p.name LIKE $3
-		ORDER BY rating %s
-		LIMIT $4
-		OFFSET $5
+		ORDER BY $4 %s
+		LIMIT $5
+		OFFSET $6
 	`, spec.PaginationSpec.Order)
 
 	productNameList := strings.Fields(spec.Product)
@@ -650,6 +657,7 @@ func Test_postgresVendorAccessor_GetAll_WithLocationAndProduct(t *testing.T) {
 				spec.Location,
 				"%"+productNameList[0]+"%",
 				"%"+productNameList[1]+"%",
+				"dt",
 				args.Limit,
 				args.Offset,
 			).
@@ -695,6 +703,7 @@ func Test_postgresVendorAccessor_GetAll_WithLocationAndProduct(t *testing.T) {
 				spec.Location,
 				"%"+productNameList[0]+"%",
 				"%"+productNameList[1]+"%",
+				"dt",
 				10,
 				0,
 			).
@@ -736,9 +745,9 @@ func Test_postgresVendorAccessor_GetAll_WithLocationAndProduct(t *testing.T) {
 				v.dt
 			FROM vendor v
 			WHERE area_group_name = $1
-			ORDER BY rating DESC
-			LIMIT $2
-			OFFSET $3
+			ORDER BY $2 DESC
+			LIMIT $3
+			OFFSET $4
 		`
 
 		rows := sqlmock.NewRows(vendorFields).
@@ -760,7 +769,7 @@ func Test_postgresVendorAccessor_GetAll_WithLocationAndProduct(t *testing.T) {
 		args := database.BuildPaginationArgs(spec.PaginationSpec)
 
 		mock.ExpectQuery(dataQuery).
-			WithArgs(spec.Location, args.Limit, args.Offset).
+			WithArgs(spec.Location, "dt", args.Limit, args.Offset).
 			WillReturnRows(rows)
 
 		totalRows := sqlmock.NewRows([]string{"count"}).AddRow(1)
@@ -825,9 +834,9 @@ func Test_postgresVendorAccessor_GetAll_WithLocationAndProduct(t *testing.T) {
 			JOIN product_vendor pv ON pv.vendor_id = v.id
 			JOIN product p ON p.id = pv.product_id
 			WHERE p.name LIKE $1 AND p.name LIKE $2
-			ORDER BY rating DESC
-			LIMIT $3
-			OFFSET $4
+			ORDER BY $3 DESC
+			LIMIT $4
+			OFFSET $5
 		`
 
 		rows := sqlmock.NewRows(vendorFields).
@@ -852,6 +861,7 @@ func Test_postgresVendorAccessor_GetAll_WithLocationAndProduct(t *testing.T) {
 			WithArgs(
 				"%"+productNameList[0]+"%",
 				"%"+productNameList[1]+"%",
+				"dt",
 				args.Limit,
 				args.Offset,
 			).
