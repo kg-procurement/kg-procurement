@@ -72,16 +72,16 @@ func (p *postgresVendorAccessor) GetAll(ctx context.Context, spec GetAllVendorSp
 	}
 
 	// Set order by default value
-	if spec.OrderBy == "" {
-		spec.OrderBy = "v.dt"
+	if paginationArgs.OrderBy == "" {
+		paginationArgs.OrderBy = "v.dt"
 	} else {
-		spec.OrderBy = "v." + spec.OrderBy
+		paginationArgs.OrderBy = "v." + paginationArgs.OrderBy
 	}
 
 	// Populate extra clauses
 	extraClauses = append(
 		extraClauses,
-		fmt.Sprintf("ORDER BY %s %s", spec.OrderBy, paginationArgs.Order),
+		fmt.Sprintf("ORDER BY %s %s", paginationArgs.OrderBy, paginationArgs.Order),
 	)
 	for _, clause := range extraClausesRaw {
 		extraClauses = append(extraClauses, fmt.Sprintf(clause, i))

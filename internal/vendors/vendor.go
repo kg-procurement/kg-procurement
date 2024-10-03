@@ -25,7 +25,6 @@ type Vendor struct {
 type GetAllVendorSpec struct {
 	Location string `json:"location"`
 	Product  string `json:"product"`
-	OrderBy  string `json:"order_by"`
 
 	database.PaginationSpec
 }

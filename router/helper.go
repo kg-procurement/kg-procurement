@@ -16,11 +16,13 @@ func GetPaginationSpec(r *http.Request) database.PaginationSpec {
 	}
 
 	order := queryParam.Get("order")
+	orderBy := queryParam.Get("order_by")
 
 	spec := database.PaginationSpec{
-		Limit: 10,
-		Order: order,
-		Page:  page,
+		Limit:   10,
+		Order:   order,
+		Page:    page,
+		OrderBy: orderBy,
 	}
 
 	return spec

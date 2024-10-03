@@ -131,10 +131,14 @@ func TestVendorService_GetAll(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 				spec: GetAllVendorSpec{
-					PaginationSpec: database.PaginationSpec{Limit: 10, Order: "DESC", Page: 1},
-					OrderBy:        "rating",
-					Location:       "Indonesia",
-					Product:        "test product",
+					PaginationSpec: database.PaginationSpec{
+						Limit:   10,
+						Order:   "DESC",
+						OrderBy: "rating",
+						Page:    1,
+					},
+					Location: "Indonesia",
+					Product:  "test product",
 				},
 			},
 			want: data,
@@ -150,11 +154,11 @@ func TestVendorService_GetAll(t *testing.T) {
 
 			accessorSpec := GetAllVendorSpec{
 				PaginationSpec: database.PaginationSpec{
-					Limit: tt.args.spec.Limit,
-					Page:  tt.args.spec.Page,
-					Order: tt.args.spec.Order,
+					Limit:   tt.args.spec.Limit,
+					Page:    tt.args.spec.Page,
+					Order:   tt.args.spec.Order,
+					OrderBy: tt.args.spec.OrderBy,
 				},
-				OrderBy:  tt.args.spec.OrderBy,
 				Location: tt.args.spec.Location,
 				Product:  tt.args.spec.Product,
 			}

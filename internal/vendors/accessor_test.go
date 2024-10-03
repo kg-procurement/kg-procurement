@@ -259,11 +259,11 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 
 		customSpec := GetAllVendorSpec{
 			PaginationSpec: database.PaginationSpec{
-				Order: "DESC",
-				Limit: 10,
-				Page:  1,
+				Order:   "DESC",
+				Limit:   10,
+				Page:    1,
+				OrderBy: "rating",
 			},
-			OrderBy: "rating",
 		}
 
 		args := database.BuildPaginationArgs(customSpec.PaginationSpec)
