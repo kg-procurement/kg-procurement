@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strings"
 	"testing"
 	"time"
 
@@ -110,6 +111,7 @@ func Test_GetProductsByVendor(t *testing.T) {
 
 	var (
 		vendorID       = "1234"
+		spec           = GetProductsByVendorSpec{VendorID: vendorID}
 		productColumns = []string{"id", "product_category_id", "uom_id", "income_tax_id", "product_type_id", "name", "description", "modified_date", "modified_by"}
 		products       = []Product{
 			{
@@ -139,10 +141,84 @@ func Test_GetProductsByVendor(t *testing.T) {
 			WithArgs(vendorID).
 			WillReturnRows(expectedResult)
 
-		res, err := c.accessor.GetProductsByVendor(ctx, vendorID)
+		res, err := c.accessor.GetProductsByVendor(ctx, spec)
 
 		c.g.Expect(err).To(gomega.BeNil())
 		c.g.Expect(res).To(gomega.BeComparableTo(products))
+	})
+
+	t.Run("success with filter by name", func(t *testing.T) {
+		var (
+			ctx            = context.Background()
+			c              = setupProductAccessorTestComponent(t)
+			expectedResult = sqlmock.NewRows(productColumns).
+					AddRow(products[1].ID, "", "", "", "", products[1].Name, "", products[1].ModifiedDate, "")
+			customSpec = GetProductsByVendorSpec{
+				VendorID: vendorID,
+				Name:     "Rice Cooker",
+			}
+		)
+		defer c.db.Close()
+
+		productNameList := strings.Fields(customSpec.Name)
+		c.mock.ExpectQuery(getProductsByVendorQuery+" AND p.name iLIKE $2 AND p.name iLIKE $3").
+			WithArgs(customSpec.VendorID, "%"+productNameList[0]+"%", "%"+productNameList[1]+"%").
+			WillReturnRows(expectedResult)
+
+		res, err := c.accessor.GetProductsByVendor(ctx, customSpec)
+
+		c.g.Expect(err).To(gomega.BeNil())
+		c.g.Expect(res).To(gomega.BeComparableTo(products[1:]))
+	})
+
+	t.Run("success with order by", func(t *testing.T) {
+		var (
+			ctx            = context.Background()
+			c              = setupProductAccessorTestComponent(t)
+			expectedResult = sqlmock.NewRows(productColumns).
+					AddRow(products[0].ID, "", "", "", "", products[0].Name, "", products[0].ModifiedDate, "").
+					AddRow(products[1].ID, "", "", "", "", products[1].Name, "", products[1].ModifiedDate, "")
+			customSpec = GetProductsByVendorSpec{
+				VendorID: vendorID,
+				OrderBy:  "name",
+			}
+		)
+		defer c.db.Close()
+
+		c.mock.ExpectQuery(getProductsByVendorQuery + " ORDER BY name").
+			WithArgs(customSpec.VendorID).
+			WillReturnRows(expectedResult)
+
+		res, err := c.accessor.GetProductsByVendor(ctx, customSpec)
+
+		c.g.Expect(err).To(gomega.BeNil())
+		c.g.Expect(res).To(gomega.BeComparableTo(products))
+	})
+
+	t.Run("success with order by and filter by name", func(t *testing.T) {
+		var (
+			ctx            = context.Background()
+			c              = setupProductAccessorTestComponent(t)
+			expectedResult = sqlmock.NewRows(productColumns).
+					AddRow(products[1].ID, "", "", "", "", products[1].Name, "", products[1].ModifiedDate, "")
+			customSpec = GetProductsByVendorSpec{
+				VendorID: vendorID,
+				OrderBy:  "name",
+				Name:     "Rice Cooker",
+			}
+		)
+		defer c.db.Close()
+
+		productNameList := strings.Fields(customSpec.Name)
+		c.mock.ExpectQuery(getProductsByVendorQuery+
+			" AND p.name iLIKE $2 AND p.name iLIKE $3 ORDER BY name").
+			WithArgs(customSpec.VendorID, "%"+productNameList[0]+"%", "%"+productNameList[1]+"%").
+			WillReturnRows(expectedResult)
+
+		res, err := c.accessor.GetProductsByVendor(ctx, customSpec)
+
+		c.g.Expect(err).To(gomega.BeNil())
+		c.g.Expect(res).To(gomega.BeComparableTo(products[1:]))
 	})
 
 	t.Run("error on query execution", func(t *testing.T) {
@@ -156,7 +232,7 @@ func Test_GetProductsByVendor(t *testing.T) {
 			WithArgs(vendorID).
 			WillReturnError(errors.New("error"))
 
-		res, err := c.accessor.GetProductsByVendor(ctx, vendorID)
+		res, err := c.accessor.GetProductsByVendor(ctx, spec)
 
 		c.g.Expect(err).ShouldNot(gomega.BeNil())
 		c.g.Expect(res).To(gomega.BeNil())
@@ -177,7 +253,7 @@ func Test_GetProductsByVendor(t *testing.T) {
 			WithArgs(vendorID).
 			WillReturnRows(expectedResult)
 
-		res, err := c.accessor.GetProductsByVendor(ctx, vendorID)
+		res, err := c.accessor.GetProductsByVendor(ctx, spec)
 
 		c.g.Expect(err).ShouldNot(gomega.BeNil())
 		c.g.Expect(res).To(gomega.BeNil())
@@ -198,7 +274,7 @@ func Test_GetProductsByVendor(t *testing.T) {
 			WithArgs(vendorID).
 			WillReturnRows(expectedResult)
 
-		res, err := c.accessor.GetProductsByVendor(ctx, vendorID)
+		res, err := c.accessor.GetProductsByVendor(ctx, spec)
 
 		c.g.Expect(err).ToNot(gomega.BeNil())
 		c.g.Expect(res).To(gomega.BeNil())

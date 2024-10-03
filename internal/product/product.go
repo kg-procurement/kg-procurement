@@ -23,3 +23,9 @@ type ProductVendor struct {
 	Product
 	vendors.Vendor
 }
+
+type GetProductsByVendorSpec struct {
+	VendorID string `json:"vendor_id"`
+	Name     string `json:"name"`
+	OrderBy  string `json:"order_by"`
+}

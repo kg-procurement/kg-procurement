@@ -23,7 +23,13 @@ func NewProductEngine(
 			return
 		}
 
-		res, err := productSvc.GetProductsByVendor(ctx, vendorID)
+		spec := product.GetProductsByVendorSpec{
+			VendorID: vendorID,
+			Name:     ctx.Query("name"),
+			OrderBy:  ctx.Query("order_by"),
+		}
+
+		res, err := productSvc.GetProductsByVendor(ctx, spec)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),

@@ -31,8 +31,8 @@ type postgresProductAccessor struct {
 	db database.DBConnector
 }
 
-func (p *postgresProductAccessor) GetProductsByVendor(_ context.Context, vendorID string) ([]Product, error) {
-	rows, err := p.db.Query(getProductsByVendorQuery, vendorID)
+func (p *postgresProductAccessor) GetProductsByVendor(_ context.Context, spec GetProductsByVendorSpec) ([]Product, error) {
+	rows, err := p.db.Query(getProductsByVendorQuery, spec.VendorID)
 	if err != nil {
 		return nil, err
 	}
