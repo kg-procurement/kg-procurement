@@ -19,6 +19,7 @@ func NewVendorEngine(
 		spec := vendors.GetAllVendorSpec{
 			Location:       ctx.Query("location"),
 			Product:        ctx.Query("product"),
+			OrderBy:        ctx.Query("order_by"),
 			PaginationSpec: paginationSpec,
 		}
 

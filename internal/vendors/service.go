@@ -21,7 +21,6 @@ func (v *VendorService) GetSomeStuff(ctx context.Context) ([]string, error) {
 
 func (v *VendorService) GetAll(ctx context.Context, spec GetAllVendorSpec) (*AccessorGetAllPaginationData, error) {
 	return v.vendorDBAccessor.GetAll(ctx, spec)
-
 }
 
 func NewVendorService(

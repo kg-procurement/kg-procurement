@@ -143,9 +143,9 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 			v.modified_by,
 			v.dt
 		FROM vendor v
-		ORDER BY rating DESC
-		LIMIT $1
-		OFFSET $2
+		ORDER BY $1 DESC
+		LIMIT $2
+		OFFSET $3
 	`
 
 	countQuery := "SELECT COUNT(*) from vendor"
@@ -183,7 +183,66 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 		args := database.BuildPaginationArgs(spec.PaginationSpec)
 
 		mock.ExpectQuery(dataQuery).
-			WithArgs(args.Limit, args.Offset).
+			WithArgs("dt", args.Limit, args.Offset).
+			WillReturnRows(rows)
+
+		totalRows := sqlmock.NewRows([]string{"count"}).AddRow(1)
+
+		mock.ExpectQuery(countQuery).WillReturnRows(totalRows)
+
+		ctx := context.Background()
+		res, err := accessor.GetAll(ctx, spec)
+
+		vendorsExpectation := []Vendor{{
+			ID:            "1",
+			Name:          "name",
+			Description:   "description",
+			BpID:          "1",
+			BpName:        "bp_name",
+			Rating:        1,
+			AreaGroupID:   "1",
+			AreaGroupName: "group_name",
+			SapCode:       "sap_code",
+			ModifiedDate:  fixedTime,
+			ModifiedBy:    1,
+			Date:          fixedTime,
+		}}
+
+		expectation := &AccessorGetAllPaginationData{
+			Vendors:  vendorsExpectation,
+			Metadata: res.Metadata,
+		}
+
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(res).To(gomega.Equal(expectation))
+	})
+
+	t.Run("success with orderby", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		spec.OrderBy = "rating"
+
+		rows := sqlmock.NewRows(vendorFields).
+			AddRow(
+				"1",
+				"name",
+				"description",
+				1,
+				"bp_name",
+				1,
+				1,
+				"group_name",
+				"sap_code",
+				fixedTime,
+				1,
+				fixedTime,
+			)
+
+		args := database.BuildPaginationArgs(spec.PaginationSpec)
+
+		mock.ExpectQuery(dataQuery).
+			WithArgs(spec.OrderBy, args.Limit, args.Offset).
 			WillReturnRows(rows)
 
 		totalRows := sqlmock.NewRows([]string{"count"}).AddRow(1)
