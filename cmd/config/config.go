@@ -24,7 +24,8 @@ type PostgresConfig struct {
 }
 
 type Routes struct {
-	Vendor VendorRoutes `mapstructure:"vendor" validate:"required"`
+	Vendor  VendorRoutes  `mapstructure:"vendor" validate:"required"`
+	Product ProductRoutes `mapstructure:"product" validate:"required"`
 }
 
 type VendorRoutes struct {
@@ -32,6 +33,10 @@ type VendorRoutes struct {
 	GetByLocation string `mapstructure:"get-by-location" validate:"required"`
 	GetByProduct  string `mapstructure:"get-by-product" validate:"required"`
 	Put           string `mapstructure:"put" validate:"required"`
+}
+
+type ProductRoutes struct {
+	GetProductsByVendor string `mapstructure:"get-products-by-vendor" validate:"required"`
 }
 
 func Load() Application {
