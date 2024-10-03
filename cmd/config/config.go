@@ -32,7 +32,7 @@ type VendorRoutes struct {
 	GetAll        string `mapstructure:"get-all" validate:"required"`
 	GetByLocation string `mapstructure:"get-by-location" validate:"required"`
 	GetByProduct  string `mapstructure:"get-by-product" validate:"required"`
-	Put           string `mapstructure:"put" validate:"required"`
+	UpdateDetail  string `mapstructure:"udpate-detail" validate:"required"`
 }
 
 type ProductRoutes struct {

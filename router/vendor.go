@@ -1,8 +1,6 @@
 package router
 
 import (
-	"encoding/json"
-	"io"
 	"kg/procurement/cmd/config"
 	"kg/procurement/internal/vendors"
 	"net/http"
@@ -55,18 +53,11 @@ func NewVendorEngine(
 		ctx.JSON(http.StatusOK, res)
 	})
 
-	r.PUT(cfg.Put, func(ctx *gin.Context) {
-		id := ctx.Query("id")
+	r.PUT(cfg.UpdateDetail, func(ctx *gin.Context) {
+		id := ctx.Request.PathValue("id")
 
-		body, err := io.ReadAll(ctx.Request.Body)
-		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{
-				"error": err.Error(),
-			})
-		}
-
-		spec := PutVendorSpec{}
-		if err = json.Unmarshal(body, &spec); err != nil {
+		spec := &vendors.PutVendorSpec{}
+		if err := ctx.ShouldBindJSON(&spec); err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
 			})
