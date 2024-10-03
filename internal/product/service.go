@@ -8,6 +8,7 @@ import (
 
 type productDBAccessor interface {
 	GetProductsByVendor(ctx context.Context, vendorID string) ([]Product, error)
+	UpdatePrice(ctx context.Context, price Price) (*Price, error)
 }
 
 type ProductService struct {
@@ -16,6 +17,10 @@ type ProductService struct {
 
 func (p *ProductService) GetProductsByVendor(ctx context.Context, vendorID string) ([]Product, error) {
 	return p.productDBAccessor.GetProductsByVendor(ctx, vendorID)
+}
+
+func (p *ProductService) UpdatePrice(ctx context.Context, price Price) (*Price, error) {
+	return p.productDBAccessor.UpdatePrice(ctx, price)
 }
 
 func NewProductService(
