@@ -209,7 +209,7 @@ func (p *postgresVendorAccessor) GetById(ctx context.Context, id string) (*Vendo
 	return &vendor, nil
 }
 
-func (p *postgresVendorAccessor) Put(ctx context.Context, vendor Vendor) (*Vendor, error) {
+func (p *postgresVendorAccessor) UpdateDetail(ctx context.Context, vendor Vendor) (*Vendor, error) {
 	now := p.clock.Now()
 
 	// Not yet updating modified_by

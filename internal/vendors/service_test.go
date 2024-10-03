@@ -257,7 +257,7 @@ func TestVendorService_GetById(t *testing.T) {
 	}
 }
 
-func TestVendorService_Put(t *testing.T) {
+func TestVendorService_UpdateDetail(t *testing.T) {
 	fixedTime := time.Date(2024, time.September, 27, 12, 30, 0, 0, time.UTC)
 	updatedFixedTime := time.Date(2024, time.September, 27, 12, 30, 0, 1, time.UTC)
 	updateSpec := Vendor{
@@ -328,10 +328,10 @@ func TestVendorService_Put(t *testing.T) {
 
 		tt.fields.mockvendorDBAccessor.
 			EXPECT().
-			Put(tt.args.ctx, tt.args.spec).
+			UpdateDetail(tt.args.ctx, tt.args.spec).
 			Return(tt.want, tt.wantErr)
 
-		res, err := v.Put(tt.args.ctx, tt.args.spec)
+		res, err := v.UpdateDetail(tt.args.ctx, tt.args.spec)
 
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(res).To(gomega.Equal(tt.want))

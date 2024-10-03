@@ -54,7 +54,7 @@ func NewVendorEngine(
 			SapCode:       spec.SapCode,
 		}
 
-		res, err := vendorSvc.Put(ctx, newVendor)
+		res, err := vendorSvc.UpdateDetail(ctx, newVendor)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),

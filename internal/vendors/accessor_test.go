@@ -1061,7 +1061,7 @@ func TestVendorAccessor_GetById(t *testing.T) {
 	})
 }
 
-func TestVendorAccessor_Put(t *testing.T) {
+func TestVendorAccessor_UpdateDetail(t *testing.T) {
 	t.Parallel()
 
 	var (
@@ -1188,7 +1188,7 @@ func TestVendorAccessor_Put(t *testing.T) {
 				now).
 			WillReturnRows(rows)
 
-		res, err := accessor.Put(ctx, *updatedVendor)
+		res, err := accessor.UpdateDetail(ctx, *updatedVendor)
 
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(res).To(gomega.Equal(updatedVendor))
@@ -1230,7 +1230,7 @@ func TestVendorAccessor_Put(t *testing.T) {
 			WillReturnRows(rows)
 
 		ctx := context.Background()
-		res, err := accessor.Put(ctx, Vendor{})
+		res, err := accessor.UpdateDetail(ctx, Vendor{})
 
 		g.Expect(err).ToNot(gomega.BeNil())
 		g.Expect(res).To(gomega.BeNil())
