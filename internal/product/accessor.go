@@ -66,22 +66,57 @@ func (p *postgresProductAccessor) GetProductsByVendor(_ context.Context, vendorI
 	return res, nil
 }
 
-func (p *postgresProductAccessor) UpdateProduct(_ context.Context, productID ProductID, payload Product) (*Price, error) {
+func (p *postgresProductAccessor) UpdateProduct(_ context.Context, productID ProductID, payload Product) (*Product, error) {
 	query := `UPDATE product SET
-		name = $1 
-		description = $2
-		WHERE id = $3`
+        product_category_id = $2,
+        uom_id = $3,
+        income_tax_id = $4,
+        product_type_id = $5,
+        name = $6,
+        description = $7,
+        modified_date = $8,
+        modified_by = $9
+    WHERE id = $1
+    RETURNING 
+        id,
+        product_category_id,
+        uom_id,
+        income_tax_id,
+        product_type_id,
+        name,
+        description,
+        modified_date,
+        modified_by
+    `
 
-	_, err := p.db.Exec(query,
-		payload.Name,
-		payload.Description,
-		productID)
+    updatedProduct := &Product{}
+    row := p.db.QueryRow(query,
+        productID,
+        payload.ProductCategoryID,
+        payload.UOMID,
+        payload.IncomeTaxID,
+        payload.ProductTypeID,
+        payload.Name,
+        payload.Description,
+        payload.ModifiedDate,
+        payload.ModifiedBy,
+    )
 
-	if err != nil {
-		return nil,fmt.Errorf("failed to update product with id %s: %w", productID, err)
-	}
+    if err := row.Scan(
+        &updatedProduct.ID,
+        &updatedProduct.ProductCategoryID,
+        &updatedProduct.UOMID,
+        &updatedProduct.IncomeTaxID,
+        &updatedProduct.ProductTypeID,
+        &updatedProduct.Name,
+        &updatedProduct.Description,
+        &updatedProduct.ModifiedDate,
+        &updatedProduct.ModifiedBy,
+    ); err != nil {
+        return nil, fmt.Errorf("failed to scan updated product: %w", err)
+    }
 
-	return nil, nil
+    return updatedProduct, nil
 }
 
 
