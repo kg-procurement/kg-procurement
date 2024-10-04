@@ -10,8 +10,8 @@ import (
 
 type productDBAccessor interface {
 	GetProductsByVendor(ctx context.Context, vendorID string, spec GetProductsByVendorSpec) ([]Product, error)
-	UpdatePrice(ctx context.Context, price Price) (*Price, error)
-	UpdateProduct(ctx context.Context, payload Product) (*Product, error)
+	UpdatePrice(ctx context.Context, price Price) (Price, error)
+	UpdateProduct(ctx context.Context, payload Product) (Product, error)
 }
 
 type ProductService struct {

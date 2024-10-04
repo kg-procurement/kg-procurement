@@ -43,7 +43,7 @@ func NewProductEngine(
 	r.PUT(cfg.UpdateProduct, func(ctx *gin.Context) {
 		id := ctx.Request.PathValue("id")
 
-		spec := &product.PutProductSpec{}
+		spec := product.PutProductSpec{}
 		if err := ctx.ShouldBindJSON(&spec); err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
@@ -69,7 +69,7 @@ func NewProductEngine(
 
 	r.PUT(cfg.UpdatePrice, func(ctx *gin.Context) {
 		id := ctx.Request.PathValue("id")
-		spec := &product.PutPriceSpec{}
+		spec := product.PutPriceSpec{}
 		if err := ctx.ShouldBindJSON(&spec); err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
