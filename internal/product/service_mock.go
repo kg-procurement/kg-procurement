@@ -116,3 +116,42 @@ func (c *MockproductDBAccessorUpdatePriceCall) DoAndReturn(f func(context.Contex
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
+
+// UpdateProduct mocks base method.
+func (m *MockproductDBAccessor) UpdateProduct(ctx context.Context, payload Product) (*Product, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateProduct", ctx, payload)
+	ret0, _ := ret[0].(*Product)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateProduct indicates an expected call of UpdateProduct.
+func (mr *MockproductDBAccessorMockRecorder) UpdateProduct(ctx, payload any) *MockproductDBAccessorUpdateProductCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateProduct", reflect.TypeOf((*MockproductDBAccessor)(nil).UpdateProduct), ctx, payload)
+	return &MockproductDBAccessorUpdateProductCall{Call: call}
+}
+
+// MockproductDBAccessorUpdateProductCall wrap *gomock.Call
+type MockproductDBAccessorUpdateProductCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockproductDBAccessorUpdateProductCall) Return(arg0 *Product, arg1 error) *MockproductDBAccessorUpdateProductCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockproductDBAccessorUpdateProductCall) Do(f func(context.Context, Product) (*Product, error)) *MockproductDBAccessorUpdateProductCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockproductDBAccessorUpdateProductCall) DoAndReturn(f func(context.Context, Product) (*Product, error)) *MockproductDBAccessorUpdateProductCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}

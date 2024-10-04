@@ -74,6 +74,75 @@ func TestProductService_GetProductsByVendor(t *testing.T) {
 	})
 }
 
+func TestProductService_UpdateProduct(t *testing.T) {
+    t.Parallel()
+
+    var (
+        updatedTime = time.Now()
+        updateSpec  = Product{
+            ID:                "some_id",
+            ProductCategoryID: "category_id_updated",
+            UOMID:            "uom_id_updated",
+            IncomeTaxID:      "income_tax_id_updated",
+            ProductTypeID:    "product_type_id_updated",
+            Name:             "Updated Product",
+            Description:      "Updated description",
+            ModifiedDate:     updatedTime,
+            ModifiedBy:       "modified_by_updated",
+        }
+        updatedProduct = &Product{
+            ID:                "some_id",
+            ProductCategoryID: "category_id_updated",
+            UOMID:            "uom_id_updated",
+            IncomeTaxID:      "income_tax_id_updated",
+            ProductTypeID:    "product_type_id_updated",
+            Name:             "Updated Product",
+            Description:      "Updated description",
+            ModifiedDate:     updatedTime,
+            ModifiedBy:       "modified_by_updated",
+        }
+    )
+
+    t.Run("success", func(t *testing.T) {
+        var (
+            g                   = gomega.NewWithT(t)
+            ctx                 = context.Background()
+            mockCtrl            = gomock.NewController(t)
+            mockProductAccessor = NewMockproductDBAccessor(mockCtrl)
+        )
+
+        svc := &ProductService{
+            productDBAccessor: mockProductAccessor,
+        }
+
+        mockProductAccessor.EXPECT().UpdateProduct(ctx, updateSpec).Return(updatedProduct, nil)
+
+        res, err := svc.UpdateProduct(ctx, updateSpec)
+        g.Expect(res).Should(gomega.BeComparableTo(updatedProduct))
+        g.Expect(err).To(gomega.BeNil())
+    })
+
+    t.Run("returns error on accessor failure", func(t *testing.T) {
+        var (
+            g                   = gomega.NewWithT(t)
+            ctx                 = context.Background()
+            mockCtrl            = gomock.NewController(t)
+            mockProductAccessor = NewMockproductDBAccessor(mockCtrl)
+        )
+
+        svc := &ProductService{
+            productDBAccessor: mockProductAccessor,
+        }
+
+        mockProductAccessor.EXPECT().UpdateProduct(ctx, updateSpec).Return(nil, errors.New("update error"))
+
+        res, err := svc.UpdateProduct(ctx, updateSpec)
+        g.Expect(res).To(gomega.BeNil())
+        g.Expect(err).ShouldNot(gomega.BeNil())
+    })
+}
+
+
 func TestPriceService_UpdatePrice(t *testing.T) {
     t.Parallel()
 
