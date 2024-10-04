@@ -2,24 +2,26 @@ package vendors
 
 import (
 	"context"
-	"fmt"
 	"kg/procurement/internal/common/database"
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
 )
 
+var ()
+
 func Test_NewVendorService(t *testing.T) {
-	_ = NewVendorService(nil)
+	_ = NewVendorService(nil, nil)
 }
 
 func TestNewVendorService(t *testing.T) {
 	type args struct {
 		mockDBConnector *database.MockDBConnector
+		mockClock       *clock.Mock
 	}
 	tests := []struct {
 		name string
@@ -30,7 +32,7 @@ func TestNewVendorService(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewVendorService(tt.args.mockDBConnector); !reflect.DeepEqual(got, tt.want) {
+			if got := NewVendorService(tt.args.mockDBConnector, tt.args.mockClock); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewVendorService() = %v, want %v", got, tt.want)
 			}
 		})
@@ -77,7 +79,7 @@ func TestVendorService_GetAll(t *testing.T) {
 			AreaGroupName: "group_name",
 			SapCode:       "sap_code",
 			ModifiedDate:  time.Now(),
-			ModifiedBy:    1,
+			ModifiedBy:    "1",
 			Date:          time.Now(),
 		},
 	}
@@ -101,7 +103,7 @@ func TestVendorService_GetAll(t *testing.T) {
 
 	type args struct {
 		ctx  context.Context
-		spec database.PaginationSpec
+		spec GetAllVendorSpec
 	}
 
 	tests := []struct {
@@ -116,7 +118,33 @@ func TestVendorService_GetAll(t *testing.T) {
 			fields: fields{
 				mockVendorDBAccessor: NewMockvendorDBAccessor(ctrl),
 			},
-			args: args{ctx: context.Background(), spec: database.PaginationSpec{Limit: 10, Order: "DESC", Page: 1}},
+			args: args{
+				ctx: context.Background(),
+				spec: GetAllVendorSpec{
+					PaginationSpec: database.PaginationSpec{Limit: 10, Order: "DESC", Page: 1},
+				},
+			},
+			want: data,
+			err:  nil,
+		},
+		{
+			name: "success with order by, location and product",
+			fields: fields{
+				mockVendorDBAccessor: NewMockvendorDBAccessor(ctrl),
+			},
+			args: args{
+				ctx: context.Background(),
+				spec: GetAllVendorSpec{
+					PaginationSpec: database.PaginationSpec{
+						Limit:   10,
+						Order:   "DESC",
+						OrderBy: "rating",
+						Page:    1,
+					},
+					Location: "Indonesia",
+					Product:  "test product",
+				},
+			},
 			want: data,
 			err:  nil,
 		},
@@ -128,10 +156,15 @@ func TestVendorService_GetAll(t *testing.T) {
 				vendorDBAccessor: tt.fields.mockVendorDBAccessor,
 			}
 
-			accessorSpec := database.PaginationSpec{
-				Limit: tt.args.spec.Limit,
-				Page:  tt.args.spec.Page,
-				Order: tt.args.spec.Order,
+			accessorSpec := GetAllVendorSpec{
+				PaginationSpec: database.PaginationSpec{
+					Limit:   tt.args.spec.Limit,
+					Page:    tt.args.spec.Page,
+					Order:   tt.args.spec.Order,
+					OrderBy: tt.args.spec.OrderBy,
+				},
+				Location: tt.args.spec.Location,
+				Product:  tt.args.spec.Product,
 			}
 
 			tt.fields.mockVendorDBAccessor.EXPECT().
@@ -151,56 +184,53 @@ func TestVendorService_GetAll(t *testing.T) {
 	}
 }
 
-func TestVendorService_GetByLocation(t *testing.T) {
-	location := "Indonesia"
-	sampleData := []Vendor{
-		{
-			ID:            "1",
-			Name:          "name",
-			Description:   "description",
-			BpID:          "1",
-			BpName:        "bp_name",
-			Rating:        1,
-			AreaGroupID:   "1",
-			AreaGroupName: location,
-			SapCode:       "sap_code",
-			ModifiedDate:  time.Now(),
-			ModifiedBy:    1,
-			Date:          time.Now(),
-		},
+func TestVendorService_GetById(t *testing.T) {
+	fixedTime := time.Date(2024, time.September, 27, 12, 30, 0, 0, time.UTC)
+
+	data := &Vendor{
+		ID:            "1",
+		Name:          "name",
+		Description:   "description",
+		BpID:          "1",
+		BpName:        "bp_name",
+		Rating:        1,
+		AreaGroupID:   "1",
+		AreaGroupName: "group_name",
+		SapCode:       "sap_code",
+		ModifiedDate:  fixedTime,
+		ModifiedBy:    "1",
+		Date:          fixedTime,
 	}
+
 	ctrl := gomock.NewController(t)
+
 	defer ctrl.Finish()
+
 	type fields struct {
 		mockVendorDBAccessor *MockvendorDBAccessor
+		mockDBConnector      *database.MockDBConnector
 	}
+
 	type args struct {
 		ctx context.Context
+		id  string
 	}
+
 	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		want    []Vendor
-		wantErr bool
+		name   string
+		fields fields
+		args   args
+		want   *Vendor
+		err    error
 	}{
 		{
 			name: "success",
 			fields: fields{
 				mockVendorDBAccessor: NewMockvendorDBAccessor(ctrl),
 			},
-			args:    args{ctx: context.Background()},
-			want:    sampleData,
-			wantErr: false,
-		},
-		{
-			name: "failure",
-			fields: fields{
-				mockVendorDBAccessor: NewMockvendorDBAccessor(ctrl),
-			},
-			args:    args{ctx: context.Background()},
-			want:    nil,
-			wantErr: true,
+			args: args{ctx: context.Background(), id: "ID"},
+			want: data,
+			err:  nil,
 		},
 	}
 	for _, tt := range tests {
@@ -210,115 +240,101 @@ func TestVendorService_GetByLocation(t *testing.T) {
 				vendorDBAccessor: tt.fields.mockVendorDBAccessor,
 			}
 
-			if tt.wantErr {
-				tt.fields.mockVendorDBAccessor.EXPECT().
-					GetByLocation(tt.args.ctx, location).
-					Return(nil, fmt.Errorf("some error"))
-			} else {
-				tt.fields.mockVendorDBAccessor.EXPECT().
-					GetByLocation(tt.args.ctx, location).
-					Return(tt.want, nil)
-			}
+			tt.fields.mockVendorDBAccessor.EXPECT().
+				GetById(tt.args.ctx, tt.args.id).
+				Return(tt.want, tt.err)
 
-			res, err := v.GetByLocation(tt.args.ctx, location)
+			res, err := v.GetById(tt.args.ctx, tt.args.id)
 
-			if tt.wantErr {
-				g.Expect(err).ToNot(gomega.BeNil())
-				g.Expect(res).To(gomega.BeNil())
-			} else {
+			if tt.err == nil {
 				g.Expect(err).To(gomega.BeNil())
 				g.Expect(res).To(gomega.Equal(tt.want))
+			} else {
+				g.Expect(err).ToNot(gomega.BeNil())
+				g.Expect(res).To(gomega.BeNil())
 			}
 		})
 	}
 }
 
-func TestVendorService_GetByProduct(t *testing.T) {
-	product := "ProductA"
-	sampleData := []Vendor{
-		{
-			ID:            "1",
-			Name:          "name",
-			Description:   "description",
-			BpID:          "1",
-			BpName:        "bp_name",
-			Rating:        1,
-			AreaGroupID:   "1",
-			AreaGroupName: "group_name",
-			SapCode:       "sap_code",
-			ModifiedDate:  time.Now(),
-			ModifiedBy:    1,
-			Date:          time.Now(),
-		},
+func TestVendorService_UpdateDetail(t *testing.T) {
+	fixedTime := time.Date(2024, time.September, 27, 12, 30, 0, 0, time.UTC)
+	updatedFixedTime := time.Date(2024, time.September, 27, 12, 30, 0, 1, time.UTC)
+	updateSpec := Vendor{
+		ID:            "ID",
+		Name:          "udpate",
+		Description:   "udpate",
+		BpID:          "udpate",
+		BpName:        "udpate",
+		Rating:        2,
+		AreaGroupID:   "udpate",
+		AreaGroupName: "udpate",
+		SapCode:       "udpate",
+		ModifiedDate:  time.Time{},
+		ModifiedBy:    "ID",
+		Date:          time.Time{},
 	}
+
+	UpdatedVendorData := &Vendor{
+		ID:            "ID",
+		Name:          "udpate",
+		Description:   "udpate",
+		BpID:          "udpate",
+		BpName:        "udpate",
+		Rating:        2,
+		AreaGroupID:   "udpate",
+		AreaGroupName: "udpate",
+		SapCode:       "udpate",
+		ModifiedDate:  updatedFixedTime,
+		ModifiedBy:    "UpdatedID",
+		Date:          fixedTime,
+	}
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
+
 	type fields struct {
-		mockVendorDBAccessor *MockvendorDBAccessor
+		mockvendorDBAccessor *MockvendorDBAccessor
 	}
+
 	type args struct {
-		ctx     context.Context
-		product string
+		ctx  context.Context
+		spec Vendor
 	}
 	tests := []struct {
 		name    string
 		fields  fields
 		args    args
-		want    []Vendor
-		wantErr bool
+		want    *Vendor
+		wantErr error
 	}{
 		{
 			name: "success",
 			fields: fields{
-				mockVendorDBAccessor: NewMockvendorDBAccessor(ctrl),
+				mockvendorDBAccessor: NewMockvendorDBAccessor(ctrl),
 			},
 			args: args{
-				ctx:     context.Background(),
-				product: product,
+				ctx:  context.Background(),
+				spec: updateSpec,
 			},
-			want:    sampleData,
-			wantErr: false,
-		},
-		{
-			name: "failure",
-			fields: fields{
-				mockVendorDBAccessor: NewMockvendorDBAccessor(ctrl),
-			},
-			args: args{
-				ctx:     context.Background(),
-				product: product,
-			},
-			want:    nil,
-			wantErr: true,
+			want: UpdatedVendorData,
 		},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			g := gomega.NewWithT(t)
-			v := &VendorService{
-				vendorDBAccessor: tt.fields.mockVendorDBAccessor,
-			}
+		g := gomega.NewWithT(t)
+		v := VendorService{
+			vendorDBAccessor: tt.fields.mockvendorDBAccessor,
+		}
 
-			productDescription := strings.Fields(tt.args.product)
-			if tt.wantErr {
-				tt.fields.mockVendorDBAccessor.EXPECT().
-					GetByProductDescription(tt.args.ctx, productDescription).
-					Return(nil, fmt.Errorf("some error"))
-			} else {
-				tt.fields.mockVendorDBAccessor.EXPECT().
-					GetByProductDescription(tt.args.ctx, productDescription).
-					Return(tt.want, nil)
-			}
+		tt.fields.mockvendorDBAccessor.
+			EXPECT().
+			UpdateDetail(tt.args.ctx, tt.args.spec).
+			Return(tt.want, tt.wantErr)
 
-			res, err := v.GetByProduct(tt.args.ctx, tt.args.product)
+		res, err := v.UpdateDetail(tt.args.ctx, tt.args.spec)
 
-			if tt.wantErr {
-				g.Expect(err).ToNot(gomega.BeNil())
-				g.Expect(res).To(gomega.BeNil())
-			} else {
-				g.Expect(err).To(gomega.BeNil())
-				g.Expect(res).To(gomega.Equal(tt.want))
-			}
-		})
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(res).To(gomega.Equal(tt.want))
+
 	}
 }

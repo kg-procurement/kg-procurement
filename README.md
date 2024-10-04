@@ -12,6 +12,16 @@ For config, copy-paste `config.example.jsonc` to `config.jsonc`
 
 Run db: `make docker-up`
 
+To run the development, you can run using `air` or the usual `go run main.go`.
+
+```bash
+# Air (Hot Reload)
+air
+
+# Manual (No Hot Reload)
+go run main.go
+```
+
 ## PgAdmin
 
 After pgadmin container is running, open `localhost:15432`, then create server.

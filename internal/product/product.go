@@ -1,6 +1,7 @@
 package product
 
 import (
+	"kg/procurement/internal/common/database"
 	"kg/procurement/internal/vendors"
 	"time"
 )
@@ -83,4 +84,8 @@ type Price struct {
 	InvocationOrder    int       `json:"invocation_order"`
 	ModifiedDate       time.Time `json:"modified_date"`
 	ModifiedBy         string    `json:"modified_by"`
+}
+type GetProductsByVendorSpec struct {
+	Name     string `json:"name"`
+	database.PaginationSpec
 }

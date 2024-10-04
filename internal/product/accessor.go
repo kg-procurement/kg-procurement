@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"kg/procurement/internal/common/database"
+	"strings"
+    "github.com/benbjohnson/clock"
 )
 
 const (
@@ -29,10 +31,47 @@ const (
 
 type postgresProductAccessor struct {
 	db database.DBConnector
+    clock clock.Clock
 }
 
-func (p *postgresProductAccessor) GetProductsByVendor(_ context.Context, vendorID string) ([]Product, error) {
-	rows, err := p.db.Query(getProductsByVendorQuery, vendorID)
+func (p *postgresProductAccessor) GetProductsByVendor(
+	_ context.Context, vendorID string, spec GetProductsByVendorSpec) ([]Product, error) {
+	paginationArgs := database.BuildPaginationArgs(spec.PaginationSpec)
+
+	// Initialize clauses and arguments
+	var (
+		whereClauses []string
+		extraClauses []string
+		args         = []interface{}{vendorID}
+		argsIndex    = 2 // start at 2 because the query already have $1
+	)
+
+	// Build WHERE clauses for product
+	if spec.Name != "" {
+		productNameList := strings.Fields(spec.Name)
+		for _, word := range productNameList {
+			whereClauses = append(whereClauses, fmt.Sprintf("p.name iLIKE $%d", argsIndex))
+			args = append(args, "%"+word+"%")
+			argsIndex++
+		}
+	}
+
+	// Build extra clauses
+	if paginationArgs.OrderBy != "" {
+		extraClauses = append(extraClauses, fmt.Sprintf("ORDER BY %s %s",
+			paginationArgs.OrderBy, paginationArgs.Order))
+	}
+
+	// Build the query
+	query := getProductsByVendorQuery
+	if len(whereClauses) > 0 {
+		query += " AND " + strings.Join(whereClauses, " AND ")
+	}
+	if len(extraClauses) > 0 {
+		query += " " + strings.Join(extraClauses, " ")
+	}
+
+	rows, err := p.db.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -67,6 +106,8 @@ func (p *postgresProductAccessor) GetProductsByVendor(_ context.Context, vendorI
 }
 
 func (p *postgresProductAccessor) UpdateProduct(_ context.Context, payload Product) (*Product, error) {
+    now := p.clock.Now()
+    
 	query := `UPDATE product SET
         product_category_id = $2,
         uom_id = $3,
@@ -75,7 +116,6 @@ func (p *postgresProductAccessor) UpdateProduct(_ context.Context, payload Produ
         name = $6,
         description = $7,
         modified_date = $8,
-        modified_by = $9
     WHERE id = $1
     RETURNING 
         id,
@@ -98,8 +138,7 @@ func (p *postgresProductAccessor) UpdateProduct(_ context.Context, payload Produ
         payload.ProductTypeID,
         payload.Name,
         payload.Description,
-        payload.ModifiedDate,
-        payload.ModifiedBy,
+        now,
     )
 
     if err := row.Scan(
@@ -121,6 +160,7 @@ func (p *postgresProductAccessor) UpdateProduct(_ context.Context, payload Produ
 
 
 func (p *postgresProductAccessor) UpdatePrice(ctx context.Context, price Price) (*Price, error) {
+    now := p.clock.Now()
     query := `UPDATE price
         SET 
             purchasing_org_id = $2,
@@ -147,7 +187,6 @@ func (p *postgresProductAccessor) UpdatePrice(ctx context.Context, price Price) 
             term_of_payment_id = $23,
             invocation_order = $24,
             modified_date = $25,
-            modified_by = $26
         WHERE 
             id = $1
         RETURNING 
@@ -205,8 +244,7 @@ func (p *postgresProductAccessor) UpdatePrice(ctx context.Context, price Price) 
         price.ItemID,
         price.TermOfPaymentID,
         price.InvocationOrder,
-        price.ModifiedDate,
-        price.ModifiedBy,
+        now,
     )
 
     if err := row.Scan(
@@ -246,8 +284,9 @@ func (p *postgresProductAccessor) UpdatePrice(ctx context.Context, price Price) 
 
 // newPostgresProductAccessor is only accessible by the Product package
 // entrypoint for other verticals should refer to the interface declared on service
-func newPostgresProductAccessor(db database.DBConnector) *postgresProductAccessor {
+func newPostgresProductAccessor(db database.DBConnector, clock clock.Clock) *postgresProductAccessor {
 	return &postgresProductAccessor{
 		db: db,
+        clock: clock,
 	}
 }

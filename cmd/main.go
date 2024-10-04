@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/benbjohnson/clock"
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,8 +26,10 @@ func main() {
 		_ = os.Stdout.Sync()
 	}()
 
-	vendorSvc := vendors.NewVendorService(conn)
-	productSvc := product.NewProductService(conn)
+	clock := clock.New()
+
+	vendorSvc := vendors.NewVendorService(conn, clock)
+	productSvc := product.NewProductService(conn, clock)
 
 	r := gin.Default()
 

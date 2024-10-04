@@ -15,7 +15,12 @@ func NewVendorEngine(
 ) {
 	r.GET(cfg.GetAll, func(ctx *gin.Context) {
 
-		spec := GetPaginationSpec(ctx.Request)
+		paginationSpec := GetPaginationSpec(ctx.Request)
+		spec := vendors.GetAllVendorSpec{
+			Location:       ctx.Query("location"),
+			Product:        ctx.Query("product"),
+			PaginationSpec: paginationSpec,
+		}
 
 		res, err := vendorSvc.GetAll(ctx, spec)
 		if err != nil {
@@ -27,10 +32,29 @@ func NewVendorEngine(
 		ctx.JSON(http.StatusOK, res)
 	})
 
-	r.GET(cfg.GetByLocation, func(ctx *gin.Context) {
-		location := ctx.Query("location")
+	r.PUT(cfg.UpdateDetail, func(ctx *gin.Context) {
+		id := ctx.Request.PathValue("id")
 
-		res, err := vendorSvc.GetByLocation(ctx, location)
+		spec := &vendors.PutVendorSpec{}
+		if err := ctx.ShouldBindJSON(&spec); err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
+		}
+
+		newVendor := vendors.Vendor{
+			ID:            id,
+			Name:          spec.Name,
+			Description:   spec.Description,
+			BpID:          spec.BpID,
+			BpName:        spec.BpName,
+			Rating:        spec.Rating,
+			AreaGroupID:   spec.AreaGroupID,
+			AreaGroupName: spec.AreaGroupName,
+			SapCode:       spec.SapCode,
+		}
+
+		res, err := vendorSvc.UpdateDetail(ctx, newVendor)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
@@ -38,18 +62,6 @@ func NewVendorEngine(
 		}
 
 		ctx.JSON(http.StatusOK, res)
-	})
 
-	r.GET(cfg.GetByProduct, func(ctx *gin.Context) {
-		product := ctx.Query("product")
-
-		res, err := vendorSvc.GetByProduct(ctx, product)
-		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{
-				"error": err.Error(),
-			})
-		}
-
-		ctx.JSON(http.StatusOK, res)
 	})
 }

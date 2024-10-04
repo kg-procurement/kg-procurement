@@ -5,15 +5,17 @@ import (
 )
 
 type PaginationSpec struct {
-	Limit int
-	Page  int
-	Order string
+	Limit   int
+	Page    int
+	Order   string
+	OrderBy string
 }
 
 type PaginationArgs struct {
-	Limit  int
-	Offset int
-	Order  string
+	Limit   int
+	Offset  int
+	Order   string
+	OrderBy string
 }
 
 type PaginationMetadata struct {
@@ -43,11 +45,11 @@ func BuildPaginationArgs(spec PaginationSpec) PaginationArgs {
 	offset := spec.Limit * (spec.Page - 1)
 
 	return PaginationArgs{
-		Limit:  limit,
-		Offset: offset,
-		Order:  validateOrderString(spec.Order),
+		Limit:   limit,
+		Offset:  offset,
+		Order:   validateOrderString(spec.Order),
+		OrderBy: spec.OrderBy,
 	}
-
 }
 
 func GeneratePaginationMetadata(spec PaginationSpec, totalEntries int) PaginationMetadata {
