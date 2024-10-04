@@ -105,7 +105,7 @@ func (p *postgresProductAccessor) GetProductsByVendor(
 	return res, nil
 }
 
-func (p *postgresProductAccessor) UpdateProduct(_ context.Context, payload Product) (*Product, error) {
+func (p *postgresProductAccessor) UpdateProduct(_ context.Context, payload Product) (Product, error) {
     now := p.clock.Now()
     
 	query := `UPDATE product SET
@@ -129,7 +129,7 @@ func (p *postgresProductAccessor) UpdateProduct(_ context.Context, payload Produ
         modified_by
     `
 
-    updatedProduct := &Product{}
+    updatedProduct := Product{}
     row := p.db.QueryRow(query,
         payload.ID,
         payload.ProductCategoryID,
@@ -152,14 +152,14 @@ func (p *postgresProductAccessor) UpdateProduct(_ context.Context, payload Produ
         &updatedProduct.ModifiedDate,
         &updatedProduct.ModifiedBy,
     ); err != nil {
-        return nil, fmt.Errorf("failed to scan updated product: %w", err)
+        return Product{}, fmt.Errorf("failed to scan updated product: %w", err)
     }
 
     return updatedProduct, nil
 }
 
 
-func (p *postgresProductAccessor) UpdatePrice(ctx context.Context, price Price) (*Price, error) {
+func (p *postgresProductAccessor) UpdatePrice(ctx context.Context, price Price) (Price, error) {
     now := p.clock.Now()
     query := `UPDATE price
         SET 
@@ -275,10 +275,10 @@ func (p *postgresProductAccessor) UpdatePrice(ctx context.Context, price Price) 
         &updatedPrice.ModifiedDate,
         &updatedPrice.ModifiedBy,
     ); err != nil {
-        return nil, err
+        return Price{}, err
     }
 
-    return &updatedPrice, nil
+    return updatedPrice, nil
 }
 
 // newPostgresProductAccessor is only accessible by the Product package

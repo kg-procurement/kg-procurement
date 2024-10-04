@@ -79,10 +79,10 @@ func (c *MockproductDBAccessorGetProductsByVendorCall) DoAndReturn(f func(contex
 }
 
 // UpdatePrice mocks base method.
-func (m *MockproductDBAccessor) UpdatePrice(ctx context.Context, price Price) (*Price, error) {
+func (m *MockproductDBAccessor) UpdatePrice(ctx context.Context, price Price) (Price, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdatePrice", ctx, price)
-	ret0, _ := ret[0].(*Price)
+	ret0, _ := ret[0].(Price)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -100,28 +100,28 @@ type MockproductDBAccessorUpdatePriceCall struct {
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockproductDBAccessorUpdatePriceCall) Return(arg0 *Price, arg1 error) *MockproductDBAccessorUpdatePriceCall {
+func (c *MockproductDBAccessorUpdatePriceCall) Return(arg0 Price, arg1 error) *MockproductDBAccessorUpdatePriceCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockproductDBAccessorUpdatePriceCall) Do(f func(context.Context, Price) (*Price, error)) *MockproductDBAccessorUpdatePriceCall {
+func (c *MockproductDBAccessorUpdatePriceCall) Do(f func(context.Context, Price) (Price, error)) *MockproductDBAccessorUpdatePriceCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockproductDBAccessorUpdatePriceCall) DoAndReturn(f func(context.Context, Price) (*Price, error)) *MockproductDBAccessorUpdatePriceCall {
+func (c *MockproductDBAccessorUpdatePriceCall) DoAndReturn(f func(context.Context, Price) (Price, error)) *MockproductDBAccessorUpdatePriceCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
 
 // UpdateProduct mocks base method.
-func (m *MockproductDBAccessor) UpdateProduct(ctx context.Context, payload Product) (*Product, error) {
+func (m *MockproductDBAccessor) UpdateProduct(ctx context.Context, payload Product) (Product, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateProduct", ctx, payload)
-	ret0, _ := ret[0].(*Product)
+	ret0, _ := ret[0].(Product)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -139,19 +139,19 @@ type MockproductDBAccessorUpdateProductCall struct {
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockproductDBAccessorUpdateProductCall) Return(arg0 *Product, arg1 error) *MockproductDBAccessorUpdateProductCall {
+func (c *MockproductDBAccessorUpdateProductCall) Return(arg0 Product, arg1 error) *MockproductDBAccessorUpdateProductCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockproductDBAccessorUpdateProductCall) Do(f func(context.Context, Product) (*Product, error)) *MockproductDBAccessorUpdateProductCall {
+func (c *MockproductDBAccessorUpdateProductCall) Do(f func(context.Context, Product) (Product, error)) *MockproductDBAccessorUpdateProductCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockproductDBAccessorUpdateProductCall) DoAndReturn(f func(context.Context, Product) (*Product, error)) *MockproductDBAccessorUpdateProductCall {
+func (c *MockproductDBAccessorUpdateProductCall) DoAndReturn(f func(context.Context, Product) (Product, error)) *MockproductDBAccessorUpdateProductCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

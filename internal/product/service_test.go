@@ -117,7 +117,7 @@ func TestProductService_UpdateProduct(t *testing.T) {
             ModifiedDate:     fixedTime,
             ModifiedBy:       "modified_by_updated",
         }
-        updatedProduct = &Product{
+        updatedProduct = Product{
             ID:                "some_id",
             ProductCategoryID: "category_id_updated",
             UOMID:            "uom_id_updated",
@@ -161,11 +161,11 @@ func TestProductService_UpdateProduct(t *testing.T) {
             productDBAccessor: mockProductAccessor,
         }
 
-        mockProductAccessor.EXPECT().UpdateProduct(ctx, updateSpec).Return(nil, errors.New("update error"))
+        mockProductAccessor.EXPECT().UpdateProduct(ctx, updateSpec).Return(Product{}, errors.New("update error"))
 
         res, err := svc.UpdateProduct(ctx, updateSpec)
-        g.Expect(res).To(gomega.BeNil())
-        g.Expect(err).ShouldNot(gomega.BeNil())
+		g.Expect(res).To(gomega.Equal(Product{}))
+		g.Expect(err).ShouldNot(gomega.BeNil())
     })
 }
 
@@ -187,7 +187,7 @@ func TestPriceService_UpdatePrice(t *testing.T) {
             ModifiedDate:    fixedTime,
             ModifiedBy:      "modified_by_updated",
         }
-        updatedPrice = &Price{
+        updatedPrice = Price{
             ID:              priceID,
             PurchasingOrgID: "org_id_updated",
             VendorID:        "vendor_id_updated",
@@ -230,10 +230,10 @@ func TestPriceService_UpdatePrice(t *testing.T) {
             productDBAccessor: mockProductAccessor,
         }
 
-        mockProductAccessor.EXPECT().UpdatePrice(ctx, updateSpec).Return(nil, errors.New("update error"))
+        mockProductAccessor.EXPECT().UpdatePrice(ctx, updateSpec).Return(Price{}, errors.New("update error"))
 
         res, err := svc.UpdatePrice(ctx, updateSpec)
-        g.Expect(res).To(gomega.BeNil())
+		g.Expect(res).To(gomega.Equal(Price{}))
         g.Expect(err).ShouldNot(gomega.BeNil())
     })
 }

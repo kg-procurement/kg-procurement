@@ -23,11 +23,11 @@ func (p *ProductService) GetProductsByVendor(
 	return p.productDBAccessor.GetProductsByVendor(ctx, vendorID, spec)
 }
 
-func (p *ProductService) UpdateProduct(ctx context.Context, payload Product) (*Product, error) {
+func (p *ProductService) UpdateProduct(ctx context.Context, payload Product) (Product, error) {
 	return p.productDBAccessor.UpdateProduct(ctx, payload)
 }
 
-func (p *ProductService) UpdatePrice(ctx context.Context, price Price) (*Price, error) {
+func (p *ProductService) UpdatePrice(ctx context.Context, price Price) (Price, error) {
 	return p.productDBAccessor.UpdatePrice(ctx, price)
 }
 

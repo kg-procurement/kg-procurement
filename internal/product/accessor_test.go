@@ -84,7 +84,7 @@ func Test_UpdateProduct(t *testing.T) {
 		)
 		defer c.db.Close()
 
-		updatedProduct := &Product{
+		updatedProduct := Product{
 			ID:                "inv1",
 			ProductCategoryID: "category_id_updated",
 			UOMID:             "uom_id_updated",
@@ -108,7 +108,7 @@ func Test_UpdateProduct(t *testing.T) {
 				now,
 			).WillReturnRows(expectedResult)
 
-		res, err := c.accessor.UpdateProduct(ctx, *updatedProduct)
+		res, err := c.accessor.UpdateProduct(ctx, updatedProduct)
 
 		c.g.Expect(err).To(gomega.BeNil())
 		c.g.Expect(res).To(gomega.Equal(updatedProduct))
@@ -148,7 +148,7 @@ func Test_UpdateProduct(t *testing.T) {
 		res, err := c.accessor.UpdateProduct(ctx, Product{})
 
 		c.g.Expect(err).ToNot(gomega.BeNil())
-		c.g.Expect(res).To(gomega.BeNil())
+		c.g.Expect(res).To(gomega.Equal(Product{}))
 	})
 
 }
@@ -284,7 +284,7 @@ func Test_UpdatePrice(t *testing.T) {
 		)
 		defer c.db.Close()
 
-		updatedPrice := &Price{
+		updatedPrice := Price{
 			ID:              "ID",
 			PurchasingOrgID: "org_id_updated",
 			VendorID:        "vendor_id_updated",
@@ -342,7 +342,7 @@ func Test_UpdatePrice(t *testing.T) {
 				now,
 			).WillReturnRows(expectedResult)
 
-		res, err := c.accessor.UpdatePrice(ctx, *updatedPrice)
+		res, err := c.accessor.UpdatePrice(ctx, updatedPrice)
 
 		c.g.Expect(err).To(gomega.BeNil())
 		c.g.Expect(res).To(gomega.Equal(updatedPrice))
@@ -416,7 +416,7 @@ func Test_UpdatePrice(t *testing.T) {
 		res, err := c.accessor.UpdatePrice(ctx, Price{})
 
 		c.g.Expect(err).ToNot(gomega.BeNil())
-		c.g.Expect(res).To(gomega.BeNil())
+		c.g.Expect(res).To(gomega.Equal(Price{}))
 	})
 }
 
