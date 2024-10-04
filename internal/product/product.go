@@ -89,3 +89,41 @@ type GetProductsByVendorSpec struct {
 	Name     string `json:"name"`
 	database.PaginationSpec
 }
+
+type PutProductSpec struct {
+	ProductCategoryID string `json:"product_category_id"`
+	UOMID             string `json:"uom_id"`
+	IncomeTaxID       string `json:"income_tax_id"`
+	ProductTypeID     string `json:"product_type_id"`
+	Name              string `json:"name"`
+	Description       string `json:"description"`
+}
+
+type PutPriceSpec struct {
+    Name               string `json:"name"`
+    PurchasingOrgID     string `json:"purchasing_org_id"`
+    VendorID           string `json:"vendor_id"`
+    ProductVendorID    string `json:"product_vendor_id"`
+    QuantityMin        int    `json:"quantity_min"`
+    QuantityMax        int    `json:"quantity_max"`
+    QuantityUOMID      string `json:"quantity_uom_id"`
+    LeadTimeMin        int    `json:"lead_time_min"`
+    LeadTimeMax        int    `json:"lead_time_max"`
+    CurrencyID         string `json:"currency_id"`
+    Price              float64 `json:"price"`
+    PriceQuantity      int    `json:"price_quantity"`
+    PriceUOMID         string `json:"price_uom_id"`
+    ValidFrom          time.Time `json:"valid_from"`
+    ValidTo            time.Time `json:"valid_to"`
+    ValidPatternID     string `json:"valid_pattern_id"`
+    AreaGroupID        string `json:"area_group_id"`
+    ReferenceNumber    string `json:"reference_number"`
+    ReferenceDate      time.Time `json:"reference_date"`
+    DocumentTypeID     string `json:"document_type_id"`
+    DocumentID         string `json:"document_id"`
+    ItemID             string `json:"item_id"`
+    TermOfPaymentID    string `json:"term_of_payment_id"`
+    InvocationOrder    int    `json:"invocation_order"`
+}
+
+
