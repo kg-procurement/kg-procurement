@@ -78,6 +78,45 @@ func (c *MockvendorDBAccessorGetAllCall) DoAndReturn(f func(context.Context, Get
 	return c
 }
 
+// GetById mocks base method.
+func (m *MockvendorDBAccessor) GetById(ctx context.Context, id string) (*Vendor, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetById", ctx, id)
+	ret0, _ := ret[0].(*Vendor)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetById indicates an expected call of GetById.
+func (mr *MockvendorDBAccessorMockRecorder) GetById(ctx, id any) *MockvendorDBAccessorGetByIdCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetById", reflect.TypeOf((*MockvendorDBAccessor)(nil).GetById), ctx, id)
+	return &MockvendorDBAccessorGetByIdCall{Call: call}
+}
+
+// MockvendorDBAccessorGetByIdCall wrap *gomock.Call
+type MockvendorDBAccessorGetByIdCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockvendorDBAccessorGetByIdCall) Return(arg0 *Vendor, arg1 error) *MockvendorDBAccessorGetByIdCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockvendorDBAccessorGetByIdCall) Do(f func(context.Context, string) (*Vendor, error)) *MockvendorDBAccessorGetByIdCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockvendorDBAccessorGetByIdCall) DoAndReturn(f func(context.Context, string) (*Vendor, error)) *MockvendorDBAccessorGetByIdCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // GetSomeStuff mocks base method.
 func (m *MockvendorDBAccessor) GetSomeStuff(ctx context.Context) ([]string, error) {
 	m.ctrl.T.Helper()
@@ -113,6 +152,45 @@ func (c *MockvendorDBAccessorGetSomeStuffCall) Do(f func(context.Context) ([]str
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockvendorDBAccessorGetSomeStuffCall) DoAndReturn(f func(context.Context) ([]string, error)) *MockvendorDBAccessorGetSomeStuffCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// UpdateDetail mocks base method.
+func (m *MockvendorDBAccessor) UpdateDetail(ctx context.Context, spec Vendor) (*Vendor, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateDetail", ctx, spec)
+	ret0, _ := ret[0].(*Vendor)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateDetail indicates an expected call of UpdateDetail.
+func (mr *MockvendorDBAccessorMockRecorder) UpdateDetail(ctx, spec any) *MockvendorDBAccessorUpdateDetailCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateDetail", reflect.TypeOf((*MockvendorDBAccessor)(nil).UpdateDetail), ctx, spec)
+	return &MockvendorDBAccessorUpdateDetailCall{Call: call}
+}
+
+// MockvendorDBAccessorUpdateDetailCall wrap *gomock.Call
+type MockvendorDBAccessorUpdateDetailCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockvendorDBAccessorUpdateDetailCall) Return(arg0 *Vendor, arg1 error) *MockvendorDBAccessorUpdateDetailCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockvendorDBAccessorUpdateDetailCall) Do(f func(context.Context, Vendor) (*Vendor, error)) *MockvendorDBAccessorUpdateDetailCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockvendorDBAccessorUpdateDetailCall) DoAndReturn(f func(context.Context, Vendor) (*Vendor, error)) *MockvendorDBAccessorUpdateDetailCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

@@ -12,11 +12,12 @@ import (
 	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/benbjohnson/clock"
 	"github.com/onsi/gomega"
 )
 
 func Test_newPostgresVendorAccessor(t *testing.T) {
-	_ = newPostgresVendorAccessor(nil)
+	_ = newPostgresVendorAccessor(nil, nil)
 }
 
 func Test_postgresVendorAccessor_GetSomeStuff(t *testing.T) {
@@ -30,11 +31,12 @@ func Test_postgresVendorAccessor_GetSomeStuff(t *testing.T) {
 	setup := func(t *testing.T) (*gomega.GomegaWithT, *sql.DB) {
 		g := gomega.NewWithT(t)
 		db, sqlMock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+		realClock := clock.New()
 		if err != nil {
 			log.Fatal("error initializing mock:", err)
 		}
 
-		accessor = newPostgresVendorAccessor(db)
+		accessor = newPostgresVendorAccessor(db, realClock)
 		mock = sqlMock
 
 		return g, db
@@ -90,6 +92,26 @@ func Test_postgresVendorAccessor_GetSomeStuff(t *testing.T) {
 		g.Expect(err).ToNot(gomega.BeNil())
 		g.Expect(res).To(gomega.BeNil())
 	})
+
+	t.Run("error on iterating row", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		rows := sqlmock.NewRows([]string{"name"}).
+			AddRow("FERRY").
+			AddRow("VALE").
+			RowError(1, fmt.Errorf("row error"))
+
+		mock.ExpectQuery(`SELECT name FROM users WHERE title = (?)`).
+			WithArgs("test").
+			WillReturnRows(rows)
+
+		ctx := context.Background()
+		res, err := accessor.GetSomeStuff(ctx)
+
+		g.Expect(err).ToNot(gomega.BeNil())
+		g.Expect(res).To(gomega.BeNil())
+	})
 }
 
 func TestVendorAccessor_GetAll(t *testing.T) {
@@ -103,11 +125,12 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 	setup := func(t *testing.T) (*gomega.GomegaWithT, *sql.DB) {
 		g := gomega.NewWithT(t)
 		db, sqlMock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+		realClock := clock.New()
 		if err != nil {
 			log.Fatal("error initializing mock:", err)
 		}
 
-		accessor = newPostgresVendorAccessor(db)
+		accessor = newPostgresVendorAccessor(db, realClock)
 		mock = sqlMock
 
 		return g, db
@@ -204,7 +227,7 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 			AreaGroupName: "group_name",
 			SapCode:       "sap_code",
 			ModifiedDate:  fixedTime,
-			ModifiedBy:    1,
+			ModifiedBy:    "1",
 			Date:          fixedTime,
 		}}
 
@@ -290,7 +313,7 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 			AreaGroupName: "group_name",
 			SapCode:       "sap_code",
 			ModifiedDate:  fixedTime,
-			ModifiedBy:    1,
+			ModifiedBy:    "1",
 			Date:          fixedTime,
 		}}
 
@@ -353,7 +376,7 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 			AreaGroupName: "group_name",
 			SapCode:       "sap_code",
 			ModifiedDate:  fixedTime,
-			ModifiedBy:    1,
+			ModifiedBy:    "1",
 			Date:          fixedTime,
 		}}
 
@@ -586,11 +609,12 @@ func Test_postgresVendorAccessor_GetAll_WithLocationAndProduct(t *testing.T) {
 	setup := func(t *testing.T) (*gomega.GomegaWithT, *sql.DB) {
 		g := gomega.NewWithT(t)
 		db, sqlMock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+		realClock := clock.New()
 		if err != nil {
 			log.Fatal("error initializing mock:", err)
 		}
 
-		accessor = newPostgresVendorAccessor(db)
+		accessor = newPostgresVendorAccessor(db, realClock)
 		mock = sqlMock
 
 		return g, db
@@ -700,7 +724,7 @@ func Test_postgresVendorAccessor_GetAll_WithLocationAndProduct(t *testing.T) {
 			AreaGroupName: "Indonesia",
 			SapCode:       "sap_code",
 			ModifiedDate:  fixedTime,
-			ModifiedBy:    1,
+			ModifiedBy:    "1",
 			Date:          fixedTime,
 		}}
 
@@ -808,7 +832,7 @@ func Test_postgresVendorAccessor_GetAll_WithLocationAndProduct(t *testing.T) {
 			AreaGroupName: "Indonesia",
 			SapCode:       "sap_code",
 			ModifiedDate:  fixedTime,
-			ModifiedBy:    1,
+			ModifiedBy:    "1",
 			Date:          fixedTime,
 		}}
 
@@ -902,7 +926,7 @@ func Test_postgresVendorAccessor_GetAll_WithLocationAndProduct(t *testing.T) {
 			AreaGroupName: "Indonesia",
 			SapCode:       "sap_code",
 			ModifiedDate:  fixedTime,
-			ModifiedBy:    1,
+			ModifiedBy:    "1",
 			Date:          fixedTime,
 		}}
 
@@ -913,5 +937,303 @@ func Test_postgresVendorAccessor_GetAll_WithLocationAndProduct(t *testing.T) {
 
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(res).To(gomega.Equal(expectation))
+	})
+}
+
+func TestVendorAccessor_GetById(t *testing.T) {
+	t.Parallel()
+
+	var (
+		accessor *postgresVendorAccessor
+		mock     sqlmock.Sqlmock
+	)
+
+	setup := func(t *testing.T) (*gomega.GomegaWithT, *sql.DB) {
+		g := gomega.NewWithT(t)
+		db, sqlMock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+		realClock := clock.New()
+		if err != nil {
+			log.Fatal("error initializing mock:", err)
+		}
+
+		accessor = newPostgresVendorAccessor(db, realClock)
+		mock = sqlMock
+
+		return g, db
+	}
+
+	vendorFields := []string{
+		"id",
+		"name",
+		"description",
+		"bp_id",
+		"bp_name",
+		"rating",
+		"area_group_id",
+		"area_group_name",
+		"sap_code",
+		"modified_date",
+		"modified_by",
+		"dt",
+	}
+
+	query := `SELECT 
+	"id",
+	"name",
+	"description",
+	"bp_id",
+	"bp_name",
+	"rating",
+	"area_group_id",
+	"area_group_name",
+	"sap_code",
+	"modified_date",
+	"modified_by",
+	"dt"
+	FROM vendor 
+	WHERE id = $1`
+
+	fixedTime := time.Date(2024, time.September, 27, 12, 30, 0, 0, time.UTC)
+
+	t.Run("success", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		rows := sqlmock.NewRows(vendorFields).
+			AddRow(
+				"ID",
+				"name",
+				"description",
+				"BpID",
+				"BpName",
+				1,
+				"AreaGroupId",
+				"AreaGroupName",
+				"SapCode",
+				fixedTime,
+				"ID",
+				fixedTime,
+			)
+
+		mock.ExpectQuery(query).
+			WithArgs("ID").
+			WillReturnRows(rows)
+
+		ctx := context.Background()
+		res, err := accessor.GetById(ctx, "ID")
+
+		expectation := &Vendor{
+			ID:            "ID",
+			Name:          "name",
+			Description:   "description",
+			BpID:          "BpID",
+			BpName:        "BpName",
+			Rating:        1,
+			AreaGroupID:   "AreaGroupId",
+			AreaGroupName: "AreaGroupName",
+			SapCode:       "SapCode",
+			ModifiedDate:  fixedTime,
+			ModifiedBy:    "ID",
+			Date:          fixedTime,
+		}
+
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(res).To(gomega.Equal(expectation))
+
+	})
+
+	t.Run("error on row scan", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		rows := sqlmock.NewRows(vendorFields).RowError(1, fmt.Errorf("error"))
+
+		mock.ExpectQuery(query).
+			WithArgs("ID").
+			WillReturnRows(rows)
+
+		ctx := context.Background()
+		res, err := accessor.GetById(ctx, "ID")
+
+		g.Expect(err).ToNot(gomega.BeNil())
+		g.Expect(res).To(gomega.BeNil())
+
+	})
+}
+
+func TestVendorAccessor_UpdateDetail(t *testing.T) {
+	t.Parallel()
+
+	var (
+		accessor  *postgresVendorAccessor
+		mock      sqlmock.Sqlmock
+		clockMock *clock.Mock
+	)
+
+	updatedFixedTime := time.Date(2024, time.September, 27, 12, 30, 0, 1, time.UTC)
+
+	fixedTime := time.Date(2024, time.September, 27, 12, 30, 0, 0, time.UTC)
+
+	setup := func(t *testing.T) (*gomega.GomegaWithT, *sql.DB) {
+		g := gomega.NewWithT(t)
+
+		db, sqlMock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+		if err != nil {
+			log.Fatal("error initializing mock:", err)
+		}
+
+		clockMock = clock.NewMock()
+
+		accessor = newPostgresVendorAccessor(db, clockMock)
+
+		mock = sqlMock
+
+		return g, db
+	}
+
+	vendorFields := []string{
+		"id",
+		"name",
+		"description",
+		"bp_id",
+		"bp_name",
+		"rating",
+		"area_group_id",
+		"area_group_name",
+		"sap_code",
+		"modified_date",
+		"modified_by",
+		"dt",
+	}
+
+	query := `UPDATE vendor
+		SET 
+			name = $2,
+			description = $3,
+			bp_id = $4,
+			bp_name = $5,
+			rating = $6,
+			area_group_id = $7,
+			area_group_name = $8,
+			sap_code = $9,
+			modified_date = $10,
+		WHERE 
+			id = $1
+		RETURNING 
+			id, 
+			name, 
+			description, 
+			bp_id, 
+			bp_name, 
+			rating, 
+			area_group_id, 
+			area_group_name, 
+			sap_code, 
+			modified_date, 
+			modified_by, 
+			dt
+	`
+
+	t.Run("success", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		clockMock.Set(time.Now())
+
+		now := clockMock.Now()
+
+		rows := sqlmock.NewRows(vendorFields).
+			AddRow(
+				"ID",
+				"updated",
+				"updated",
+				"updated",
+				"updated",
+				2,
+				"updated",
+				"updated",
+				"updated",
+				now,
+				"updater",
+				fixedTime,
+			)
+
+		ctx := context.Background()
+
+		updatedVendor := &Vendor{
+			ID:            "ID",
+			Name:          "updated",
+			Description:   "updated",
+			BpID:          "updated",
+			BpName:        "updated",
+			Rating:        2,
+			AreaGroupID:   "updated",
+			AreaGroupName: "updated",
+			SapCode:       "updated",
+			ModifiedDate:  now,
+			ModifiedBy:    "updater",
+			Date:          fixedTime,
+		}
+
+		mock.ExpectQuery(query).
+			WithArgs("ID",
+				"updated",
+				"updated",
+				"updated",
+				"updated",
+				2,
+				"updated",
+				"updated",
+				"updated",
+				now).
+			WillReturnRows(rows)
+
+		res, err := accessor.UpdateDetail(ctx, *updatedVendor)
+
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(res).To(gomega.Equal(updatedVendor))
+	})
+
+	t.Run("error on row scan", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		rows := sqlmock.NewRows(vendorFields).
+			AddRow(
+				nil,
+				nil,
+				nil,
+				nil,
+				nil,
+				nil,
+				nil,
+				nil,
+				nil,
+				nil,
+				nil,
+				nil,
+			)
+
+		mock.ExpectQuery(query).
+			WithArgs("ID",
+				"updated",
+				"updated",
+				"updated",
+				"updated",
+				"not int",
+				"updated",
+				"updated",
+				"updated",
+				updatedFixedTime,
+				"updatedID",
+				fixedTime).
+			WillReturnRows(rows)
+
+		ctx := context.Background()
+		res, err := accessor.UpdateDetail(ctx, Vendor{})
+
+		g.Expect(err).ToNot(gomega.BeNil())
+		g.Expect(res).To(gomega.BeNil())
+
 	})
 }

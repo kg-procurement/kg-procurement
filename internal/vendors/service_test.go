@@ -7,17 +7,21 @@ import (
 	"testing"
 	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
 )
 
+var ()
+
 func Test_NewVendorService(t *testing.T) {
-	_ = NewVendorService(nil)
+	_ = NewVendorService(nil, nil)
 }
 
 func TestNewVendorService(t *testing.T) {
 	type args struct {
 		mockDBConnector *database.MockDBConnector
+		mockClock       *clock.Mock
 	}
 	tests := []struct {
 		name string
@@ -28,7 +32,7 @@ func TestNewVendorService(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewVendorService(tt.args.mockDBConnector); !reflect.DeepEqual(got, tt.want) {
+			if got := NewVendorService(tt.args.mockDBConnector, tt.args.mockClock); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewVendorService() = %v, want %v", got, tt.want)
 			}
 		})
@@ -75,7 +79,7 @@ func TestVendorService_GetAll(t *testing.T) {
 			AreaGroupName: "group_name",
 			SapCode:       "sap_code",
 			ModifiedDate:  time.Now(),
-			ModifiedBy:    1,
+			ModifiedBy:    "1",
 			Date:          time.Now(),
 		},
 	}
@@ -177,5 +181,160 @@ func TestVendorService_GetAll(t *testing.T) {
 				g.Expect(res).To(gomega.BeNil())
 			}
 		})
+	}
+}
+
+func TestVendorService_GetById(t *testing.T) {
+	fixedTime := time.Date(2024, time.September, 27, 12, 30, 0, 0, time.UTC)
+
+	data := &Vendor{
+		ID:            "1",
+		Name:          "name",
+		Description:   "description",
+		BpID:          "1",
+		BpName:        "bp_name",
+		Rating:        1,
+		AreaGroupID:   "1",
+		AreaGroupName: "group_name",
+		SapCode:       "sap_code",
+		ModifiedDate:  fixedTime,
+		ModifiedBy:    "1",
+		Date:          fixedTime,
+	}
+
+	ctrl := gomock.NewController(t)
+
+	defer ctrl.Finish()
+
+	type fields struct {
+		mockVendorDBAccessor *MockvendorDBAccessor
+		mockDBConnector      *database.MockDBConnector
+	}
+
+	type args struct {
+		ctx context.Context
+		id  string
+	}
+
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   *Vendor
+		err    error
+	}{
+		{
+			name: "success",
+			fields: fields{
+				mockVendorDBAccessor: NewMockvendorDBAccessor(ctrl),
+			},
+			args: args{ctx: context.Background(), id: "ID"},
+			want: data,
+			err:  nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := gomega.NewWithT(t)
+			v := &VendorService{
+				vendorDBAccessor: tt.fields.mockVendorDBAccessor,
+			}
+
+			tt.fields.mockVendorDBAccessor.EXPECT().
+				GetById(tt.args.ctx, tt.args.id).
+				Return(tt.want, tt.err)
+
+			res, err := v.GetById(tt.args.ctx, tt.args.id)
+
+			if tt.err == nil {
+				g.Expect(err).To(gomega.BeNil())
+				g.Expect(res).To(gomega.Equal(tt.want))
+			} else {
+				g.Expect(err).ToNot(gomega.BeNil())
+				g.Expect(res).To(gomega.BeNil())
+			}
+		})
+	}
+}
+
+func TestVendorService_UpdateDetail(t *testing.T) {
+	fixedTime := time.Date(2024, time.September, 27, 12, 30, 0, 0, time.UTC)
+	updatedFixedTime := time.Date(2024, time.September, 27, 12, 30, 0, 1, time.UTC)
+	updateSpec := Vendor{
+		ID:            "ID",
+		Name:          "udpate",
+		Description:   "udpate",
+		BpID:          "udpate",
+		BpName:        "udpate",
+		Rating:        2,
+		AreaGroupID:   "udpate",
+		AreaGroupName: "udpate",
+		SapCode:       "udpate",
+		ModifiedDate:  time.Time{},
+		ModifiedBy:    "ID",
+		Date:          time.Time{},
+	}
+
+	UpdatedVendorData := &Vendor{
+		ID:            "ID",
+		Name:          "udpate",
+		Description:   "udpate",
+		BpID:          "udpate",
+		BpName:        "udpate",
+		Rating:        2,
+		AreaGroupID:   "udpate",
+		AreaGroupName: "udpate",
+		SapCode:       "udpate",
+		ModifiedDate:  updatedFixedTime,
+		ModifiedBy:    "UpdatedID",
+		Date:          fixedTime,
+	}
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	type fields struct {
+		mockvendorDBAccessor *MockvendorDBAccessor
+	}
+
+	type args struct {
+		ctx  context.Context
+		spec Vendor
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    *Vendor
+		wantErr error
+	}{
+		{
+			name: "success",
+			fields: fields{
+				mockvendorDBAccessor: NewMockvendorDBAccessor(ctrl),
+			},
+			args: args{
+				ctx:  context.Background(),
+				spec: updateSpec,
+			},
+			want: UpdatedVendorData,
+		},
+	}
+	for _, tt := range tests {
+		g := gomega.NewWithT(t)
+		v := VendorService{
+			vendorDBAccessor: tt.fields.mockvendorDBAccessor,
+		}
+
+		tt.fields.mockvendorDBAccessor.
+			EXPECT().
+			UpdateDetail(tt.args.ctx, tt.args.spec).
+			Return(tt.want, tt.wantErr)
+
+		res, err := v.UpdateDetail(tt.args.ctx, tt.args.spec)
+
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(res).To(gomega.Equal(tt.want))
+
 	}
 }
