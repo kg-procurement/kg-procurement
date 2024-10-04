@@ -66,7 +66,7 @@ func (p *postgresProductAccessor) GetProductsByVendor(_ context.Context, vendorI
 	return res, nil
 }
 
-func (p *postgresProductAccessor) UpdateProduct(_ context.Context, productID ProductID, payload Product) (*Product, error) {
+func (p *postgresProductAccessor) UpdateProduct(_ context.Context, payload Product) (*Product, error) {
 	query := `UPDATE product SET
         product_category_id = $2,
         uom_id = $3,
@@ -91,7 +91,7 @@ func (p *postgresProductAccessor) UpdateProduct(_ context.Context, productID Pro
 
     updatedProduct := &Product{}
     row := p.db.QueryRow(query,
-        productID,
+        payload.ID,
         payload.ProductCategoryID,
         payload.UOMID,
         payload.IncomeTaxID,

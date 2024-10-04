@@ -102,7 +102,7 @@ func Test_UpdateProduct(t *testing.T) {
                 updatedProduct.ModifiedBy,
             ).WillReturnRows(expectedResult)
 
-        res, err := c.accessor.UpdateProduct(ctx, updatedProduct.ID, *updatedProduct)
+        res, err := c.accessor.UpdateProduct(ctx, *updatedProduct)
 
         c.g.Expect(err).To(gomega.BeNil())
         c.g.Expect(res).To(gomega.Equal(updatedProduct))
@@ -152,7 +152,7 @@ func Test_UpdateProduct(t *testing.T) {
             ModifiedBy:        "modified_by_updated",
         }
 
-        res, err := c.accessor.UpdateProduct(ctx, updatedProduct.ID, *updatedProduct)
+        res, err := c.accessor.UpdateProduct(ctx, *updatedProduct)
 
         c.g.Expect(err).ToNot(gomega.BeNil())
         c.g.Expect(res).To(gomega.BeNil())
