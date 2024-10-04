@@ -66,7 +66,7 @@ func (p *postgresProductAccessor) GetProductsByVendor(_ context.Context, vendorI
 	return res, nil
 }
 
-func (p *postgresProductAccessor) UpdateProduct(_ context.Context, productID ProductID, payload Product) error {
+func (p *postgresProductAccessor) UpdateProduct(_ context.Context, productID ProductID, payload Product) (*Price, error) {
 	query := `UPDATE product SET
 		name = $1 
 		description = $2
@@ -78,11 +78,12 @@ func (p *postgresProductAccessor) UpdateProduct(_ context.Context, productID Pro
 		productID)
 
 	if err != nil {
-		return fmt.Errorf("failed to update product with id %s: %w", productID, err)
+		return nil,fmt.Errorf("failed to update product with id %s: %w", productID, err)
 	}
 
-	return nil
+	return nil, nil
 }
+
 
 func (p *postgresProductAccessor) UpdatePrice(ctx context.Context, price Price) (*Price, error) {
     query := `UPDATE price

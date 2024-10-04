@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
 	"testing"
 	"time"
 
@@ -20,124 +19,180 @@ func Test_newPostgresProductAccessor(t *testing.T) {
 func Test_UpdateProduct(t *testing.T) {
 	t.Parallel()
 
-	var (
-		accessor *postgresProductAccessor
-		mock     sqlmock.Sqlmock
-	)
-
-	setup := func(t *testing.T) (*gomega.GomegaWithT, *sql.DB) {
-		g := gomega.NewWithT(t)
-		db, sqlMock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
-		if err != nil {
-			log.Fatal("error initializing mock:", err)
-		}
-
-		accessor = newPostgresProductAccessor(db)
-		mock = sqlMock
-
-		return g, db
+	productFields := []string{
+		"id",
+		"product_category_id",
+		"uom_id",
+		"income_tax_id",
+		"product_type_id",
+		"name",
+		"description",
+		"modified_date",
+		"modified_by",
 	}
 
-	t.Run("When updating product successfully, should return no error", func(t *testing.T) {
-		g, db := setup(t)
-		defer db.Close()
+	query := `UPDATE product
+        SET 
+            product_category_id = $2,
+            uom_id = $3,
+            income_tax_id = $4,
+            product_type_id = $5,
+            name = $6,
+            description = $7,
+            modified_date = $8,
+            modified_by = $9
+        WHERE 
+            id = $1
+        RETURNING 
+            id,
+            product_category_id,
+            uom_id,
+            income_tax_id,
+            product_type_id,
+            name,
+            description,
+            modified_date,
+            modified_by
+    `
 
-		initialProduct := Product{
-			ID:          "inv1",
-			Name:        "Product A",
-			Description: "Initial Description",
-		}
+	fixedTime := time.Now()
+	updatedFixedTime := time.Now().Add(1 * time.Hour)
 
-		updatedProduct := Product{
-			ID:          "inv1",
-			Name:        "Product A Updated",
-			Description: "Updated Description",
-		}
+	t.Run("success", func(t *testing.T) {
+		var (
+            ctx            = context.Background()
+            c              = setupProductAccessorTestComponent(t)
+            expectedResult = sqlmock.NewRows(productFields).
+                AddRow(
+                    "inv1",
+                    "category_id_updated",
+                    "uom_id_updated",
+                    "income_tax_id_updated",
+                    "product_type_id_updated",
+                    "Product A Updated",
+                    "Updated Description",
+                    updatedFixedTime,
+                    "modified_by_updated",
+                )
+        )
+        defer c.db.Close()
 
-		mock.ExpectExec(`UPDATE product SET name = $1 description = $2 WHERE id = $3`).
-			WithArgs(updatedProduct.Name, updatedProduct.Description, updatedProduct.ID).
-			WillReturnResult(sqlmock.NewResult(1, 1))
+		updatedProduct := &Product{
+            ID:                "inv1",
+            ProductCategoryID: "category_id_updated",
+            UOMID:             "uom_id_updated",
+            IncomeTaxID:       "income_tax_id_updated",
+            ProductTypeID:     "product_type_id_updated",
+            Name:              "Product A Updated",
+            Description:       "Updated Description",
+            ModifiedDate:      updatedFixedTime,
+            ModifiedBy:        "modified_by_updated",
+        }
 
-		ctx := context.Background()
-		err := accessor.UpdateProduct(ctx, initialProduct.ID, updatedProduct)
+		c.mock.ExpectQuery(query).
+            WithArgs(
+                updatedProduct.ID,
+                updatedProduct.ProductCategoryID,
+                updatedProduct.UOMID,
+                updatedProduct.IncomeTaxID,
+                updatedProduct.ProductTypeID,
+                updatedProduct.Name,
+                updatedProduct.Description,
+                updatedProduct.ModifiedDate,
+                updatedProduct.ModifiedBy,
+            ).WillReturnRows(expectedResult)
 
-		g.Expect(err).To(gomega.BeNil())
+        res, err := c.accessor.UpdateProduct(ctx, updatedProduct.ID, *updatedProduct)
+
+        c.g.Expect(err).To(gomega.BeNil())
+        c.g.Expect(res).To(gomega.Equal(updatedProduct))
 	})
 
-	t.Run("When updating product fails due to database error, should return error", func(t *testing.T) {
-		g, db := setup(t)
-		defer db.Close()
+	t.Run("error on row scan", func(t *testing.T) {
+        var (
+            ctx            = context.Background()
+            c              = setupProductAccessorTestComponent(t)
+            expectedResult = sqlmock.NewRows(productFields).
+                AddRow(
+                    "inv1",
+                    "category_id_updated",
+                    "uom_id_updated",
+                    "income_tax_id_updated",
+                    "product_type_id_updated",
+                    "Product A Updated",
+                    "Updated Description",
+                    "not a time",
+                    "modified_by_updated",
+                )
+        )
+        defer c.db.Close()
 
-		updatedProduct := Product{
-			ID:          "inv1",
-			Name:        "Product A Updated",
-			Description: "Updated Description",
-		}
+        c.mock.ExpectQuery(query).
+            WithArgs(
+                "inv1",
+                "category_id_updated",
+                "uom_id_updated",
+                "income_tax_id_updated",
+                "product_type_id_updated",
+                "Product A Updated",
+                "Updated Description",
+                "not a time",
+                "modified_by_updated",
+            ).WillReturnRows(expectedResult)
 
-		mock.ExpectExec(`UPDATE product SET name = $1 description = $2 WHERE id = $3`).
-			WithArgs(updatedProduct.Name, updatedProduct.Description, updatedProduct.ID).
-			WillReturnError(errors.New("some database error"))
+        updatedProduct := &Product{
+            ID:                "inv1",
+            ProductCategoryID: "category_id_updated",
+            UOMID:             "uom_id_updated",
+            IncomeTaxID:       "income_tax_id_updated",
+            ProductTypeID:     "product_type_id_updated",
+            Name:              "Product A Updated",
+            Description:       "Updated Description",
+            ModifiedDate:      fixedTime,
+            ModifiedBy:        "modified_by_updated",
+        }
 
-		ctx := context.Background()
-		err := accessor.UpdateProduct(ctx, updatedProduct.ID, updatedProduct)
+        res, err := c.accessor.UpdateProduct(ctx, updatedProduct.ID, *updatedProduct)
 
-		g.Expect(err).ToNot(gomega.BeNil())
-	})
-
-	t.Run("When updating product and item not found, should return error", func(t *testing.T) {
-		g, db := setup(t)
-		defer db.Close()
-
-		updatedProduct := Product{
-			ID:          "nonexistent_inv",
-			Name:        "Non-existent Product",
-			Description: "This item does not exist",
-		}
-
-		mock.ExpectExec(`UPDATE product SET name = $1 description = $2 WHERE id = $3`).
-			WithArgs(updatedProduct.Name, updatedProduct.Description, updatedProduct.ID).
-			WillReturnError(errors.New("product item not found"))
-
-		ctx := context.Background()
-		err := accessor.UpdateProduct(ctx, updatedProduct.ID, updatedProduct)
-
-		g.Expect(err).ToNot(gomega.BeNil())
-	})
+        c.g.Expect(err).ToNot(gomega.BeNil())
+        c.g.Expect(res).To(gomega.BeNil())
+    })
+    
 }
 
 func Test_UpdatePrice(t *testing.T) {
-    t.Parallel()
+	t.Parallel()
 
-    priceFields := []string{
-        "id",
-        "purchasing_org_id",
-        "vendor_id",
-        "product_vendor_id",
-        "quantity_min",
-        "quantity_max",
-        "quantity_uom_id",
-        "lead_time_min",
-        "lead_time_max",
-        "currency_id",
-        "price",
-        "price_quantity",
-        "price_uom_id",
-        "valid_from",
-        "valid_to",
-        "valid_pattern_id",
-        "area_group_id",
-        "reference_number",
-        "reference_date",
-        "document_type_id",
-        "document_id",
-        "item_id",
-        "term_of_payment_id",
-        "invocation_order",
-        "modified_date",
-        "modified_by",
-    }
+	priceFields := []string{
+		"id",
+		"purchasing_org_id",
+		"vendor_id",
+		"product_vendor_id",
+		"quantity_min",
+		"quantity_max",
+		"quantity_uom_id",
+		"lead_time_min",
+		"lead_time_max",
+		"currency_id",
+		"price",
+		"price_quantity",
+		"price_uom_id",
+		"valid_from",
+		"valid_to",
+		"valid_pattern_id",
+		"area_group_id",
+		"reference_number",
+		"reference_date",
+		"document_type_id",
+		"document_id",
+		"item_id",
+		"term_of_payment_id",
+		"invocation_order",
+		"modified_date",
+		"modified_by",
+	}
 
-    query := `UPDATE price
+	query := `UPDATE price
         SET 
             purchasing_org_id = $2,
             vendor_id = $3,
@@ -195,213 +250,212 @@ func Test_UpdatePrice(t *testing.T) {
             modified_by
     `
 
-    // Example time values for your test
-    fixedTime := time.Now()
-    updatedFixedTime := time.Now().Add(1 * time.Hour)
+	// Example time values for your test
+	fixedTime := time.Now()
+	updatedFixedTime := time.Now().Add(1 * time.Hour)
 
-    t.Run("success", func(t *testing.T) {
-        var (
+	t.Run("success", func(t *testing.T) {
+		var (
 			ctx            = context.Background()
 			c              = setupProductAccessorTestComponent(t)
 			expectedResult = sqlmock.NewRows(priceFields).
-						AddRow(
-							"ID",
-							"org_id_updated",
-							"vendor_id_updated",
-							"product_vendor_id_updated",
-							10,
-							100,
-							"quantity_uom_id_updated",
-							1,
-							2,
-							"currency_id_updated",
-							99.99,
-							1,
-							"price_uom_id_updated",
-							fixedTime,
-							updatedFixedTime,
-							"valid_pattern_id_updated",
-							"area_group_id_updated",
-							"reference_number_updated",
-							fixedTime,
-							"document_type_id_updated",
-							"document_id_updated",
-							"item_id_updated",
-							"term_of_payment_id_updated",
-							1,
-							updatedFixedTime,
-							"modified_by_updated",
-						)
+					AddRow(
+					"ID",
+					"org_id_updated",
+					"vendor_id_updated",
+					"product_vendor_id_updated",
+					10,
+					100,
+					"quantity_uom_id_updated",
+					1,
+					2,
+					"currency_id_updated",
+					99.99,
+					1,
+					"price_uom_id_updated",
+					fixedTime,
+					updatedFixedTime,
+					"valid_pattern_id_updated",
+					"area_group_id_updated",
+					"reference_number_updated",
+					fixedTime,
+					"document_type_id_updated",
+					"document_id_updated",
+					"item_id_updated",
+					"term_of_payment_id_updated",
+					1,
+					updatedFixedTime,
+					"modified_by_updated",
+				)
 		)
-        defer c.db.Close()
+		defer c.db.Close()
 
-        updatedPrice := &Price{
-            ID:                "ID",
-            PurchasingOrgID:   "org_id_updated",
-            VendorID:          "vendor_id_updated",
-            ProductVendorID:   "product_vendor_id_updated",
-            QuantityMin:       10,
-            QuantityMax:       100,
-            QuantityUOMID:     "quantity_uom_id_updated",
-            LeadTimeMin:       1,
-            LeadTimeMax:       2,
-            CurrencyID:        "currency_id_updated",
-            Price:             99.99,
-            PriceQuantity:     1,
-            PriceUOMID:        "price_uom_id_updated",
-            ValidFrom:         fixedTime,
-            ValidTo:           updatedFixedTime,
-            ValidPatternID:    "valid_pattern_id_updated",
-            AreaGroupID:       "area_group_id_updated",
-            ReferenceNumber:   "reference_number_updated",
-            ReferenceDate:     fixedTime,
-            DocumentTypeID:    "document_type_id_updated",
-            DocumentID:        "document_id_updated",
-            ItemID:            "item_id_updated",
-            TermOfPaymentID:   "term_of_payment_id_updated",
-            InvocationOrder:    1,
-            ModifiedDate:      updatedFixedTime,
-            ModifiedBy:        "modified_by_updated",
-        }
+		updatedPrice := &Price{
+			ID:              "ID",
+			PurchasingOrgID: "org_id_updated",
+			VendorID:        "vendor_id_updated",
+			ProductVendorID: "product_vendor_id_updated",
+			QuantityMin:     10,
+			QuantityMax:     100,
+			QuantityUOMID:   "quantity_uom_id_updated",
+			LeadTimeMin:     1,
+			LeadTimeMax:     2,
+			CurrencyID:      "currency_id_updated",
+			Price:           99.99,
+			PriceQuantity:   1,
+			PriceUOMID:      "price_uom_id_updated",
+			ValidFrom:       fixedTime,
+			ValidTo:         updatedFixedTime,
+			ValidPatternID:  "valid_pattern_id_updated",
+			AreaGroupID:     "area_group_id_updated",
+			ReferenceNumber: "reference_number_updated",
+			ReferenceDate:   fixedTime,
+			DocumentTypeID:  "document_type_id_updated",
+			DocumentID:      "document_id_updated",
+			ItemID:          "item_id_updated",
+			TermOfPaymentID: "term_of_payment_id_updated",
+			InvocationOrder: 1,
+			ModifiedDate:    updatedFixedTime,
+			ModifiedBy:      "modified_by_updated",
+		}
 
-        c.mock.ExpectQuery(query).
-            WithArgs(
-                "ID",
-                updatedPrice.PurchasingOrgID,
-                updatedPrice.VendorID,
-                updatedPrice.ProductVendorID,
-                updatedPrice.QuantityMin,
-                updatedPrice.QuantityMax,
-                updatedPrice.QuantityUOMID,
-                updatedPrice.LeadTimeMin,
-                updatedPrice.LeadTimeMax,
-                updatedPrice.CurrencyID,
-                updatedPrice.Price,
-                updatedPrice.PriceQuantity,
-                updatedPrice.PriceUOMID,
-                updatedPrice.ValidFrom,
-                updatedPrice.ValidTo,
-                updatedPrice.ValidPatternID,
-                updatedPrice.AreaGroupID,
-                updatedPrice.ReferenceNumber,
-                updatedPrice.ReferenceDate,
-                updatedPrice.DocumentTypeID,
-                updatedPrice.DocumentID,
-                updatedPrice.ItemID,
-                updatedPrice.TermOfPaymentID,
-                updatedPrice.InvocationOrder,
-                updatedPrice.ModifiedDate,
-                updatedPrice.ModifiedBy,
-            ).WillReturnRows(expectedResult)
+		c.mock.ExpectQuery(query).
+			WithArgs(
+				"ID",
+				updatedPrice.PurchasingOrgID,
+				updatedPrice.VendorID,
+				updatedPrice.ProductVendorID,
+				updatedPrice.QuantityMin,
+				updatedPrice.QuantityMax,
+				updatedPrice.QuantityUOMID,
+				updatedPrice.LeadTimeMin,
+				updatedPrice.LeadTimeMax,
+				updatedPrice.CurrencyID,
+				updatedPrice.Price,
+				updatedPrice.PriceQuantity,
+				updatedPrice.PriceUOMID,
+				updatedPrice.ValidFrom,
+				updatedPrice.ValidTo,
+				updatedPrice.ValidPatternID,
+				updatedPrice.AreaGroupID,
+				updatedPrice.ReferenceNumber,
+				updatedPrice.ReferenceDate,
+				updatedPrice.DocumentTypeID,
+				updatedPrice.DocumentID,
+				updatedPrice.ItemID,
+				updatedPrice.TermOfPaymentID,
+				updatedPrice.InvocationOrder,
+				updatedPrice.ModifiedDate,
+				updatedPrice.ModifiedBy,
+			).WillReturnRows(expectedResult)
 
-        res, err := c.accessor.UpdatePrice(ctx, *updatedPrice)
+		res, err := c.accessor.UpdatePrice(ctx, *updatedPrice)
 
-        c.g.Expect(err).To(gomega.BeNil())
-        c.g.Expect(res).To(gomega.Equal(updatedPrice))
-    })
+		c.g.Expect(err).To(gomega.BeNil())
+		c.g.Expect(res).To(gomega.Equal(updatedPrice))
+	})
 
-    t.Run("error on row scan", func(t *testing.T) {
-        var (
+	t.Run("error on row scan", func(t *testing.T) {
+		var (
 			ctx            = context.Background()
 			c              = setupProductAccessorTestComponent(t)
 			expectedResult = sqlmock.NewRows(priceFields).
-						AddRow(
-							"ID",
-							"org_id_updated",
-							"vendor_id_updated",
-							"product_vendor_id_updated",
-							10,
-							100,
-							"quantity_uom_id_updated",
-							"not int", // Invalid quantity
-							"not int", // Invalid quantity
-							"currency_id_updated",
-							99.99,
-							1,
-							"price_uom_id_updated",
-							fixedTime,
-							updatedFixedTime,
-							"valid_pattern_id_updated",
-							"area_group_id_updated",
-							"reference_number_updated",
-							fixedTime,
-							"document_type_id_updated",
-							"document_id_updated",
-							"item_id_updated",
-							"term_of_payment_id_updated",
-							1,
-							updatedFixedTime,
-							"modified_by_updated",
-						)
+					AddRow(
+					"ID",
+					"org_id_updated",
+					"vendor_id_updated",
+					"product_vendor_id_updated",
+					10,
+					100,
+					"quantity_uom_id_updated",
+					"not int", // Invalid quantity
+					"not int", // Invalid quantity
+					"currency_id_updated",
+					99.99,
+					1,
+					"price_uom_id_updated",
+					fixedTime,
+					updatedFixedTime,
+					"valid_pattern_id_updated",
+					"area_group_id_updated",
+					"reference_number_updated",
+					fixedTime,
+					"document_type_id_updated",
+					"document_id_updated",
+					"item_id_updated",
+					"term_of_payment_id_updated",
+					1,
+					updatedFixedTime,
+					"modified_by_updated",
+				)
 		)
-        defer c.db.Close()
+		defer c.db.Close()
 
-        c.mock.ExpectQuery(query).
-            WithArgs(
-                "ID",
-                "org_id_updated",
-                "vendor_id_updated",
-                "product_vendor_id_updated",
-                10,
-                100,
-                "quantity_uom_id_updated",
-                "not int",
-                "not int",
-                "currency_id_updated",
-                99.99,
-                1,
-                "price_uom_id_updated",
-                fixedTime,
-                updatedFixedTime,
-                "valid_pattern_id_updated",
-                "area_group_id_updated",
-                "reference_number_updated",
-                fixedTime,
-                "document_type_id_updated",
-                "document_id_updated",
-                "item_id_updated",
-                "term_of_payment_id_updated",
-                1,
-                updatedFixedTime,
-                "modified_by_updated",
-            ).WillReturnRows(expectedResult)
+		c.mock.ExpectQuery(query).
+			WithArgs(
+				"ID",
+				"org_id_updated",
+				"vendor_id_updated",
+				"product_vendor_id_updated",
+				10,
+				100,
+				"quantity_uom_id_updated",
+				"not int",
+				"not int",
+				"currency_id_updated",
+				99.99,
+				1,
+				"price_uom_id_updated",
+				fixedTime,
+				updatedFixedTime,
+				"valid_pattern_id_updated",
+				"area_group_id_updated",
+				"reference_number_updated",
+				fixedTime,
+				"document_type_id_updated",
+				"document_id_updated",
+				"item_id_updated",
+				"term_of_payment_id_updated",
+				1,
+				updatedFixedTime,
+				"modified_by_updated",
+			).WillReturnRows(expectedResult)
 
-        updatedPrice := &Price{
-            ID:                "ID",
-            PurchasingOrgID:   "org_id_updated",
-            VendorID:          "vendor_id_updated",
-            ProductVendorID:   "product_vendor_id_updated",
-            QuantityMin:       10,
-            QuantityMax:       100,
-            QuantityUOMID:     "quantity_uom_id_updated",
-            LeadTimeMin:       1,
-            LeadTimeMax:       2,
-            CurrencyID:        "currency_id_updated",
-            Price:             99.99,
-            PriceQuantity:     1,
-            PriceUOMID:        "price_uom_id_updated",
-            ValidFrom:         fixedTime,
-            ValidTo:           updatedFixedTime,
-            ValidPatternID:    "valid_pattern_id_updated",
-            AreaGroupID:       "area_group_id_updated",
-            ReferenceNumber:   "reference_number_updated",
-            ReferenceDate:     fixedTime,
-            DocumentTypeID:    "document_type_id_updated",
-            DocumentID:        "document_id_updated",
-            ItemID:            "item_id_updated",
-            TermOfPaymentID:   "term_of_payment_id_updated",
-            InvocationOrder:    1,
-            ModifiedDate:      updatedFixedTime,
-            ModifiedBy:        "modified_by_updated",
-        }
+		updatedPrice := &Price{
+			ID:              "ID",
+			PurchasingOrgID: "org_id_updated",
+			VendorID:        "vendor_id_updated",
+			ProductVendorID: "product_vendor_id_updated",
+			QuantityMin:     10,
+			QuantityMax:     100,
+			QuantityUOMID:   "quantity_uom_id_updated",
+			LeadTimeMin:     1,
+			LeadTimeMax:     2,
+			CurrencyID:      "currency_id_updated",
+			Price:           99.99,
+			PriceQuantity:   1,
+			PriceUOMID:      "price_uom_id_updated",
+			ValidFrom:       fixedTime,
+			ValidTo:         updatedFixedTime,
+			ValidPatternID:  "valid_pattern_id_updated",
+			AreaGroupID:     "area_group_id_updated",
+			ReferenceNumber: "reference_number_updated",
+			ReferenceDate:   fixedTime,
+			DocumentTypeID:  "document_type_id_updated",
+			DocumentID:      "document_id_updated",
+			ItemID:          "item_id_updated",
+			TermOfPaymentID: "term_of_payment_id_updated",
+			InvocationOrder: 1,
+			ModifiedDate:    updatedFixedTime,
+			ModifiedBy:      "modified_by_updated",
+		}
 
-        res, err := c.accessor.UpdatePrice(ctx, *updatedPrice)
+		res, err := c.accessor.UpdatePrice(ctx, *updatedPrice)
 
-        c.g.Expect(err).ToNot(gomega.BeNil())
-        c.g.Expect(res).To(gomega.BeNil())
-    })
+		c.g.Expect(err).ToNot(gomega.BeNil())
+		c.g.Expect(res).To(gomega.BeNil())
+	})
 }
-
 
 func Test_GetProductsByVendor(t *testing.T) {
 	t.Parallel()
