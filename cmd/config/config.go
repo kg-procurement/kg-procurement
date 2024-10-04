@@ -31,6 +31,7 @@ type Routes struct {
 type VendorRoutes struct {
 	GetAll       string `mapstructure:"get-all" validate:"required"`
 	UpdateDetail string `mapstructure:"udpate-detail" validate:"required"`
+	GetById      string `mapstructure:"get-by-id" validate:"required"`
 }
 
 type ProductRoutes struct {
