@@ -1153,7 +1153,7 @@ func TestVendorAccessor_UpdateDetail(t *testing.T) {
 				"updated",
 				"updated",
 				"updated",
-				nil,
+				now,
 				"updater",
 				fixedTime,
 			)
