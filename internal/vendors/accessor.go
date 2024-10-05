@@ -211,7 +211,7 @@ func (p *postgresVendorAccessor) GetById(ctx context.Context, id string) (*Vendo
 
 func (p *postgresVendorAccessor) UpdateDetail(ctx context.Context, vendor Vendor) (*Vendor, error) {
 	now := p.clock.Now()
-	
+
 	// Not yet updating modified_by
 	query := `UPDATE vendor
 		SET 
@@ -223,7 +223,7 @@ func (p *postgresVendorAccessor) UpdateDetail(ctx context.Context, vendor Vendor
 			area_group_id = $7,
 			area_group_name = $8,
 			sap_code = $9,
-			modified_date = $10,
+			modified_date = $10
 		WHERE 
 			id = $1
 		RETURNING 
