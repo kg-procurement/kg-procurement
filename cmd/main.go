@@ -29,7 +29,7 @@ func main() {
 	clock := clock.New()
 
 	vendorSvc := vendors.NewVendorService(conn, clock)
-	productSvc := product.NewProductService(conn)
+	productSvc := product.NewProductService(conn, clock)
 
 	r := gin.Default()
 
