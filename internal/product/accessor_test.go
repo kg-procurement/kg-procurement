@@ -42,7 +42,7 @@ func Test_UpdateProduct(t *testing.T) {
             product_type_id = $5,
             name = $6,
             description = $7,
-            modified_date = $8,
+            modified_date = $8
         WHERE 
             id = $1
         RETURNING 
@@ -59,9 +59,9 @@ func Test_UpdateProduct(t *testing.T) {
 
 	// fixedTime := time.Now()
 	t.Run("success", func(t *testing.T) {
-		var(
-			ctx            = context.Background()
-			c              = setupProductAccessorTestComponent(t)
+		var (
+			ctx = context.Background()
+			c   = setupProductAccessorTestComponent(t)
 		)
 
 		c.cmock.Set(time.Now())
@@ -70,7 +70,7 @@ func Test_UpdateProduct(t *testing.T) {
 
 		var (
 			expectedResult = sqlmock.NewRows(productFields).
-					AddRow(
+				AddRow(
 					"inv1",
 					"category_id_updated",
 					"uom_id_updated",
@@ -210,7 +210,7 @@ func Test_UpdatePrice(t *testing.T) {
             item_id = $22,
             term_of_payment_id = $23,
             invocation_order = $24,
-            modified_date = $25,
+            modified_date = $25
         WHERE 
             id = $1
         RETURNING 
@@ -245,15 +245,15 @@ func Test_UpdatePrice(t *testing.T) {
 	updatedFixedTime := time.Now().Add(1 * time.Hour)
 
 	t.Run("success", func(t *testing.T) {
-		var(
-			ctx            = context.Background()
-			c              = setupProductAccessorTestComponent(t)
+		var (
+			ctx = context.Background()
+			c   = setupProductAccessorTestComponent(t)
 		)
 		c.cmock.Set(time.Now())
 		now := c.cmock.Now()
 		var (
 			expectedResult = sqlmock.NewRows(priceFields).
-					AddRow(
+				AddRow(
 					"ID",
 					"org_id_updated",
 					"vendor_id_updated",
@@ -354,33 +354,33 @@ func Test_UpdatePrice(t *testing.T) {
 			c              = setupProductAccessorTestComponent(t)
 			expectedResult = sqlmock.NewRows(priceFields).
 					AddRow(
-						nil,
-						nil,
-						nil,
-						nil,
-						nil,
-						nil,
-						nil,
-						nil,
-						nil,
-						nil,
-						nil,
-						nil,
-						nil,
-						nil,
-						nil,
-						nil,
-						nil,
-						nil,
-						nil,
-						nil,
-						nil,
-						nil,
-						nil,
-						nil,
-						nil,
-						nil,
-					)
+					nil,
+					nil,
+					nil,
+					nil,
+					nil,
+					nil,
+					nil,
+					nil,
+					nil,
+					nil,
+					nil,
+					nil,
+					nil,
+					nil,
+					nil,
+					nil,
+					nil,
+					nil,
+					nil,
+					nil,
+					nil,
+					nil,
+					nil,
+					nil,
+					nil,
+					nil,
+				)
 		)
 		defer c.db.Close()
 

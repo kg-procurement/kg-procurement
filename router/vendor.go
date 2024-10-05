@@ -33,7 +33,7 @@ func NewVendorEngine(
 	})
 
 	r.PUT(cfg.UpdateDetail, func(ctx *gin.Context) {
-		id := ctx.Request.PathValue("id")
+		id := ctx.Param("id")
 
 		spec := &vendors.PutVendorSpec{}
 		if err := ctx.ShouldBindJSON(&spec); err != nil {
@@ -66,7 +66,7 @@ func NewVendorEngine(
 	})
 
 	r.GET(cfg.GetById, func(ctx *gin.Context) {
-		id := ctx.Request.PathValue("id")
+		id := ctx.Param("id")
 
 		res, err := vendorSvc.GetById(ctx, id)
 		if err != nil {

@@ -41,7 +41,7 @@ func NewProductEngine(
 	})
 
 	r.PUT(cfg.UpdateProduct, func(ctx *gin.Context) {
-		id := ctx.Request.PathValue("id")
+		id := ctx.Param("id")
 
 		spec := product.PutProductSpec{}
 		if err := ctx.ShouldBindJSON(&spec); err != nil {
@@ -50,13 +50,13 @@ func NewProductEngine(
 			})
 		}
 		newProduct := product.Product{
-			ID:              product.ProductID(id),
+			ID:                product.ProductID(id),
 			ProductCategoryID: spec.ProductCategoryID,
-			UOMID:           spec.UOMID,
-			IncomeTaxID:     spec.IncomeTaxID,
-			ProductTypeID:   spec.ProductTypeID,
-			Name:            spec.Name,
-			Description:     spec.Description,
+			UOMID:             spec.UOMID,
+			IncomeTaxID:       spec.IncomeTaxID,
+			ProductTypeID:     spec.ProductTypeID,
+			Name:              spec.Name,
+			Description:       spec.Description,
 		}
 		res, err := productSvc.UpdateProduct(ctx, newProduct)
 		if err != nil {
@@ -68,7 +68,7 @@ func NewProductEngine(
 	})
 
 	r.PUT(cfg.UpdatePrice, func(ctx *gin.Context) {
-		id := ctx.Request.PathValue("id")
+		id := ctx.Param("id")
 		spec := product.PutPriceSpec{}
 		if err := ctx.ShouldBindJSON(&spec); err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{
@@ -101,7 +101,7 @@ func NewProductEngine(
 			TermOfPaymentID: spec.TermOfPaymentID,
 			InvocationOrder: spec.InvocationOrder,
 		}
-		
+
 		res, err := productSvc.UpdatePrice(ctx, newPrice)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{

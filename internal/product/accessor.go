@@ -3,9 +3,9 @@ package product
 import (
 	"context"
 	"fmt"
+	"github.com/benbjohnson/clock"
 	"kg/procurement/internal/common/database"
 	"strings"
-    "github.com/benbjohnson/clock"
 )
 
 const (
@@ -30,8 +30,8 @@ const (
 )
 
 type postgresProductAccessor struct {
-	db database.DBConnector
-    clock clock.Clock
+	db    database.DBConnector
+	clock clock.Clock
 }
 
 func (p *postgresProductAccessor) GetProductsByVendor(
@@ -106,8 +106,8 @@ func (p *postgresProductAccessor) GetProductsByVendor(
 }
 
 func (p *postgresProductAccessor) UpdateProduct(_ context.Context, payload Product) (Product, error) {
-    now := p.clock.Now()
-    
+	now := p.clock.Now()
+
 	query := `UPDATE product SET
         product_category_id = $2,
         uom_id = $3,
@@ -115,7 +115,7 @@ func (p *postgresProductAccessor) UpdateProduct(_ context.Context, payload Produ
         product_type_id = $5,
         name = $6,
         description = $7,
-        modified_date = $8,
+        modified_date = $8
     WHERE id = $1
     RETURNING 
         id,
@@ -129,39 +129,38 @@ func (p *postgresProductAccessor) UpdateProduct(_ context.Context, payload Produ
         modified_by
     `
 
-    updatedProduct := Product{}
-    row := p.db.QueryRow(query,
-        payload.ID,
-        payload.ProductCategoryID,
-        payload.UOMID,
-        payload.IncomeTaxID,
-        payload.ProductTypeID,
-        payload.Name,
-        payload.Description,
-        now,
-    )
+	updatedProduct := Product{}
+	row := p.db.QueryRow(query,
+		payload.ID,
+		payload.ProductCategoryID,
+		payload.UOMID,
+		payload.IncomeTaxID,
+		payload.ProductTypeID,
+		payload.Name,
+		payload.Description,
+		now,
+	)
 
-    if err := row.Scan(
-        &updatedProduct.ID,
-        &updatedProduct.ProductCategoryID,
-        &updatedProduct.UOMID,
-        &updatedProduct.IncomeTaxID,
-        &updatedProduct.ProductTypeID,
-        &updatedProduct.Name,
-        &updatedProduct.Description,
-        &updatedProduct.ModifiedDate,
-        &updatedProduct.ModifiedBy,
-    ); err != nil {
-        return Product{}, fmt.Errorf("failed to scan updated product: %w", err)
-    }
+	if err := row.Scan(
+		&updatedProduct.ID,
+		&updatedProduct.ProductCategoryID,
+		&updatedProduct.UOMID,
+		&updatedProduct.IncomeTaxID,
+		&updatedProduct.ProductTypeID,
+		&updatedProduct.Name,
+		&updatedProduct.Description,
+		&updatedProduct.ModifiedDate,
+		&updatedProduct.ModifiedBy,
+	); err != nil {
+		return Product{}, fmt.Errorf("failed to scan updated product: %w", err)
+	}
 
-    return updatedProduct, nil
+	return updatedProduct, nil
 }
 
-
 func (p *postgresProductAccessor) UpdatePrice(ctx context.Context, price Price) (Price, error) {
-    now := p.clock.Now()
-    query := `UPDATE price
+	now := p.clock.Now()
+	query := `UPDATE price
         SET 
             purchasing_org_id = $2,
             vendor_id = $3,
@@ -186,7 +185,7 @@ func (p *postgresProductAccessor) UpdatePrice(ctx context.Context, price Price) 
             item_id = $22,
             term_of_payment_id = $23,
             invocation_order = $24,
-            modified_date = $25,
+            modified_date = $25
         WHERE 
             id = $1
         RETURNING 
@@ -218,74 +217,74 @@ func (p *postgresProductAccessor) UpdatePrice(ctx context.Context, price Price) 
             modified_by
     `
 
-    updatedPrice := Price{}
-    row := p.db.QueryRow(query,
-        price.ID,
-        price.PurchasingOrgID,
-        price.VendorID,
-        price.ProductVendorID,
-        price.QuantityMin,
-        price.QuantityMax,
-        price.QuantityUOMID,
-        price.LeadTimeMin,
-        price.LeadTimeMax,
-        price.CurrencyID,
-        price.Price,
-        price.PriceQuantity,
-        price.PriceUOMID,
-        price.ValidFrom,
-        price.ValidTo,
-        price.ValidPatternID,
-        price.AreaGroupID,
-        price.ReferenceNumber,
-        price.ReferenceDate,
-        price.DocumentTypeID,
-        price.DocumentID,
-        price.ItemID,
-        price.TermOfPaymentID,
-        price.InvocationOrder,
-        now,
-    )
+	updatedPrice := Price{}
+	row := p.db.QueryRow(query,
+		price.ID,
+		price.PurchasingOrgID,
+		price.VendorID,
+		price.ProductVendorID,
+		price.QuantityMin,
+		price.QuantityMax,
+		price.QuantityUOMID,
+		price.LeadTimeMin,
+		price.LeadTimeMax,
+		price.CurrencyID,
+		price.Price,
+		price.PriceQuantity,
+		price.PriceUOMID,
+		price.ValidFrom,
+		price.ValidTo,
+		price.ValidPatternID,
+		price.AreaGroupID,
+		price.ReferenceNumber,
+		price.ReferenceDate,
+		price.DocumentTypeID,
+		price.DocumentID,
+		price.ItemID,
+		price.TermOfPaymentID,
+		price.InvocationOrder,
+		now,
+	)
 
-    if err := row.Scan(
-        &updatedPrice.ID,
-        &updatedPrice.PurchasingOrgID,
-        &updatedPrice.VendorID,
-        &updatedPrice.ProductVendorID,
-        &updatedPrice.QuantityMin,
-        &updatedPrice.QuantityMax,
-        &updatedPrice.QuantityUOMID,
-        &updatedPrice.LeadTimeMin,
-        &updatedPrice.LeadTimeMax,
-        &updatedPrice.CurrencyID,
-        &updatedPrice.Price,
-        &updatedPrice.PriceQuantity,
-        &updatedPrice.PriceUOMID,
-        &updatedPrice.ValidFrom,
-        &updatedPrice.ValidTo,
-        &updatedPrice.ValidPatternID,
-        &updatedPrice.AreaGroupID,
-        &updatedPrice.ReferenceNumber,
-        &updatedPrice.ReferenceDate,
-        &updatedPrice.DocumentTypeID,
-        &updatedPrice.DocumentID,
-        &updatedPrice.ItemID,
-        &updatedPrice.TermOfPaymentID,
-        &updatedPrice.InvocationOrder,
-        &updatedPrice.ModifiedDate,
-        &updatedPrice.ModifiedBy,
-    ); err != nil {
-        return Price{}, err
-    }
+	if err := row.Scan(
+		&updatedPrice.ID,
+		&updatedPrice.PurchasingOrgID,
+		&updatedPrice.VendorID,
+		&updatedPrice.ProductVendorID,
+		&updatedPrice.QuantityMin,
+		&updatedPrice.QuantityMax,
+		&updatedPrice.QuantityUOMID,
+		&updatedPrice.LeadTimeMin,
+		&updatedPrice.LeadTimeMax,
+		&updatedPrice.CurrencyID,
+		&updatedPrice.Price,
+		&updatedPrice.PriceQuantity,
+		&updatedPrice.PriceUOMID,
+		&updatedPrice.ValidFrom,
+		&updatedPrice.ValidTo,
+		&updatedPrice.ValidPatternID,
+		&updatedPrice.AreaGroupID,
+		&updatedPrice.ReferenceNumber,
+		&updatedPrice.ReferenceDate,
+		&updatedPrice.DocumentTypeID,
+		&updatedPrice.DocumentID,
+		&updatedPrice.ItemID,
+		&updatedPrice.TermOfPaymentID,
+		&updatedPrice.InvocationOrder,
+		&updatedPrice.ModifiedDate,
+		&updatedPrice.ModifiedBy,
+	); err != nil {
+		return Price{}, err
+	}
 
-    return updatedPrice, nil
+	return updatedPrice, nil
 }
 
 // newPostgresProductAccessor is only accessible by the Product package
 // entrypoint for other verticals should refer to the interface declared on service
 func newPostgresProductAccessor(db database.DBConnector, clock clock.Clock) *postgresProductAccessor {
-    return &postgresProductAccessor{
-        db: db,
-        clock: clock,
+	return &postgresProductAccessor{
+		db:    db,
+		clock: clock,
 	}
 }
