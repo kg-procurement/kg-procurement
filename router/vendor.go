@@ -1,7 +1,6 @@
 package router
 
 import (
-	"fmt"
 	"kg/procurement/cmd/config"
 	"kg/procurement/internal/vendors"
 	"net/http"
@@ -36,8 +35,6 @@ func NewVendorEngine(
 	r.PUT(cfg.UpdateDetail, func(ctx *gin.Context) {
 		id := ctx.Param("id")
 
-		fmt.Println("bener ga nih: ", id)
-
 		spec := &vendors.PutVendorSpec{}
 		if err := ctx.ShouldBindJSON(&spec); err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{
@@ -70,9 +67,6 @@ func NewVendorEngine(
 
 	r.GET(cfg.GetById, func(ctx *gin.Context) {
 		id := ctx.Param("id")
-
-		fmt.Println("masuk sini kan")
-		fmt.Println("id: ", id)
 
 		res, err := vendorSvc.GetById(ctx, id)
 		if err != nil {
