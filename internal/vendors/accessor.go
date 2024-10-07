@@ -123,7 +123,7 @@ func (p *postgresVendorAccessor) GetAll(ctx context.Context, spec GetAllVendorSp
 	`, joinClause, whereClause, extraClause)
 
 	// Execute the query
-	rows, err := p.db.Query(dataQuery, args...)
+	rows, err := p.db.Queryx(dataQuery, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -133,21 +133,7 @@ func (p *postgresVendorAccessor) GetAll(ctx context.Context, spec GetAllVendorSp
 	vendors := []Vendor{}
 	for rows.Next() {
 		var vendor Vendor
-		err := rows.Scan(
-			&vendor.ID,
-			&vendor.Name,
-			&vendor.Description,
-			&vendor.BpID,
-			&vendor.BpName,
-			&vendor.Rating,
-			&vendor.AreaGroupID,
-			&vendor.AreaGroupName,
-			&vendor.SapCode,
-			&vendor.ModifiedDate,
-			&vendor.ModifiedBy,
-			&vendor.Date,
-		)
-		if err != nil {
+		if err := rows.StructScan(&vendor); err != nil {
 			return nil, err
 		}
 		vendors = append(vendors, vendor)
@@ -188,21 +174,8 @@ func (p *postgresVendorAccessor) GetById(ctx context.Context, id string) (*Vendo
 		WHERE id = $1`
 
 	vendor := Vendor{}
-	row := p.db.QueryRow(query, id)
-	if err := row.Scan(
-		&vendor.ID,
-		&vendor.Name,
-		&vendor.Description,
-		&vendor.BpID,
-		&vendor.BpName,
-		&vendor.Rating,
-		&vendor.AreaGroupID,
-		&vendor.AreaGroupName,
-		&vendor.SapCode,
-		&vendor.ModifiedDate,
-		&vendor.ModifiedBy,
-		&vendor.Date,
-	); err != nil {
+	row := p.db.QueryRowx(query, id)
+	if err := row.StructScan(&vendor); err != nil {
 		return nil, err
 	}
 
@@ -241,8 +214,8 @@ func (p *postgresVendorAccessor) UpdateDetail(ctx context.Context, vendor Vendor
 			dt
 	`
 
-	updatedVendor := Vendor{}
-	row := p.db.QueryRow(query,
+	updatedVendor := &Vendor{}
+	row := p.db.QueryRowx(query,
 		vendor.ID,
 		vendor.Name,
 		vendor.Description,
@@ -254,23 +227,11 @@ func (p *postgresVendorAccessor) UpdateDetail(ctx context.Context, vendor Vendor
 		vendor.SapCode,
 		now)
 
-	if err := row.Scan(
-		&updatedVendor.ID,
-		&updatedVendor.Name,
-		&updatedVendor.Description,
-		&updatedVendor.BpID,
-		&updatedVendor.BpName,
-		&updatedVendor.Rating,
-		&updatedVendor.AreaGroupID,
-		&updatedVendor.AreaGroupName,
-		&updatedVendor.SapCode,
-		&updatedVendor.ModifiedDate,
-		&updatedVendor.ModifiedBy,
-		&updatedVendor.Date); err != nil {
+	if err := row.StructScan(updatedVendor); err != nil {
 		return nil, err
 	}
 
-	return &updatedVendor, nil
+	return updatedVendor, nil
 }
 
 // newPostgresVendorAccessor is only accessible by the vendor package

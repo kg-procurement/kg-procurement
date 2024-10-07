@@ -69,7 +69,7 @@ func (p *postgresProductAccessor) GetProductsByVendor(
 		query += " " + strings.Join(extraClauses, " ")
 	}
 
-	rows, err := p.db.Query(query, args...)
+	rows, err := p.db.Queryx(query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -79,18 +79,7 @@ func (p *postgresProductAccessor) GetProductsByVendor(
 
 	for rows.Next() {
 		var product Product
-		err := rows.Scan(
-			&product.ID,
-			&product.ProductCategoryID,
-			&product.UOMID,
-			&product.IncomeTaxID,
-			&product.ProductTypeID,
-			&product.Name,
-			&product.Description,
-			&product.ModifiedDate,
-			&product.ModifiedBy,
-		)
-		if err != nil {
+		if err := rows.StructScan(&product); err != nil {
 			return nil, err
 		}
 		res = append(res, product)
