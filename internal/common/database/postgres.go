@@ -40,6 +40,10 @@ func (c *Conn) QueryRow(query string, args ...interface{}) *sql.Row {
 	return c.db.QueryRow(query, args...)
 }
 
+func (c *Conn) QueryRowx(query string, args ...interface{}) *sqlx.Row {
+	return c.db.QueryRowx(query, args...)
+}
+
 func (c *Conn) Close() error {
 	return c.db.Close()
 }
@@ -49,7 +53,7 @@ func (c *Conn) Queryx(query string, args ...interface{}) (*sqlx.Rows, error) {
 	return c.db.Queryx(query, args)
 }
 
-func (c *Conn) NamedQuery(query string, args ...interface{}) (*sqlx.Rows, error) {
+func (c *Conn) NamedQuery(query string, args interface{}) (*sqlx.Rows, error) {
 	return c.db.NamedQuery(query, args)
 }
 
