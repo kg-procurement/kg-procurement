@@ -13,6 +13,7 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/benbjohnson/clock"
+	"github.com/jmoiron/sqlx"
 	"github.com/onsi/gomega"
 )
 
@@ -30,13 +31,14 @@ func Test_postgresVendorAccessor_GetSomeStuff(t *testing.T) {
 
 	setup := func(t *testing.T) (*gomega.GomegaWithT, *sql.DB) {
 		g := gomega.NewWithT(t)
-		db, sqlMock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 		realClock := clock.New()
+		db, sqlMock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 		if err != nil {
 			log.Fatal("error initializing mock:", err)
 		}
+		sqlxDB := sqlx.NewDb(db, "sqlmock")
 
-		accessor = newPostgresVendorAccessor(db, realClock)
+		accessor = newPostgresVendorAccessor(sqlxDB, realClock)
 		mock = sqlMock
 
 		return g, db
@@ -124,13 +126,14 @@ func TestVendorAccessor_GetAll(t *testing.T) {
 
 	setup := func(t *testing.T) (*gomega.GomegaWithT, *sql.DB) {
 		g := gomega.NewWithT(t)
-		db, sqlMock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 		realClock := clock.New()
+		db, sqlMock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 		if err != nil {
 			log.Fatal("error initializing mock:", err)
 		}
+		sqlxDB := sqlx.NewDb(db, "sqlmock")
 
-		accessor = newPostgresVendorAccessor(db, realClock)
+		accessor = newPostgresVendorAccessor(sqlxDB, realClock)
 		mock = sqlMock
 
 		return g, db
@@ -608,13 +611,15 @@ func Test_postgresVendorAccessor_GetAll_WithLocationAndProduct(t *testing.T) {
 
 	setup := func(t *testing.T) (*gomega.GomegaWithT, *sql.DB) {
 		g := gomega.NewWithT(t)
-		db, sqlMock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 		realClock := clock.New()
+
+		db, sqlMock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 		if err != nil {
 			log.Fatal("error initializing mock:", err)
 		}
+		sqlxDB := sqlx.NewDb(db, "sqlmock")
 
-		accessor = newPostgresVendorAccessor(db, realClock)
+		accessor = newPostgresVendorAccessor(sqlxDB, realClock)
 		mock = sqlMock
 
 		return g, db
@@ -950,13 +955,15 @@ func TestVendorAccessor_GetById(t *testing.T) {
 
 	setup := func(t *testing.T) (*gomega.GomegaWithT, *sql.DB) {
 		g := gomega.NewWithT(t)
-		db, sqlMock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 		realClock := clock.New()
+
+		db, sqlMock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 		if err != nil {
 			log.Fatal("error initializing mock:", err)
 		}
+		sqlxDB := sqlx.NewDb(db, "sqlmock")
 
-		accessor = newPostgresVendorAccessor(db, realClock)
+		accessor = newPostgresVendorAccessor(sqlxDB, realClock)
 		mock = sqlMock
 
 		return g, db
@@ -1081,10 +1088,11 @@ func TestVendorAccessor_UpdateDetail(t *testing.T) {
 		if err != nil {
 			log.Fatal("error initializing mock:", err)
 		}
+		sqlxDB := sqlx.NewDb(db, "sqlmock")
 
 		clockMock = clock.NewMock()
 
-		accessor = newPostgresVendorAccessor(db, clockMock)
+		accessor = newPostgresVendorAccessor(sqlxDB, clockMock)
 
 		mock = sqlMock
 

@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/jmoiron/sqlx"
 	"github.com/onsi/gomega"
 )
 
@@ -33,8 +34,9 @@ func TestUpdateProduct(t *testing.T) {
 		if err != nil {
 			log.Fatal("error initializing mock:", err)
 		}
+		sqlxDB := sqlx.NewDb(db, "sqlmock")
 
-		accessor = newPostgresProductAccessor(db)
+		accessor = newPostgresProductAccessor(sqlxDB)
 		mock = sqlMock
 
 		return g, db
@@ -289,11 +291,12 @@ type productAccessorTestComponent struct {
 func setupProductAccessorTestComponent(t *testing.T) productAccessorTestComponent {
 	g := gomega.NewWithT(t)
 	db, sqlMock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+	sqlxDB := sqlx.NewDb(db, "sqlmock")
 
 	return productAccessorTestComponent{
 		g:        g,
 		mock:     sqlMock,
 		db:       db,
-		accessor: newPostgresProductAccessor(db),
+		accessor: newPostgresProductAccessor(sqlxDB),
 	}
 }
