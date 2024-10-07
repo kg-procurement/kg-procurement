@@ -30,12 +30,14 @@ type Routes struct {
 
 type VendorRoutes struct {
 	GetAll       string `mapstructure:"get-all" validate:"required"`
-	UpdateDetail string `mapstructure:"udpate-detail" validate:"required"`
+	UpdateDetail string `mapstructure:"update-detail" validate:"required"`
 	GetById      string `mapstructure:"get-by-id" validate:"required"`
 }
 
 type ProductRoutes struct {
 	GetProductsByVendor string `mapstructure:"get-products-by-vendor" validate:"required"`
+	UpdateProduct string `mapstructure:"update-product" validate:"required"`
+	UpdatePrice string `mapstructure:"update-price" validate:"required"`
 }
 
 func Load() Application {

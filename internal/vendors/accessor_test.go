@@ -1124,7 +1124,7 @@ func TestVendorAccessor_UpdateDetail(t *testing.T) {
 			area_group_id = $7,
 			area_group_name = $8,
 			sap_code = $9,
-			modified_date = $10,
+			modified_date = $10
 		WHERE 
 			id = $1
 		RETURNING 
