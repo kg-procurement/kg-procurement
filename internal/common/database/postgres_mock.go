@@ -13,6 +13,7 @@ import (
 	sql "database/sql"
 	reflect "reflect"
 
+	sqlx "github.com/jmoiron/sqlx"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -121,6 +122,127 @@ func (c *MockDBConnectorExecCall) DoAndReturn(f func(string, ...any) (sql.Result
 	return c
 }
 
+// Get mocks base method.
+func (m *MockDBConnector) Get(dest any, query string, args ...any) error {
+	m.ctrl.T.Helper()
+	varargs := []any{dest, query}
+	for _, a := range args {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Get", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Get indicates an expected call of Get.
+func (mr *MockDBConnectorMockRecorder) Get(dest, query any, args ...any) *MockDBConnectorGetCall {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]any{dest, query}, args...)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockDBConnector)(nil).Get), varargs...)
+	return &MockDBConnectorGetCall{Call: call}
+}
+
+// MockDBConnectorGetCall wrap *gomock.Call
+type MockDBConnectorGetCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockDBConnectorGetCall) Return(arg0 error) *MockDBConnectorGetCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockDBConnectorGetCall) Do(f func(any, string, ...any) error) *MockDBConnectorGetCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockDBConnectorGetCall) DoAndReturn(f func(any, string, ...any) error) *MockDBConnectorGetCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// NamedExec mocks base method.
+func (m *MockDBConnector) NamedExec(query string, arg any) (sql.Result, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "NamedExec", query, arg)
+	ret0, _ := ret[0].(sql.Result)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NamedExec indicates an expected call of NamedExec.
+func (mr *MockDBConnectorMockRecorder) NamedExec(query, arg any) *MockDBConnectorNamedExecCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NamedExec", reflect.TypeOf((*MockDBConnector)(nil).NamedExec), query, arg)
+	return &MockDBConnectorNamedExecCall{Call: call}
+}
+
+// MockDBConnectorNamedExecCall wrap *gomock.Call
+type MockDBConnectorNamedExecCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockDBConnectorNamedExecCall) Return(arg0 sql.Result, arg1 error) *MockDBConnectorNamedExecCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockDBConnectorNamedExecCall) Do(f func(string, any) (sql.Result, error)) *MockDBConnectorNamedExecCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockDBConnectorNamedExecCall) DoAndReturn(f func(string, any) (sql.Result, error)) *MockDBConnectorNamedExecCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// NamedQuery mocks base method.
+func (m *MockDBConnector) NamedQuery(query string, arg any) (*sqlx.Rows, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "NamedQuery", query, arg)
+	ret0, _ := ret[0].(*sqlx.Rows)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NamedQuery indicates an expected call of NamedQuery.
+func (mr *MockDBConnectorMockRecorder) NamedQuery(query, arg any) *MockDBConnectorNamedQueryCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NamedQuery", reflect.TypeOf((*MockDBConnector)(nil).NamedQuery), query, arg)
+	return &MockDBConnectorNamedQueryCall{Call: call}
+}
+
+// MockDBConnectorNamedQueryCall wrap *gomock.Call
+type MockDBConnectorNamedQueryCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockDBConnectorNamedQueryCall) Return(arg0 *sqlx.Rows, arg1 error) *MockDBConnectorNamedQueryCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockDBConnectorNamedQueryCall) Do(f func(string, any) (*sqlx.Rows, error)) *MockDBConnectorNamedQueryCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockDBConnectorNamedQueryCall) DoAndReturn(f func(string, any) (*sqlx.Rows, error)) *MockDBConnectorNamedQueryCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // Query mocks base method.
 func (m *MockDBConnector) Query(query string, args ...any) (*sql.Rows, error) {
 	m.ctrl.T.Helper()
@@ -204,6 +326,136 @@ func (c *MockDBConnectorQueryRowCall) Do(f func(string, ...any) *sql.Row) *MockD
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockDBConnectorQueryRowCall) DoAndReturn(f func(string, ...any) *sql.Row) *MockDBConnectorQueryRowCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// QueryRowx mocks base method.
+func (m *MockDBConnector) QueryRowx(query string, args ...any) *sqlx.Row {
+	m.ctrl.T.Helper()
+	varargs := []any{query}
+	for _, a := range args {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "QueryRowx", varargs...)
+	ret0, _ := ret[0].(*sqlx.Row)
+	return ret0
+}
+
+// QueryRowx indicates an expected call of QueryRowx.
+func (mr *MockDBConnectorMockRecorder) QueryRowx(query any, args ...any) *MockDBConnectorQueryRowxCall {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]any{query}, args...)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryRowx", reflect.TypeOf((*MockDBConnector)(nil).QueryRowx), varargs...)
+	return &MockDBConnectorQueryRowxCall{Call: call}
+}
+
+// MockDBConnectorQueryRowxCall wrap *gomock.Call
+type MockDBConnectorQueryRowxCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockDBConnectorQueryRowxCall) Return(arg0 *sqlx.Row) *MockDBConnectorQueryRowxCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockDBConnectorQueryRowxCall) Do(f func(string, ...any) *sqlx.Row) *MockDBConnectorQueryRowxCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockDBConnectorQueryRowxCall) DoAndReturn(f func(string, ...any) *sqlx.Row) *MockDBConnectorQueryRowxCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// Queryx mocks base method.
+func (m *MockDBConnector) Queryx(query string, args ...any) (*sqlx.Rows, error) {
+	m.ctrl.T.Helper()
+	varargs := []any{query}
+	for _, a := range args {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Queryx", varargs...)
+	ret0, _ := ret[0].(*sqlx.Rows)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Queryx indicates an expected call of Queryx.
+func (mr *MockDBConnectorMockRecorder) Queryx(query any, args ...any) *MockDBConnectorQueryxCall {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]any{query}, args...)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Queryx", reflect.TypeOf((*MockDBConnector)(nil).Queryx), varargs...)
+	return &MockDBConnectorQueryxCall{Call: call}
+}
+
+// MockDBConnectorQueryxCall wrap *gomock.Call
+type MockDBConnectorQueryxCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockDBConnectorQueryxCall) Return(arg0 *sqlx.Rows, arg1 error) *MockDBConnectorQueryxCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockDBConnectorQueryxCall) Do(f func(string, ...any) (*sqlx.Rows, error)) *MockDBConnectorQueryxCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockDBConnectorQueryxCall) DoAndReturn(f func(string, ...any) (*sqlx.Rows, error)) *MockDBConnectorQueryxCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// Select mocks base method.
+func (m *MockDBConnector) Select(dest any, query string, args ...any) error {
+	m.ctrl.T.Helper()
+	varargs := []any{dest, query}
+	for _, a := range args {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Select", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Select indicates an expected call of Select.
+func (mr *MockDBConnectorMockRecorder) Select(dest, query any, args ...any) *MockDBConnectorSelectCall {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]any{dest, query}, args...)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Select", reflect.TypeOf((*MockDBConnector)(nil).Select), varargs...)
+	return &MockDBConnectorSelectCall{Call: call}
+}
+
+// MockDBConnectorSelectCall wrap *gomock.Call
+type MockDBConnectorSelectCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockDBConnectorSelectCall) Return(arg0 error) *MockDBConnectorSelectCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockDBConnectorSelectCall) Do(f func(any, string, ...any) error) *MockDBConnectorSelectCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockDBConnectorSelectCall) DoAndReturn(f func(any, string, ...any) error) *MockDBConnectorSelectCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

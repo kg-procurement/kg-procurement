@@ -6,12 +6,14 @@ import (
 	"errors"
 	"fmt"
 	"kg/procurement/internal/common/database"
+	"log"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/benbjohnson/clock"
+	"github.com/jmoiron/sqlx"
 	"github.com/onsi/gomega"
 )
 
@@ -57,20 +59,97 @@ func Test_UpdateProduct(t *testing.T) {
             modified_by
     `
 
-	// fixedTime := time.Now()
 	t.Run("success", func(t *testing.T) {
 		var (
 			ctx = context.Background()
 			c   = setupProductAccessorTestComponent(t)
 		)
 
-		c.cmock.Set(time.Now())
-		now := c.cmock.Now()
-		fmt.Print("Name: ", now)
+		setup := func(t *testing.T) (*gomega.GomegaWithT, *sqlx.DB) {
+			g := gomega.NewWithT(t)
+			c.cmock.Set(time.Now())
 
-		var (
-			expectedResult = sqlmock.NewRows(productFields).
-				AddRow(
+			db, _, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+			if err != nil {
+				log.Fatal("error initializing mock:", err)
+			}
+			sqlxDB := sqlx.NewDb(db, "sqlmock")
+
+			return g, sqlxDB
+		}
+
+		t.Run("When updating product successfully, should return no error", func(t *testing.T) {
+			_, db := setup(t)
+			defer db.Close()
+
+			now := c.cmock.Now()
+			var (
+				expectedResult = sqlmock.NewRows(productFields).
+					AddRow(
+						"inv1",
+						"category_id_updated",
+						"uom_id_updated",
+						"income_tax_id_updated",
+						"product_type_id_updated",
+						"Product A Updated",
+						"Updated Description",
+						now,
+						"someone",
+					)
+			)
+			defer c.db.Close()
+
+			updatedProduct := Product{
+				ID:                "inv1",
+				ProductCategoryID: "category_id_updated",
+				UOMID:             "uom_id_updated",
+				IncomeTaxID:       "income_tax_id_updated",
+				ProductTypeID:     "product_type_id_updated",
+				Name:              "Product A Updated",
+				Description:       "Updated Description",
+				ModifiedDate:      now,
+				ModifiedBy:        "someone",
+			}
+
+			c.mock.ExpectQuery(query).
+				WithArgs(
+					updatedProduct.ID,
+					updatedProduct.ProductCategoryID,
+					updatedProduct.UOMID,
+					updatedProduct.IncomeTaxID,
+					updatedProduct.ProductTypeID,
+					updatedProduct.Name,
+					updatedProduct.Description,
+					now,
+				).WillReturnRows(expectedResult)
+
+			res, err := c.accessor.UpdateProduct(ctx, updatedProduct)
+
+			c.g.Expect(err).To(gomega.BeNil())
+			c.g.Expect(res).To(gomega.Equal(updatedProduct))
+		})
+
+		t.Run("error on row scan", func(t *testing.T) {
+			var (
+				ctx            = context.Background()
+				c              = setupProductAccessorTestComponent(t)
+				expectedResult = sqlmock.NewRows(productFields).
+						AddRow(
+						"nil",
+						"nil",
+						"nil",
+						"nil",
+						"nil",
+						"nil",
+						"nil",
+						"nil",
+						"nil",
+					)
+			)
+			defer c.db.Close()
+
+			c.mock.ExpectQuery(query).
+				WithArgs(
 					"inv1",
 					"category_id_updated",
 					"uom_id_updated",
@@ -78,79 +157,15 @@ func Test_UpdateProduct(t *testing.T) {
 					"product_type_id_updated",
 					"Product A Updated",
 					"Updated Description",
-					now,
-					"someone",
-				)
-		)
-		defer c.db.Close()
+					"not a time",
+				).WillReturnRows(expectedResult)
 
-		updatedProduct := Product{
-			ID:                "inv1",
-			ProductCategoryID: "category_id_updated",
-			UOMID:             "uom_id_updated",
-			IncomeTaxID:       "income_tax_id_updated",
-			ProductTypeID:     "product_type_id_updated",
-			Name:              "Product A Updated",
-			Description:       "Updated Description",
-			ModifiedDate:      now,
-			ModifiedBy:        "someone",
-		}
+			res, err := c.accessor.UpdateProduct(ctx, Product{})
 
-		c.mock.ExpectQuery(query).
-			WithArgs(
-				updatedProduct.ID,
-				updatedProduct.ProductCategoryID,
-				updatedProduct.UOMID,
-				updatedProduct.IncomeTaxID,
-				updatedProduct.ProductTypeID,
-				updatedProduct.Name,
-				updatedProduct.Description,
-				now,
-			).WillReturnRows(expectedResult)
-
-		res, err := c.accessor.UpdateProduct(ctx, updatedProduct)
-
-		c.g.Expect(err).To(gomega.BeNil())
-		c.g.Expect(res).To(gomega.Equal(updatedProduct))
+			c.g.Expect(err).ToNot(gomega.BeNil())
+			c.g.Expect(res).To(gomega.Equal(Product{}))
+		})
 	})
-
-	t.Run("error on row scan", func(t *testing.T) {
-		var (
-			ctx            = context.Background()
-			c              = setupProductAccessorTestComponent(t)
-			expectedResult = sqlmock.NewRows(productFields).
-					AddRow(
-					"nil",
-					"nil",
-					"nil",
-					"nil",
-					"nil",
-					"nil",
-					"nil",
-					"nil",
-					"nil",
-				)
-		)
-		defer c.db.Close()
-
-		c.mock.ExpectQuery(query).
-			WithArgs(
-				"inv1",
-				"category_id_updated",
-				"uom_id_updated",
-				"income_tax_id_updated",
-				"product_type_id_updated",
-				"Product A Updated",
-				"Updated Description",
-				"not a time",
-			).WillReturnRows(expectedResult)
-
-		res, err := c.accessor.UpdateProduct(ctx, Product{})
-
-		c.g.Expect(err).ToNot(gomega.BeNil())
-		c.g.Expect(res).To(gomega.Equal(Product{}))
-	})
-
 }
 
 func Test_UpdatePrice(t *testing.T) {
@@ -603,6 +618,7 @@ type productAccessorTestComponent struct {
 func setupProductAccessorTestComponent(t *testing.T) productAccessorTestComponent {
 	g := gomega.NewWithT(t)
 	db, sqlMock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+	sqlxDB := sqlx.NewDb(db, "sqlmock")
 
 	clockMock := clock.NewMock()
 
@@ -610,7 +626,7 @@ func setupProductAccessorTestComponent(t *testing.T) productAccessorTestComponen
 		g:        g,
 		mock:     sqlMock,
 		db:       db,
-		accessor: newPostgresProductAccessor(db, clockMock),
+		accessor: newPostgresProductAccessor(sqlxDB, clockMock),
 		cmock:    clockMock,
 	}
 }
