@@ -9,6 +9,7 @@ import (
 type Application struct {
 	Common Common `mapstructure:"common" validate:"required"`
 	Routes Routes `mapstructure:"routes" validate:"required"`
+	Token  Token  `mapstructure:"token" validate:"required"`
 }
 
 type Common struct {
@@ -36,8 +37,12 @@ type VendorRoutes struct {
 
 type ProductRoutes struct {
 	GetProductsByVendor string `mapstructure:"get-products-by-vendor" validate:"required"`
-	UpdateProduct string `mapstructure:"update-product" validate:"required"`
-	UpdatePrice string `mapstructure:"update-price" validate:"required"`
+	UpdateProduct       string `mapstructure:"update-product" validate:"required"`
+	UpdatePrice         string `mapstructure:"update-price" validate:"required"`
+}
+
+type Token struct {
+	Secret string `mapstructure:"secret" validate:"required"`
 }
 
 func Load() Application {
