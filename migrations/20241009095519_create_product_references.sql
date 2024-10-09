@@ -38,7 +38,7 @@ CREATE TABLE uom
 ALTER TABLE product
     ADD CONSTRAINT fk_product_category
         FOREIGN KEY (product_category_id) REFERENCES product_category (id)
-            ON DELETE SET NULL,
+        ON DELETE SET NULL,
     ADD CONSTRAINT fk_uom
         FOREIGN KEY (uom_id) REFERENCES uom (id)
         ON DELETE SET NULL,
@@ -50,7 +50,7 @@ ALTER TABLE product
 -- +goose Down
 -- +goose StatementBegin
 ALTER TABLE product
-DROP CONSTRAINT IF EXISTS fk_product_category,
+    DROP CONSTRAINT IF EXISTS fk_product_category,
     DROP CONSTRAINT IF EXISTS fk_uom,
     DROP CONSTRAINT IF EXISTS fk_product_type;
 
