@@ -4,6 +4,7 @@ CREATE TABLE account (
     id VARCHAR(15) PRIMARY KEY,
     email VARCHAR(63) UNIQUE NOT NULL,
     password TEXT NOT NULL,
+    modified_date TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 -- +goose StatementEnd
