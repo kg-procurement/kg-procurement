@@ -635,6 +635,170 @@ func Test_writeProduct(t *testing.T) {
 	})
 }
 
+func Test_writeProductCategory(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		var (
+			ctx      = context.Background()
+			c        = setupProductAccessorTestComponent(t, WithQueryMatcher(sqlmock.QueryMatcherRegexp))
+			now      = c.cmock.Now()
+			category = ProductCategory{ID: "123", ModifiedDate: now}
+		)
+
+		transformedQuery, args, _ := sqlx.Named(insertProductCategory, category)
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectExec(regexp.QuoteMeta(transformedQuery)).WithArgs(
+			driverArgs...,
+		).WillReturnResult(sqlmock.NewResult(1, 1))
+
+		err := c.accessor.writeProductCategory(ctx, category)
+		c.g.Expect(err).Should(gomega.BeNil())
+	})
+
+	t.Run("error", func(t *testing.T) {
+		var (
+			ctx      = context.Background()
+			c        = setupProductAccessorTestComponent(t)
+			now      = c.cmock.Now()
+			category = ProductCategory{ID: "123", ModifiedDate: now}
+		)
+
+		transformedQuery, args, _ := sqlx.Named(insertProductCategory, category)
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectExec(regexp.QuoteMeta(transformedQuery)).WithArgs(
+			driverArgs...,
+		).WillReturnError(errors.New("error"))
+
+		err := c.accessor.writeProductCategory(ctx, category)
+		c.g.Expect(err).ShouldNot(gomega.BeNil())
+	})
+}
+
+func Test_writeProductType(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		var (
+			ctx   = context.Background()
+			c     = setupProductAccessorTestComponent(t, WithQueryMatcher(sqlmock.QueryMatcherRegexp))
+			now   = c.cmock.Now()
+			pType = ProductType{ID: "123", ModifiedDate: now}
+		)
+
+		transformedQuery, args, _ := sqlx.Named(insertProductType, pType)
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectExec(regexp.QuoteMeta(transformedQuery)).WithArgs(
+			driverArgs...,
+		).WillReturnResult(sqlmock.NewResult(1, 1))
+
+		err := c.accessor.writeProductType(ctx, pType)
+		c.g.Expect(err).Should(gomega.BeNil())
+	})
+
+	t.Run("error", func(t *testing.T) {
+		var (
+			ctx   = context.Background()
+			c     = setupProductAccessorTestComponent(t)
+			now   = c.cmock.Now()
+			pType = ProductType{ID: "123", ModifiedDate: now}
+		)
+
+		transformedQuery, args, _ := sqlx.Named(insertProductType, pType)
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectExec(regexp.QuoteMeta(transformedQuery)).WithArgs(
+			driverArgs...,
+		).WillReturnError(errors.New("error"))
+
+		err := c.accessor.writeProductType(ctx, pType)
+		c.g.Expect(err).ShouldNot(gomega.BeNil())
+	})
+}
+
+func Test_writeUOM(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		var (
+			ctx = context.Background()
+			c   = setupProductAccessorTestComponent(t, WithQueryMatcher(sqlmock.QueryMatcherRegexp))
+			now = c.cmock.Now()
+			uom = UOM{ID: "123", ModifiedDate: now}
+		)
+
+		transformedQuery, args, _ := sqlx.Named(insertUOM, uom)
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectExec(regexp.QuoteMeta(transformedQuery)).WithArgs(
+			driverArgs...,
+		).WillReturnResult(sqlmock.NewResult(1, 1))
+
+		err := c.accessor.writeUOM(ctx, uom)
+		c.g.Expect(err).Should(gomega.BeNil())
+	})
+
+	t.Run("error", func(t *testing.T) {
+		var (
+			ctx = context.Background()
+			c   = setupProductAccessorTestComponent(t)
+			now = c.cmock.Now()
+			uom = UOM{ID: "123", ModifiedDate: now}
+		)
+
+		transformedQuery, args, _ := sqlx.Named(insertUOM, uom)
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectExec(regexp.QuoteMeta(transformedQuery)).WithArgs(
+			driverArgs...,
+		).WillReturnError(errors.New("error"))
+
+		err := c.accessor.writeUOM(ctx, uom)
+		c.g.Expect(err).ShouldNot(gomega.BeNil())
+	})
+}
+
+func Test_Close(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		c := setupProductAccessorTestComponent(t)
+
+		c.mock.ExpectClose()
+		err := c.accessor.Close()
+		c.g.Expect(err).ShouldNot(gomega.HaveOccurred())
+	})
+
+	t.Run("error", func(t *testing.T) {
+		c := setupProductAccessorTestComponent(t)
+
+		c.mock.ExpectClose().WillReturnError(errors.New("error"))
+		err := c.accessor.Close()
+		c.g.Expect(err).Should(gomega.HaveOccurred())
+	})
+}
+
 type productAccessorTestComponent struct {
 	g        *gomega.WithT
 	mock     sqlmock.Sqlmock
