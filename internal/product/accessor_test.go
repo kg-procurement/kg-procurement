@@ -3,10 +3,12 @@ package product
 import (
 	"context"
 	"database/sql"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"kg/procurement/internal/common/database"
 	"log"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -35,29 +37,6 @@ func Test_UpdateProduct(t *testing.T) {
 		"modified_date",
 		"modified_by",
 	}
-
-	query := `UPDATE product
-        SET 
-            product_category_id = $2,
-            uom_id = $3,
-            income_tax_id = $4,
-            product_type_id = $5,
-            name = $6,
-            description = $7,
-            modified_date = $8
-        WHERE 
-            id = $1
-        RETURNING 
-            id,
-            product_category_id,
-            uom_id,
-            income_tax_id,
-            product_type_id,
-            name,
-            description,
-            modified_date,
-            modified_by
-    `
 
 	t.Run("success", func(t *testing.T) {
 		var (
@@ -107,11 +86,11 @@ func Test_UpdateProduct(t *testing.T) {
 				ProductTypeID:     "product_type_id_updated",
 				Name:              "Product A Updated",
 				Description:       "Updated Description",
-				ModifiedDate:      now,
 				ModifiedBy:        "someone",
+				ModifiedDate:      now,
 			}
 
-			c.mock.ExpectQuery(query).
+			c.mock.ExpectQuery(updateProduct).
 				WithArgs(
 					updatedProduct.ID,
 					updatedProduct.ProductCategoryID,
@@ -148,7 +127,7 @@ func Test_UpdateProduct(t *testing.T) {
 			)
 			defer c.db.Close()
 
-			c.mock.ExpectQuery(query).
+			c.mock.ExpectQuery(updateProduct).
 				WithArgs(
 					"inv1",
 					"category_id_updated",
@@ -439,6 +418,7 @@ func Test_GetProductsByVendor(t *testing.T) {
 	t.Parallel()
 
 	var (
+		now            = time.Now()
 		vendorID       = "1234"
 		spec           = GetProductsByVendorSpec{}
 		productColumns = []string{"id", "product_category_id", "uom_id", "income_tax_id", "product_type_id", "name", "description", "modified_date", "modified_by"}
@@ -446,12 +426,12 @@ func Test_GetProductsByVendor(t *testing.T) {
 			{
 				ID:           "1111",
 				Name:         "Mixer",
-				ModifiedDate: time.Now(),
+				ModifiedDate: now,
 			},
 			{
 				ID:           "2222",
 				Name:         "Rice Cooker",
-				ModifiedDate: time.Now(),
+				ModifiedDate: now,
 			},
 		}
 	)
@@ -607,6 +587,54 @@ func Test_GetProductsByVendor(t *testing.T) {
 	})
 }
 
+func Test_writeProduct(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		var (
+			ctx     = context.Background()
+			c       = setupProductAccessorTestComponent(t, WithQueryMatcher(sqlmock.QueryMatcherRegexp))
+			now     = c.cmock.Now()
+			product = Product{ID: "123", ModifiedDate: now}
+		)
+
+		transformedQuery, args, _ := sqlx.Named(insertProduct, product)
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectExec(regexp.QuoteMeta(transformedQuery)).WithArgs(
+			driverArgs...,
+		).WillReturnResult(sqlmock.NewResult(1, 1))
+
+		err := c.accessor.writeProduct(ctx, product)
+		c.g.Expect(err).Should(gomega.BeNil())
+	})
+
+	t.Run("error", func(t *testing.T) {
+		var (
+			ctx     = context.Background()
+			c       = setupProductAccessorTestComponent(t)
+			now     = c.cmock.Now()
+			product = Product{ID: "123", ModifiedDate: now}
+		)
+
+		transformedQuery, args, _ := sqlx.Named(insertProduct, product)
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectExec(regexp.QuoteMeta(transformedQuery)).WithArgs(
+			driverArgs...,
+		).WillReturnError(errors.New("error"))
+
+		err := c.accessor.writeProduct(ctx, product)
+		c.g.Expect(err).ShouldNot(gomega.BeNil())
+	})
+}
+
 type productAccessorTestComponent struct {
 	g        *gomega.WithT
 	mock     sqlmock.Sqlmock
@@ -615,9 +643,29 @@ type productAccessorTestComponent struct {
 	cmock    *clock.Mock
 }
 
-func setupProductAccessorTestComponent(t *testing.T) productAccessorTestComponent {
+type setupOptions struct {
+	queryMatcher sqlmock.QueryMatcher
+}
+
+func WithQueryMatcher(matcher sqlmock.QueryMatcher) Option {
+	return func(o *setupOptions) {
+		o.queryMatcher = matcher
+	}
+}
+
+type Option func(*setupOptions)
+
+func setupProductAccessorTestComponent(t *testing.T, opts ...Option) productAccessorTestComponent {
+	options := setupOptions{
+		queryMatcher: sqlmock.QueryMatcherEqual,
+	}
+
+	for _, opt := range opts {
+		opt(&options)
+	}
+
 	g := gomega.NewWithT(t)
-	db, sqlMock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+	db, sqlMock, _ := sqlmock.New(sqlmock.QueryMatcherOption(options.queryMatcher))
 	sqlxDB := sqlx.NewDb(db, "sqlmock")
 
 	clockMock := clock.NewMock()

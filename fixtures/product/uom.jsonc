@@ -1,0 +1,113 @@
+// All the lists here are hand written since the data is not provided by KG yet
+[
+  {
+    "id": "1",
+    "name": "Box",
+    "description": "boxes",
+    "dimension": "",
+    "sap_code": "",
+    "modified_date": "",
+    "modified_date": "2020-11-02 07:44:58",
+    "modified_by": "0"
+  },
+  {
+    "id": "3",
+    "name": "Day",
+    "description": "days",
+    "dimension": "",
+    "sap_code": "",
+    "modified_date": "",
+    "modified_date": "2020-11-02 07:44:58",
+    "modified_by": "0"
+  },
+  {
+    "id": "4",
+    "name": "Dz",
+    "description": "dozens",
+    "dimension": "",
+    "sap_code": "",
+    "modified_date": "",
+    "modified_date": "2020-11-02 07:44:58",
+    "modified_by": "0"
+  },
+  {
+    "id": "8",
+    "name": "AU",
+    "description": "astronomical units",
+    "dimension": "",
+    "sap_code": "",
+    "modified_date": "",
+    "modified_date": "2020-11-02 07:44:58",
+    "modified_by": "0"
+  },
+  {
+    "id": "23",
+    "name": "Unit",
+    "description": "units",
+    "dimension": "",
+    "sap_code": "",
+    "modified_date": "",
+    "modified_date": "2020-11-02 07:44:58",
+    "modified_by": "0"
+  },
+  {
+    "id": "24",
+    "name": "Rim",
+    "description": "rim",
+    "dimension": "",
+    "sap_code": "",
+    "modified_date": "",
+    "modified_date": "2020-11-02 07:44:58",
+    "modified_by": "0"
+  },
+  {
+    "id": "25",
+    "name": "Sheet",
+    "description": "sheets",
+    "dimension": "",
+    "sap_code": "",
+    "modified_date": "",
+    "modified_date": "2020-11-02 07:44:58",
+    "modified_by": "0"
+  },
+  {
+    "id": "26",
+    "name": "Pcs",
+    "description": "pieces",
+    "dimension": "",
+    "sap_code": "",
+    "modified_date": "",
+    "modified_date": "2020-11-02 07:44:58",
+    "modified_by": "0"
+  },
+  {
+    "id": "34",
+    "name": "Month",
+    "description": "months",
+    "dimension": "",
+    "sap_code": "",
+    "modified_date": "",
+    "modified_date": "2020-11-02 07:44:58",
+    "modified_by": "0"
+  },
+  {
+    "id": "36",
+    "name": "Pack of 100",
+    "description": "pack of 100",
+    "dimension": "",
+    "sap_code": "",
+    "modified_date": "",
+    "modified_date": "2020-11-02 07:44:58",
+    "modified_by": "0"
+  },
+  {
+    "id": "42",
+    "name": "Lot",
+    "description": "lots",
+    "dimension": "",
+    "sap_code": "",
+    "modified_date": "",
+    "modified_date": "2020-11-02 07:44:58",
+    "modified_by": "0"
+  }
+]

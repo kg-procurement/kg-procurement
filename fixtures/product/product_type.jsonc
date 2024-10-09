@@ -1,0 +1,52 @@
+[
+  {
+    "id": "1",
+    "name": "Goods - Stockable",
+    "description": "",
+    "goods": true,
+    "asset": false,
+    "stock": true,
+    "modified_date": "2020-08-28 11:06:55",
+    "modified_by": "0"
+  },
+  {
+    "id": "2",
+    "name": "Services",
+    "description": "",
+    "goods": false,
+    "asset": false,
+    "stock": false,
+    "modified_date": "2024-07-05 15:02:15",
+    "modified_by": "1017"
+  },
+  {
+    "id": "3",
+    "name": "Goods - Non Stockable",
+    "description": "",
+    "goods": true,
+    "asset": false,
+    "stock": false,
+    "modified_date": "2020-08-28 11:06:55",
+    "modified_by": "0"
+  },
+  {
+    "id": "4",
+    "name": "Goods - Asset",
+    "description": "",
+    "goods": true,
+    "asset": true,
+    "stock": true,
+    "modified_date": "2023-07-28 14:18:47",
+    "modified_by": "1017"
+  },
+  {
+    "id": "6",
+    "name": "Iklan - Barter",
+    "description": "",
+    "goods": true,
+    "asset": false,
+    "stock": true,
+    "modified_date": "2024-07-05 15:02:54",
+    "modified_by": "1017"
+  }
+]
