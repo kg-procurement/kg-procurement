@@ -11,7 +11,7 @@ import (
 func TestTokenService_GenerateToken(t *testing.T) {
 	t.Parallel()
 
-	t.Run("success", func(t *testing.T) {
+	t.Run("GenerateTokenWithValidClaimsShouldReturnExpectedToken", func(t *testing.T) {
 		var (
 			g             = gomega.NewWithT(t)
 			mockCtrl      = gomock.NewController(t)
@@ -33,7 +33,7 @@ func TestTokenService_GenerateToken(t *testing.T) {
 		g.Expect(tokenString).To(gomega.Equal(expectedToken))
 	})
 
-	t.Run("returns error when tokenManager fails", func(t *testing.T) {
+	t.Run("FailedToGenerateTokenShouldReturnExpectedError", func(t *testing.T) {
 		var (
 			g            = gomega.NewWithT(t)
 			mockCtrl     = gomock.NewController(t)
@@ -55,7 +55,7 @@ func TestTokenService_GenerateToken(t *testing.T) {
 		g.Expect(tokenString).To(gomega.BeEmpty())
 	})
 
-	t.Run("returns error when ClaimSpec is invalid", func(t *testing.T) {
+	t.Run("GenerateTokenWithInvalidClaimsShouldReturnExpectedToken", func(t *testing.T) {
 		var (
 			g            = gomega.NewWithT(t)
 			mockCtrl     = gomock.NewController(t)
@@ -81,7 +81,7 @@ func TestTokenService_GenerateToken(t *testing.T) {
 func TestTokenService_ValidateToken(t *testing.T) {
 	t.Parallel()
 
-	t.Run("success", func(t *testing.T) {
+	t.Run("ValidateTokenWithShouldReturnExpectedClaims", func(t *testing.T) {
 		var (
 			g              = gomega.NewWithT(t)
 			mockCtrl       = gomock.NewController(t)
@@ -107,7 +107,7 @@ func TestTokenService_ValidateToken(t *testing.T) {
 		g.Expect(claims).To(gomega.Equal(expectedClaims))
 	})
 
-	t.Run("returns error when tokenManager fails", func(t *testing.T) {
+	t.Run("ErrorValidateTokenWithShouldReturnExpectedError", func(t *testing.T) {
 		var (
 			g            = gomega.NewWithT(t)
 			mockCtrl     = gomock.NewController(t)
@@ -116,9 +116,7 @@ func TestTokenService_ValidateToken(t *testing.T) {
 			expectedErr  = errors.New("failed to validate token")
 		)
 
-		mockTokenMgr.EXPECT().
-			ValidateToken(tokenString).
-			Return(nil, expectedErr)
+		mockTokenMgr.EXPECT().ValidateToken(tokenString).Return(nil, expectedErr)
 
 		svc := &TokenService{
 			tokenManager: mockTokenMgr,
@@ -130,7 +128,7 @@ func TestTokenService_ValidateToken(t *testing.T) {
 		g.Expect(claims).To(gomega.BeNil())
 	})
 
-	t.Run("returns error when tokenString is invalid", func(t *testing.T) {
+	t.Run("ValidateTokenWithInvalidTokenShouldReturnExpectedError", func(t *testing.T) {
 		var (
 			g            = gomega.NewWithT(t)
 			mockCtrl     = gomock.NewController(t)
