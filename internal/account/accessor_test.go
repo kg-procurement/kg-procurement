@@ -3,6 +3,7 @@ package account
 import (
 	"context"
 	"database/sql"
+	"database/sql/driver"
 	"testing"
 	"time"
 
@@ -22,7 +23,7 @@ func Test_RegisterAccount(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		var (
 			ctx = context.Background()
-			c   = setupProductAccessorTestComponent(t)
+			c   = setupAccountAccessorTestComponent(t, WithQueryMatcher(sqlmock.QueryMatcherRegexp))
 		)
 		c.cmock.Set(time.Now())
 		now := c.cmock.Now()
@@ -36,12 +37,15 @@ func Test_RegisterAccount(t *testing.T) {
 			CreatedAt:    now,
 		}
 
-		c.mock.ExpectExec(insertAccountQuery).
+		transformedQuery, args, _ := sqlx.Named(insertAccountQuery, data)
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectExec(transformedQuery).
 			WithArgs(
-				"ID",
-				"a@mail.com",
-				"password",
-				now,
+				driverArgs...,
 			).WillReturnResult(sqlmock.NewResult(1, 1))
 
 		err := c.accessor.RegisterAccount(ctx, data)
@@ -52,7 +56,7 @@ func Test_RegisterAccount(t *testing.T) {
 	t.Run("error - invalid query", func(t *testing.T) {
 		var (
 			ctx = context.Background()
-			c   = setupProductAccessorTestComponent(t)
+			c   = setupAccountAccessorTestComponent(t, WithQueryMatcher(sqlmock.QueryMatcherRegexp))
 		)
 		c.cmock.Set(time.Now())
 		now := c.cmock.Now()
@@ -65,12 +69,15 @@ func Test_RegisterAccount(t *testing.T) {
 			ModifiedDate: now,
 		}
 
-		c.mock.ExpectExec(insertAccountQuery).
+		transformedQuery, args, _ := sqlx.Named(insertAccountQuery, data)
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectExec(transformedQuery).
 			WithArgs(
-				"ID",
-				"a@mail.com",
-				"password",
-				now,
+				driverArgs...,
 			).WillReturnError(sql.ErrConnDone)
 
 		err := c.accessor.RegisterAccount(ctx, data)
@@ -82,7 +89,7 @@ func Test_RegisterAccount(t *testing.T) {
 	t.Run("error - missing fields", func(t *testing.T) {
 		var (
 			ctx = context.Background()
-			c   = setupProductAccessorTestComponent(t)
+			c   = setupAccountAccessorTestComponent(t, WithQueryMatcher(sqlmock.QueryMatcherRegexp))
 		)
 		c.cmock.Set(time.Now())
 		now := c.cmock.Now()
@@ -94,12 +101,15 @@ func Test_RegisterAccount(t *testing.T) {
 			ModifiedDate: now,
 		}
 
-		c.mock.ExpectExec(insertAccountQuery).
+		transformedQuery, args, _ := sqlx.Named(insertAccountQuery, data)
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectExec(transformedQuery).
 			WithArgs(
-				"ID",
-				"a@mail.com",
-				sqlmock.AnyArg(),
-				now,
+				driverArgs...,
 			).WillReturnError(sql.ErrNoRows)
 
 		err := c.accessor.RegisterAccount(ctx, data)
@@ -109,7 +119,7 @@ func Test_RegisterAccount(t *testing.T) {
 	})
 }
 
-type productAccessorTestComponent struct {
+type accountAccessorTestComponent struct {
 	g        *gomega.WithT
 	mock     sqlmock.Sqlmock
 	db       *sql.DB
@@ -117,14 +127,34 @@ type productAccessorTestComponent struct {
 	cmock    *clock.Mock
 }
 
-func setupProductAccessorTestComponent(t *testing.T) productAccessorTestComponent {
+type setupOptions struct {
+	queryMatcher sqlmock.QueryMatcher
+}
+
+func WithQueryMatcher(matcher sqlmock.QueryMatcher) Option {
+	return func(o *setupOptions) {
+		o.queryMatcher = matcher
+	}
+}
+
+type Option func(*setupOptions)
+
+func setupAccountAccessorTestComponent(t *testing.T, opts ...Option) accountAccessorTestComponent {
+	options := setupOptions{
+		queryMatcher: sqlmock.QueryMatcherEqual,
+	}
+
+	for _, opt := range opts {
+		opt(&options)
+	}
+
 	g := gomega.NewWithT(t)
 	db, sqlMock, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 	sqlxDB := sqlx.NewDb(db, "sqlmock")
 
 	clockMock := clock.NewMock()
 
-	return productAccessorTestComponent{
+	return accountAccessorTestComponent{
 		g:        g,
 		mock:     sqlMock,
 		db:       db,

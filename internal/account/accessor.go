@@ -15,10 +15,10 @@ const (
 			password,
 			modified_date
 		) VALUES (
-			$1,
-			$2,
-			$3,
-			$4
+			:id,
+			:email,
+			:password,
+			:modified_date
 		)
 	`
 )
@@ -29,13 +29,8 @@ type postgresAccountAccessor struct {
 }
 
 func (r *postgresAccountAccessor) RegisterAccount(ctx context.Context, account Account) error {
-	_, err := r.db.Exec(
-		insertAccountQuery,
-		account.ID,
-		account.Email,
-		account.Password,
-		r.clock.Now(),
-	)
+	account.ModifiedDate = r.clock.Now()
+	_, err := r.db.NamedExec(insertAccountQuery, &account)
 	if err != nil {
 		return err
 	}
