@@ -19,7 +19,10 @@ type ProductService struct {
 }
 
 func (p *ProductService) GetProductsByVendor(
-	ctx context.Context, vendorID string, spec GetProductsByVendorSpec) ([]Product, error) {
+	ctx context.Context,
+	vendorID string,
+	spec GetProductsByVendorSpec,
+) ([]Product, error) {
 	return p.productDBAccessor.GetProductsByVendor(ctx, vendorID, spec)
 }
 
