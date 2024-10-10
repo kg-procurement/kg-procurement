@@ -126,10 +126,10 @@ func TestAccountService_RegisterAccount(t *testing.T) {
 				defer monkey.Unpatch(bcrypt.GenerateFromPassword)
 			} else if tt.name == "failed to generate ID" {
 				// Mock GenerateRandomID to return an error
-				monkey.Patch(GenerateRandomID, func() (string, error) {
+				monkey.Patch(generateRandomID, func() (string, error) {
 					return "", errors.New("failed to generate ID")
 				})
-				defer monkey.Unpatch(GenerateRandomID)
+				defer monkey.Unpatch(generateRandomID)
 			}
 
 			err := a.RegisterAccount(tt.args.ctx, tt.args.spec)

@@ -32,7 +32,7 @@ func (a *AccountService) RegisterAccount(ctx context.Context, spec RegisterAccou
 	}
 
 	// Generate ID
-	id, err := GenerateRandomID()
+	id, err := generateRandomID()
 	if err != nil {
 		return fmt.Errorf("failed to generate random ID: %w", err)
 	}

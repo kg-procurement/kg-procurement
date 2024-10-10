@@ -17,7 +17,7 @@ func Test_GenerateRandomID(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		g := gomega.NewWithT(t)
 
-		id, err := GenerateRandomID()
+		id, err := generateRandomID()
 
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(len(id)).To(gomega.Equal(15))
@@ -26,8 +26,8 @@ func Test_GenerateRandomID(t *testing.T) {
 	t.Run("success - unique IDs", func(t *testing.T) {
 		g := gomega.NewWithT(t)
 
-		id1, err1 := GenerateRandomID()
-		id2, err2 := GenerateRandomID()
+		id1, err1 := generateRandomID()
+		id2, err2 := generateRandomID()
 
 		g.Expect(err1).To(gomega.BeNil())
 		g.Expect(err2).To(gomega.BeNil())
@@ -42,7 +42,7 @@ func Test_GenerateRandomID(t *testing.T) {
 		})
 		defer monkey.Unpatch(rand.Int)
 
-		_, err := GenerateRandomID()
+		_, err := generateRandomID()
 
 		g.Expect(err).ShouldNot(gomega.BeNil())
 	})

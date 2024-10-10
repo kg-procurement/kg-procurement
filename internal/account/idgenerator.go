@@ -8,7 +8,7 @@ import (
 
 const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
-func GenerateRandomID() (string, error) {
+func generateRandomID() (string, error) {
 	var result strings.Builder
 	length := 15
 
