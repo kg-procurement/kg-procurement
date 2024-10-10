@@ -5,8 +5,13 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
+	"kg/procurement/cmd/config"
 	"testing"
 )
+
+func Test_NewTokenService(t *testing.T) {
+	_ = NewTokenService(config.Token{}, nil)
+}
 
 func TestTokenService_GenerateToken(t *testing.T) {
 	t.Parallel()
