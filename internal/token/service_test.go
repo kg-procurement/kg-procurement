@@ -2,6 +2,7 @@ package token
 
 import (
 	"errors"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
 	"testing"
@@ -74,5 +75,81 @@ func TestTokenService_GenerateToken(t *testing.T) {
 		// assertions
 		g.Expect(err).To(gomega.Equal(expectedErr))
 		g.Expect(tokenString).To(gomega.BeEmpty())
+	})
+}
+
+func TestTokenService_ValidateToken(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		var (
+			g              = gomega.NewWithT(t)
+			mockCtrl       = gomock.NewController(t)
+			mockTokenMgr   = NewMocktokenManager(mockCtrl)
+			tokenString    = "valid_token_string"
+			expectedClaims = &Claims{
+				RegisteredClaims: jwt.RegisteredClaims{
+					Subject: "123",
+				},
+			}
+		)
+
+		// mock expectation
+		mockTokenMgr.EXPECT().ValidateToken(tokenString).Return(expectedClaims, nil)
+
+		svc := &TokenService{
+			tokenManager: mockTokenMgr,
+		}
+		claims, err := svc.ValidateToken(tokenString)
+
+		// assertions
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(claims).To(gomega.Equal(expectedClaims))
+	})
+
+	t.Run("returns error when tokenManager fails", func(t *testing.T) {
+		var (
+			g            = gomega.NewWithT(t)
+			mockCtrl     = gomock.NewController(t)
+			mockTokenMgr = NewMocktokenManager(mockCtrl)
+			tokenString  = "invalid_token_string"
+			expectedErr  = errors.New("failed to validate token")
+		)
+
+		mockTokenMgr.EXPECT().
+			ValidateToken(tokenString).
+			Return(nil, expectedErr)
+
+		svc := &TokenService{
+			tokenManager: mockTokenMgr,
+		}
+		claims, err := svc.ValidateToken(tokenString)
+
+		// assertions
+		g.Expect(err).To(gomega.Equal(expectedErr))
+		g.Expect(claims).To(gomega.BeNil())
+	})
+
+	t.Run("returns error when tokenString is invalid", func(t *testing.T) {
+		var (
+			g            = gomega.NewWithT(t)
+			mockCtrl     = gomock.NewController(t)
+			mockTokenMgr = NewMocktokenManager(mockCtrl)
+			tokenString  = ""
+			expectedErr  = errors.New("token string is empty")
+		)
+
+		mockTokenMgr.EXPECT().
+			ValidateToken(tokenString).
+			Return(nil, expectedErr)
+
+		svc := &TokenService{
+			tokenManager: mockTokenMgr,
+		}
+		claims, err := svc.ValidateToken(tokenString)
+
+		// assertions
+		g.Expect(err).To(gomega.Equal(expectedErr))
+		g.Expect(claims).To(gomega.BeNil())
 	})
 }
