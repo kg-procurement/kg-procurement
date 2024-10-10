@@ -39,17 +39,7 @@ func Test_GenerateToken(t *testing.T) {
 		spec := ClaimSpec{UserID: "123"}
 
 		// create a valid token
-		tokenObject := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
-			RegisteredClaims: jwt.RegisteredClaims{
-				Subject:   spec.UserID,
-				ExpiresAt: jwt.NewNumericDate(mockClock.Now().UTC().Add(30 * 24 * time.Hour)),
-				IssuedAt:  jwt.NewNumericDate(mockClock.Now().UTC()),
-				ID:        uuid.NewString(),
-			},
-		})
-
-		// sign the token
-		token, err := tokenObject.SignedString([]byte(jwtMgr.cfg.Secret))
+		token, err := jwtMgr.GenerateToken(spec)
 
 		g.Expect(token).ShouldNot(gomega.BeEmpty())
 		g.Expect(err).ShouldNot(gomega.HaveOccurred())
@@ -59,20 +49,12 @@ func Test_GenerateToken(t *testing.T) {
 		g := setup(t)
 		spec := ClaimSpec{UserID: "123"}
 
-		// create a valid token
-		tokenObject := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
-			RegisteredClaims: jwt.RegisteredClaims{
-				Subject:   spec.UserID,
-				ExpiresAt: jwt.NewNumericDate(mockClock.Now().UTC().Add(30 * 24 * time.Hour)),
-				IssuedAt:  jwt.NewNumericDate(mockClock.Now().UTC()),
-				ID:        uuid.NewString(),
-			},
-		})
+		// invalid secret
+		jwtMgr.cfg.Secret = ""
+		token, err := jwtMgr.GenerateToken(spec)
 
-		// sign the token with an invalid secret
-		token, err := tokenObject.SignedString("haha")
-
-		g.Expect(token).Should(gomega.Equal(""))
+		// assertions
+		g.Expect(token).Should(gomega.BeEmpty())
 		g.Expect(err).Should(gomega.HaveOccurred())
 	})
 }
@@ -160,6 +142,6 @@ func Test_ValidateToken(t *testing.T) {
 
 		// assertions
 		g.Expect(err).Should(gomega.HaveOccurred())
-		g.Expect(errors.Is(err, jwt.ErrSignatureInvalid)).Should(gomega.BeTrue())
+		g.Expect(errors.Is(err, jwt.ErrInvalidKeyType)).Should(gomega.BeTrue())
 	})
 }
