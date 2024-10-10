@@ -58,6 +58,11 @@ func (s *Seeder) SetupUOM(ctx context.Context, uoms []UOM) error {
 }
 
 func (s *Seeder) SetupProductVendor(ctx context.Context, pvList []ProductVendor) error {
+	for _, pv := range pvList {
+		if err := s.seederDataWriter.writeProductVendor(ctx, pv); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 

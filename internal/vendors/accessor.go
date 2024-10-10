@@ -244,11 +244,15 @@ func (p *postgresVendorAccessor) UpdateDetail(ctx context.Context, vendor Vendor
 }
 
 func (p *postgresVendorAccessor) writeVendor(ctx context.Context, vendor Vendor) error {
+	if _, err := p.db.NamedExec(insertVendor, vendor); err != nil {
+		fmt.Println("log error: ", err)
+		return err
+	}
 	return nil
 }
 
 func (p *postgresVendorAccessor) Close() error {
-	return nil
+	return p.db.Close()
 }
 
 // newPostgresVendorAccessor is only accessible by the vendor package

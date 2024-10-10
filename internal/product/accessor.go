@@ -336,6 +336,10 @@ func (p *postgresProductAccessor) writeUOM(_ context.Context, uom UOM) error {
 }
 
 func (p *postgresProductAccessor) writeProductVendor(_ context.Context, pv ProductVendor) error {
+	if _, err := p.db.NamedExec(insertProductVendor, pv); err != nil {
+		log.Printf("failed inserting product_vendor, product_id: %s and vendor_id: %s", pv.ProductID, pv.VendorID)
+		return err
+	}
 	return nil
 }
 

@@ -18,22 +18,27 @@ type Seeder struct {
 }
 
 func (s *Seeder) SetupVendors(ctx context.Context, vendors []Vendor) error {
+	for _, vendor := range vendors {
+		if err := s.seederDataWriter.writeVendor(ctx, vendor); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
 func (s *Seeder) Close() error {
-	return nil
+	return s.seederDataWriter.Close()
 }
 
 func NewSeeder(
 	seederDataWriter seederDataWriter,
 ) *Seeder {
-	return nil
+	return &Seeder{seederDataWriter}
 }
 
 func NewDBSeederWriter(
 	dbClient database.DBConnector,
 	clock clock.Clock,
 ) seederDataWriter {
-	return nil
+	return newPostgresVendorAccessor(dbClient, clock)
 }
