@@ -4,7 +4,6 @@ import (
 	"errors"
 	"github.com/benbjohnson/clock"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/google/uuid"
 	"github.com/onsi/gomega"
 	"kg/procurement/cmd/config"
 	"testing"
@@ -84,21 +83,10 @@ func Test_ValidateToken(t *testing.T) {
 		spec := ClaimSpec{UserID: "123"}
 
 		// create a valid token
-		tokenObject := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
-			RegisteredClaims: jwt.RegisteredClaims{
-				Subject:   spec.UserID,
-				ExpiresAt: jwt.NewNumericDate(mockClock.Now().UTC().Add(30 * 24 * time.Hour)),
-				IssuedAt:  jwt.NewNumericDate(mockClock.Now().UTC()),
-				ID:        uuid.NewString(),
-			},
-		})
-
-		// sign the token
-		tokenString, err := tokenObject.SignedString([]byte(jwtMgr.cfg.Secret))
-		g.Expect(err).ShouldNot(gomega.HaveOccurred())
+		token, err := jwtMgr.GenerateToken(spec)
 
 		// validate the token
-		claims, err := jwtMgr.ValidateToken(tokenString)
+		claims, err := jwtMgr.ValidateToken(token)
 
 		// assertions
 		g.Expect(err).ShouldNot(gomega.HaveOccurred())
@@ -123,25 +111,14 @@ func Test_ValidateToken(t *testing.T) {
 		g := setup(t)
 		spec := ClaimSpec{UserID: "123"}
 
-		// create a valid token
-		tokenObject := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
-			RegisteredClaims: jwt.RegisteredClaims{
-				Subject:   spec.UserID,
-				ExpiresAt: jwt.NewNumericDate(mockClock.Now().UTC().Add(30 * 24 * time.Hour)),
-				IssuedAt:  jwt.NewNumericDate(mockClock.Now().UTC()),
-				ID:        uuid.NewString(),
-			},
-		})
+		token, err := jwtMgr.GenerateToken(spec)
 
-		// sign the token with different secret
-		tokenString, err := tokenObject.SignedString([]byte("differentSecret"))
-		g.Expect(err).ShouldNot(gomega.HaveOccurred())
-
-		// validate the token
-		_, err = jwtMgr.ValidateToken(tokenString)
+		// validate the token with different secret
+		jwtMgr.cfg.Secret = "differentSecret"
+		_, err = jwtMgr.ValidateToken(token)
 
 		// assertions
 		g.Expect(err).Should(gomega.HaveOccurred())
-		g.Expect(errors.Is(err, jwt.ErrInvalidKeyType)).Should(gomega.BeTrue())
+		g.Expect(errors.Is(err, jwt.ErrSignatureInvalid)).Should(gomega.BeTrue())
 	})
 }

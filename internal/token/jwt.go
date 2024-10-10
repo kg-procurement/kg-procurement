@@ -1,6 +1,7 @@
 package token
 
 import (
+	"errors"
 	"github.com/benbjohnson/clock"
 	"github.com/golang-jwt/jwt/v5"
 	"kg/procurement/cmd/config"
@@ -15,6 +16,10 @@ type jwtManager struct {
 }
 
 func (s *jwtManager) GenerateToken(spec ClaimSpec) (string, error) {
+	if s.cfg.Secret == "" {
+		return "", errors.New("secret key is empty")
+	}
+
 	tokenObject := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   spec.UserID,
@@ -33,6 +38,10 @@ func (s *jwtManager) GenerateToken(spec ClaimSpec) (string, error) {
 }
 
 func (s *jwtManager) ValidateToken(tokenString string) (*Claims, error) {
+	if s.cfg.Secret == "" {
+		return nil, errors.New("secret key is empty")
+	}
+
 	claims := &Claims{}
 	token, err := jwt.ParseWithClaims(
 		tokenString,
@@ -40,7 +49,7 @@ func (s *jwtManager) ValidateToken(tokenString string) (*Claims, error) {
 		func(t *jwt.Token) (interface{}, error) {
 			_, isAccSigningMethod := t.Method.(*jwt.SigningMethodHMAC)
 			if !isAccSigningMethod {
-				return nil, jwt.ErrInvalidKeyType
+				return nil, jwt.ErrSignatureInvalid
 			}
 			return []byte(s.cfg.Secret), nil
 		},
@@ -53,7 +62,7 @@ func (s *jwtManager) ValidateToken(tokenString string) (*Claims, error) {
 
 	claims, ok := token.Claims.(*Claims)
 	if !ok || !token.Valid {
-		return nil, jwt.ErrInvalidKeyType
+		return nil, jwt.ErrTokenMalformed
 	}
 
 	return claims, nil
