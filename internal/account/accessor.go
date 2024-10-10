@@ -29,6 +29,16 @@ type postgresAccountAccessor struct {
 }
 
 func (r *postgresAccountAccessor) RegisterAccount(ctx context.Context, account Account) error {
+	_, err := r.db.Exec(
+		insertAccountQuery,
+		account.ID,
+		account.Email,
+		account.Password,
+		r.clock.Now(),
+	)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
