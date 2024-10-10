@@ -9,7 +9,7 @@ import (
 
 const (
 	insertAccountQuery = `
-		INSERT INTO accounts (
+		INSERT INTO account (
 			id,
 			email,
 			password,
