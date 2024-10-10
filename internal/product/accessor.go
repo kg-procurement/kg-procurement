@@ -53,6 +53,12 @@ const (
 		VALUES 
 			(:id, :name, :description, :dimension, :sap_code, :modified_date, :modified_by)
 	`
+	insertProductVendor = `
+		INSERT INTO product_vendor
+			(product_id, vendor_id)
+		VALUES 
+			(:product_id, :vendor_id)
+	`
 	updateProduct = `UPDATE product SET
         product_category_id = $2,
         uom_id = $3,
@@ -326,6 +332,10 @@ func (p *postgresProductAccessor) writeUOM(_ context.Context, uom UOM) error {
 		log.Printf("failed inserting uom: %s", uom.ID)
 		return err
 	}
+	return nil
+}
+
+func (p *postgresProductAccessor) writeProductVendor(_ context.Context, pv ProductVendor) error {
 	return nil
 }
 

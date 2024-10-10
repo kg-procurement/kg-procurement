@@ -2,7 +2,6 @@ package product
 
 import (
 	"kg/procurement/internal/common/database"
-	"kg/procurement/internal/vendors"
 	"time"
 )
 
@@ -54,8 +53,8 @@ type UOM struct {
 }
 
 type ProductVendor struct {
-	Product
-	vendors.Vendor
+	ProductID string `db:"product_id" json:"product_id"`
+	VendorID  string `db:"vendor_id" json:"vendor_id"`
 }
 
 type Price struct {

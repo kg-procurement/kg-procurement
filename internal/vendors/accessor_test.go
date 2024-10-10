@@ -3,10 +3,12 @@ package vendors
 import (
 	"context"
 	"database/sql"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"kg/procurement/internal/common/database"
 	"log"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -1244,4 +1246,112 @@ func TestVendorAccessor_UpdateDetail(t *testing.T) {
 		g.Expect(res).To(gomega.BeNil())
 
 	})
+}
+
+func Test_writeProductVendor(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		var (
+			ctx    = context.Background()
+			c      = setupProductAccessorTestComponent(t, WithQueryMatcher(sqlmock.QueryMatcherRegexp))
+			vendor = Vendor{ID: "123"}
+		)
+
+		transformedQuery, args, _ := sqlx.Named(insertVendor, vendor)
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectExec(regexp.QuoteMeta(transformedQuery)).WithArgs(
+			driverArgs...,
+		).WillReturnResult(sqlmock.NewResult(1, 1))
+
+		err := c.accessor.writeVendor(ctx, vendor)
+		c.g.Expect(err).Should(gomega.BeNil())
+	})
+
+	t.Run("error", func(t *testing.T) {
+		var (
+			ctx    = context.Background()
+			c      = setupProductAccessorTestComponent(t)
+			vendor = Vendor{ID: "123"}
+		)
+
+		transformedQuery, args, _ := sqlx.Named(insertVendor, vendor)
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectExec(regexp.QuoteMeta(transformedQuery)).WithArgs(
+			driverArgs...,
+		).WillReturnError(errors.New("error"))
+
+		err := c.accessor.writeVendor(ctx, vendor)
+		c.g.Expect(err).ShouldNot(gomega.BeNil())
+	})
+}
+
+func Test_Close(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		c := setupProductAccessorTestComponent(t)
+		c.mock.ExpectClose()
+		err := c.accessor.Close()
+		c.g.Expect(err).Should(gomega.BeNil())
+	})
+
+	t.Run("error", func(t *testing.T) {
+		c := setupProductAccessorTestComponent(t)
+		c.mock.ExpectClose().WillReturnError(errors.New("error"))
+		err := c.accessor.Close()
+		c.g.Expect(err).ShouldNot(gomega.BeNil())
+	})
+}
+
+type vendorAccessorTestComponent struct {
+	g        *gomega.WithT
+	mock     sqlmock.Sqlmock
+	db       *sql.DB
+	accessor *postgresVendorAccessor
+	cmock    *clock.Mock
+}
+
+type setupOptions struct {
+	queryMatcher sqlmock.QueryMatcher
+}
+
+func WithQueryMatcher(matcher sqlmock.QueryMatcher) Option {
+	return func(o *setupOptions) {
+		o.queryMatcher = matcher
+	}
+}
+
+type Option func(*setupOptions)
+
+func setupProductAccessorTestComponent(t *testing.T, opts ...Option) vendorAccessorTestComponent {
+	options := setupOptions{
+		queryMatcher: sqlmock.QueryMatcherEqual,
+	}
+
+	for _, opt := range opts {
+		opt(&options)
+	}
+
+	g := gomega.NewWithT(t)
+	db, sqlMock, _ := sqlmock.New(sqlmock.QueryMatcherOption(options.queryMatcher))
+	sqlxDB := sqlx.NewDb(db, "sqlmock")
+
+	clockMock := clock.NewMock()
+
+	return vendorAccessorTestComponent{
+		g:        g,
+		mock:     sqlMock,
+		db:       db,
+		accessor: newPostgresVendorAccessor(sqlxDB, clockMock),
+		cmock:    clockMock,
+	}
 }

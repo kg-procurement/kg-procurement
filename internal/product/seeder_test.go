@@ -131,6 +131,30 @@ func Test_Seeder(t *testing.T) {
 		})
 	})
 
+	t.Run("setup product-vendor", func(t *testing.T) {
+		pv := []ProductVendor{{ProductID: "123", VendorID: "321"}, {ProductID: "321", VendorID: "123"}}
+
+		t.Run("success", func(t *testing.T) {
+			g := setup(t)
+
+			mockWriter.EXPECT().writeProductVendor(ctx, ProductVendor{ProductID: "123", VendorID: "321"})
+			mockWriter.EXPECT().writeProductVendor(ctx, ProductVendor{ProductID: "321", VendorID: "123"})
+
+			err := subject.SetupProductVendor(ctx, pv)
+			g.Expect(err).ShouldNot(gomega.HaveOccurred())
+		})
+
+		t.Run("error", func(t *testing.T) {
+			g := setup(t)
+
+			mockWriter.EXPECT().writeProductVendor(ctx, ProductVendor{ProductID: "123", VendorID: "321"})
+			mockWriter.EXPECT().writeProductVendor(ctx, ProductVendor{ProductID: "321", VendorID: "123"}).Return(errors.New("error"))
+
+			err := subject.SetupProductVendor(ctx, pv)
+			g.Expect(err).Should(gomega.HaveOccurred())
+		})
+	})
+
 	t.Run("close", func(t *testing.T) {
 		t.Run("success", func(t *testing.T) {
 			g := setup(t)
