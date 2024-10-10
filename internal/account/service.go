@@ -4,8 +4,10 @@ package account
 import (
 	"context"
 	"fmt"
+	"kg/procurement/internal/common/database"
 	"net/mail"
 
+	"github.com/benbjohnson/clock"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -29,11 +31,27 @@ func (a *AccountService) RegisterAccount(ctx context.Context, spec RegisterAccou
 		return fmt.Errorf("failed to hash password: %w", err)
 	}
 
+	// Generate ID
+	id, err := GenerateRandomID()
+	if err != nil {
+		return fmt.Errorf("failed to generate random ID: %w", err)
+	}
+
 	// Create account
 	account := Account{
+		ID:       id,
 		Email:    spec.Email,
 		Password: string(hashedPassword),
 	}
 
 	return a.accountDBAccessor.RegisterAccount(ctx, account)
+}
+
+func NewAccountService(
+	conn database.DBConnector,
+	clock clock.Clock,
+) *AccountService {
+	return &AccountService{
+		accountDBAccessor: newPostgresAccountAccessor(conn, clock),
+	}
 }

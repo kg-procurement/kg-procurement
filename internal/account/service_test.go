@@ -70,6 +70,20 @@ func TestAccountService_RegisterAccount(t *testing.T) {
 			wantErr: errors.New("failed to hash password"),
 		},
 		{
+			name: "failed to generate ID",
+			fields: fields{
+				mockAccountDBAccessor: NewMockaccountDBAccessor(ctrl),
+			},
+			args: args{
+				ctx: context.Background(),
+				spec: RegisterAccountSpec{
+					Email:    "test@example.com",
+					Password: "password123",
+				},
+			},
+			wantErr: errors.New("failed to generate ID"),
+		},
+		{
 			name: "database error",
 			fields: fields{
 				mockAccountDBAccessor: NewMockaccountDBAccessor(ctrl),
@@ -106,6 +120,12 @@ func TestAccountService_RegisterAccount(t *testing.T) {
 					return nil, errors.New("failed to hash password")
 				})
 				defer monkey.Unpatch(bcrypt.GenerateFromPassword)
+			} else if tt.name == "failed to generate ID" {
+				// Mock GenerateRandomID to return an error
+				monkey.Patch(GenerateRandomID, func() (string, error) {
+					return "", errors.New("failed to generate ID")
+				})
+				defer monkey.Unpatch(GenerateRandomID)
 			}
 
 			err := a.RegisterAccount(tt.args.ctx, tt.args.spec)
