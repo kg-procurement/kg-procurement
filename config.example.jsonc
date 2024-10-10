@@ -11,8 +11,6 @@
   "routes": {
     "vendor": {
       "get-all": "/vendor",
-      "get-by-location": "/vendor/location",
-      "get-by-product": "/vendor/product",
       "update-detail": "/vendor/:id",
       "get-by-id": "/vendor/:id"
     },
@@ -20,6 +18,9 @@
       "get-products-by-vendor": "/product/vendor/:vendor_id",
       "update-product": "/product/:id",
       "update-price": "/product/price/:id"
+    },
+    "account": {
+      "register": "/account/register"
     }
   }
 }
