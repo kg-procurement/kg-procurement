@@ -13,6 +13,7 @@ type seederDataWriter interface {
 	writeProductCategory(ctx context.Context, productCategory ProductCategory) error
 	writeProductType(ctx context.Context, productType ProductType) error
 	writeUOM(ctx context.Context, uom UOM) error
+	writeProductVendor(ctx context.Context, pv ProductVendor) error
 	Close() error
 }
 
@@ -50,6 +51,15 @@ func (s *Seeder) SetupProductType(ctx context.Context, productType []ProductType
 func (s *Seeder) SetupUOM(ctx context.Context, uoms []UOM) error {
 	for _, uoms := range uoms {
 		if err := s.seederDataWriter.writeUOM(ctx, uoms); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (s *Seeder) SetupProductVendor(ctx context.Context, pvList []ProductVendor) error {
+	for _, pv := range pvList {
+		if err := s.seederDataWriter.writeProductVendor(ctx, pv); err != nil {
 			return err
 		}
 	}

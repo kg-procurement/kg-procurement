@@ -14,6 +14,15 @@ type postgresVendorAccessor struct {
 	clock clock.Clock
 }
 
+const (
+	insertVendor = `
+		INSERT INTO vendor
+			(id, name, description, bp_id, bp_name, rating, area_group_id, area_group_name, sap_code, modified_date, modified_by, dt)
+		VALUES 
+			(:id, :name, :description, :bp_id, :bp_name, :rating, :area_group_id, :area_group_name, :sap_code, :modified_date, :modified_by, :dt)
+	`
+)
+
 // GetSomeStuff is just an example
 func (p *postgresVendorAccessor) GetSomeStuff(ctx context.Context) ([]string, error) {
 	rows, err := p.db.Query(`SELECT name FROM users WHERE title = (?)`, "test")
@@ -232,6 +241,18 @@ func (p *postgresVendorAccessor) UpdateDetail(ctx context.Context, vendor Vendor
 	}
 
 	return updatedVendor, nil
+}
+
+func (p *postgresVendorAccessor) writeVendor(ctx context.Context, vendor Vendor) error {
+	if _, err := p.db.NamedExec(insertVendor, vendor); err != nil {
+		fmt.Println("log error: ", err)
+		return err
+	}
+	return nil
+}
+
+func (p *postgresVendorAccessor) Close() error {
+	return p.db.Close()
 }
 
 // newPostgresVendorAccessor is only accessible by the vendor package
