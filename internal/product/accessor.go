@@ -81,7 +81,10 @@ type postgresProductAccessor struct {
 }
 
 func (p *postgresProductAccessor) GetProductsByVendor(
-	_ context.Context, vendorID string, spec GetProductsByVendorSpec) ([]Product, error) {
+	_ context.Context,
+	vendorID string,
+	spec GetProductsByVendorSpec,
+) ([]Product, error) {
 	paginationArgs := database.BuildPaginationArgs(spec.PaginationSpec)
 
 	// Initialize clauses and arguments

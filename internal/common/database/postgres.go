@@ -50,7 +50,7 @@ func (c *Conn) Close() error {
 
 // sqlx specific wrappers
 func (c *Conn) Queryx(query string, args ...interface{}) (*sqlx.Rows, error) {
-	return c.db.Queryx(query, args)
+	return c.db.Queryx(query, args...)
 }
 
 func (c *Conn) NamedQuery(query string, args interface{}) (*sqlx.Rows, error) {
@@ -62,11 +62,11 @@ func (c *Conn) NamedExec(query string, arg interface{}) (sql.Result, error) {
 }
 
 func (c *Conn) Select(dest interface{}, query string, args ...interface{}) error {
-	return c.db.Select(dest, query, args)
+	return c.db.Select(dest, query, args...)
 }
 
 func (c *Conn) Get(dest interface{}, query string, args ...interface{}) error {
-	return c.db.Get(dest, query, args)
+	return c.db.Get(dest, query, args...)
 }
 
 func NewConn(host, user, password, name, port string) *Conn {
