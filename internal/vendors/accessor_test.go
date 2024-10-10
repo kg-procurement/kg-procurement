@@ -1254,7 +1254,7 @@ func Test_writeProductVendor(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		var (
 			ctx    = context.Background()
-			c      = setupProductAccessorTestComponent(t, WithQueryMatcher(sqlmock.QueryMatcherRegexp))
+			c      = setupVendorAccessorTestComponent(t, WithQueryMatcher(sqlmock.QueryMatcherRegexp))
 			vendor = Vendor{ID: "123"}
 		)
 
@@ -1275,7 +1275,7 @@ func Test_writeProductVendor(t *testing.T) {
 	t.Run("error", func(t *testing.T) {
 		var (
 			ctx    = context.Background()
-			c      = setupProductAccessorTestComponent(t)
+			c      = setupVendorAccessorTestComponent(t)
 			vendor = Vendor{ID: "123"}
 		)
 
@@ -1298,14 +1298,14 @@ func Test_Close(t *testing.T) {
 	t.Parallel()
 
 	t.Run("success", func(t *testing.T) {
-		c := setupProductAccessorTestComponent(t)
+		c := setupVendorAccessorTestComponent(t)
 		c.mock.ExpectClose()
 		err := c.accessor.Close()
 		c.g.Expect(err).Should(gomega.BeNil())
 	})
 
 	t.Run("error", func(t *testing.T) {
-		c := setupProductAccessorTestComponent(t)
+		c := setupVendorAccessorTestComponent(t)
 		c.mock.ExpectClose().WillReturnError(errors.New("error"))
 		err := c.accessor.Close()
 		c.g.Expect(err).ShouldNot(gomega.BeNil())
@@ -1332,7 +1332,7 @@ func WithQueryMatcher(matcher sqlmock.QueryMatcher) Option {
 
 type Option func(*setupOptions)
 
-func setupProductAccessorTestComponent(t *testing.T, opts ...Option) vendorAccessorTestComponent {
+func setupVendorAccessorTestComponent(t *testing.T, opts ...Option) vendorAccessorTestComponent {
 	options := setupOptions{
 		queryMatcher: sqlmock.QueryMatcherEqual,
 	}
