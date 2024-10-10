@@ -20,6 +20,9 @@
       "get-products-by-vendor": "/product/vendor/:vendor_id",
       "update-product": "/product/:id",
       "update-price": "/product/price/:id"
+    },
+    "token": {
+      "secret": "secret"
     }
   }
 }
