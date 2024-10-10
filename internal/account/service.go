@@ -3,6 +3,10 @@ package account
 
 import (
 	"context"
+	"fmt"
+	"net/mail"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type accountDBAccessor interface {
@@ -14,5 +18,22 @@ type AccountService struct {
 }
 
 func (a *AccountService) RegisterAccount(ctx context.Context, spec RegisterAccountSpec) error {
-	return nil
+	// Validate email
+	if _, err := mail.ParseAddress(spec.Email); err != nil {
+		return fmt.Errorf("invalid email: %w", err)
+	}
+
+	// Hash the password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(spec.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return fmt.Errorf("failed to hash password: %w", err)
+	}
+
+	// Create account
+	account := Account{
+		Email:    spec.Email,
+		Password: string(hashedPassword),
+	}
+
+	return a.accountDBAccessor.RegisterAccount(ctx, account)
 }
