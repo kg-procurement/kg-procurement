@@ -11,6 +11,10 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+func Test_NewAccountService(t *testing.T) {
+	_ = NewAccountService(nil, nil)
+}
+
 func TestAccountService_RegisterAccount(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
