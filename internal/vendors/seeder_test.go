@@ -57,4 +57,25 @@ func Test_Seeder(t *testing.T) {
 		})
 	})
 
+	t.Run("Close", func(t *testing.T) {
+
+		t.Run("success", func(t *testing.T) {
+			g := setup(t)
+
+			mockWriter.EXPECT().Close()
+
+			err := subject.Close()
+			g.Expect(err).ShouldNot(gomega.HaveOccurred())
+		})
+
+		t.Run("error", func(t *testing.T) {
+			g := setup(t)
+
+			mockWriter.EXPECT().Close().Return(errors.New("error"))
+
+			err := subject.Close()
+			g.Expect(err).Should(gomega.HaveOccurred())
+		})
+	})
+
 }
