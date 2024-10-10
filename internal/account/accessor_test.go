@@ -19,13 +19,6 @@ func Test_newPostgresProductAccessor(t *testing.T) {
 func Test_RegisterAccount(t *testing.T) {
 	t.Parallel()
 
-	accountFields := []string{
-		"id",
-		"email",
-		"password",
-		"created_at",
-	}
-
 	t.Run("success", func(t *testing.T) {
 		var (
 			ctx = context.Background()
@@ -43,13 +36,13 @@ func Test_RegisterAccount(t *testing.T) {
 			CreatedAt:    now,
 		}
 
-		c.mock.ExpectQuery(insertAccountQuery).
+		c.mock.ExpectExec(insertAccountQuery).
 			WithArgs(
 				"ID",
 				"a@mail.com",
 				"password",
 				now,
-			).WillReturnRows(sqlmock.NewRows(accountFields))
+			).WillReturnResult(sqlmock.NewResult(1, 1))
 
 		err := c.accessor.RegisterAccount(ctx, data)
 
@@ -72,7 +65,7 @@ func Test_RegisterAccount(t *testing.T) {
 			ModifiedDate: now,
 		}
 
-		c.mock.ExpectQuery(insertAccountQuery).
+		c.mock.ExpectExec(insertAccountQuery).
 			WithArgs(
 				"ID",
 				"a@mail.com",
@@ -101,7 +94,7 @@ func Test_RegisterAccount(t *testing.T) {
 			ModifiedDate: now,
 		}
 
-		c.mock.ExpectQuery(insertAccountQuery).
+		c.mock.ExpectExec(insertAccountQuery).
 			WithArgs(
 				"ID",
 				"a@mail.com",
