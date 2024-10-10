@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"kg/procurement/internal/common/database"
+	"log"
 	"strings"
 
 	"github.com/benbjohnson/clock"
@@ -28,6 +29,50 @@ const (
 		WHERE 
 			pv.vendor_id = $1
 	`
+	insertProduct = `
+		INSERT INTO product
+			(id, product_category_id, uom_id, income_tax_id, product_type_id, name, description, modified_date, modified_by)
+		VALUES 
+			(:id, :product_category_id, :uom_id, :income_tax_id, :product_type_id, :name, :description, :modified_date, :modified_by)
+	`
+	insertProductCategory = `
+		INSERT INTO product_category
+			(id, name, code, description, parent_id, specialist_bpid, modified_date, modified_by)
+		VALUES 
+			(:id, :name, :code, :description, :parent_id, :specialist_bpid, :modified_date, :modified_by)
+	`
+	insertProductType = `
+		INSERT INTO product_type
+			(id, name, description, goods, asset, stock, modified_date, modified_by)
+		VALUES 
+			(:id, :name, :description, :goods, :asset, :stock, :modified_date, :modified_by)
+	`
+	insertUOM = `
+		INSERT INTO uom
+			(id, name, description, dimension, sap_code, modified_date, modified_by)
+		VALUES 
+			(:id, :name, :description, :dimension, :sap_code, :modified_date, :modified_by)
+	`
+	updateProduct = `UPDATE product SET
+        product_category_id = $2,
+        uom_id = $3,
+        income_tax_id = $4,
+        product_type_id = $5,
+        name = $6,
+        description = $7,
+        modified_date = $8
+    WHERE id = $1
+    RETURNING 
+        id,
+        product_category_id,
+        uom_id,
+        income_tax_id,
+        product_type_id,
+        name,
+        description,
+        modified_date,
+        modified_by
+    `
 )
 
 type postgresProductAccessor struct {
@@ -98,29 +143,8 @@ func (p *postgresProductAccessor) GetProductsByVendor(
 func (p *postgresProductAccessor) UpdateProduct(_ context.Context, payload Product) (Product, error) {
 	now := p.clock.Now()
 
-	query := `UPDATE product SET
-        product_category_id = $2,
-        uom_id = $3,
-        income_tax_id = $4,
-        product_type_id = $5,
-        name = $6,
-        description = $7,
-        modified_date = $8
-    WHERE id = $1
-    RETURNING 
-        id,
-        product_category_id,
-        uom_id,
-        income_tax_id,
-        product_type_id,
-        name,
-        description,
-        modified_date,
-        modified_by
-    `
-
 	updatedProduct := Product{}
-	row := p.db.QueryRow(query,
+	row := p.db.QueryRow(updateProduct,
 		payload.ID,
 		payload.ProductCategoryID,
 		payload.UOMID,
@@ -268,6 +292,42 @@ func (p *postgresProductAccessor) UpdatePrice(ctx context.Context, price Price) 
 	}
 
 	return updatedPrice, nil
+}
+
+func (p *postgresProductAccessor) writeProduct(_ context.Context, product Product) error {
+	if _, err := p.db.NamedExec(insertProduct, product); err != nil {
+		log.Printf("failed inserting product: %s", product.ID)
+		return err
+	}
+	return nil
+}
+
+func (p *postgresProductAccessor) writeProductCategory(_ context.Context, category ProductCategory) error {
+	if _, err := p.db.NamedExec(insertProductCategory, category); err != nil {
+		log.Printf("failed inserting product category: %s", category.ID)
+		return err
+	}
+	return nil
+}
+
+func (p *postgresProductAccessor) writeProductType(_ context.Context, pType ProductType) error {
+	if _, err := p.db.NamedExec(insertProductType, pType); err != nil {
+		log.Printf("failed inserting product type: %s", pType.ID)
+		return err
+	}
+	return nil
+}
+
+func (p *postgresProductAccessor) writeUOM(_ context.Context, uom UOM) error {
+	if _, err := p.db.NamedExec(insertUOM, uom); err != nil {
+		log.Printf("failed inserting uom: %s", uom.ID)
+		return err
+	}
+	return nil
+}
+
+func (p *postgresProductAccessor) Close() error {
+	return p.db.Close()
 }
 
 // newPostgresProductAccessor is only accessible by the Product package

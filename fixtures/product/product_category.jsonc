@@ -1,0 +1,872 @@
+[
+  {
+    "id": "1",
+    "parent_id": "0",
+    "code": "BMT",
+    "name": "Buku, Majalah, Tabloid, Harian",
+    "description": "Buku, Majalah, Harian (koran)",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "2",
+    "parent_id": "0",
+    "code": "ILC",
+    "name": "Internet, Link, Cloud",
+    "description": "Hosting, Domain Name, Link",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "3",
+    "parent_id": "0",
+    "code": "KEN",
+    "name": "Kendaraan",
+    "description": "",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "4",
+    "parent_id": "3",
+    "code": "MBL",
+    "name": "Mobil",
+    "description": "Mobil",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "5",
+    "parent_id": "3",
+    "code": "MTR",
+    "name": "Motor",
+    "description": "Motor",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "6",
+    "parent_id": "3",
+    "code": "PKD",
+    "name": "Pemeliharaan Kendaraan",
+    "description": "Servis, Cuci, Derek, dll",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "7",
+    "parent_id": "3",
+    "code": "SSK",
+    "name": "Surat-Surat Kendaraan",
+    "description": "STNK, Keur, Balik Nama, Pajak Kendaraan, dll",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "8",
+    "parent_id": "0",
+    "code": "KOM",
+    "name": "Komputer User",
+    "description": "",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "9",
+    "parent_id": "8",
+    "code": "CPU",
+    "name": "Desktop, Workstation, Mini PC",
+    "description": "Komputer tetap, dikelola oleh departemen pengguna",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "10",
+    "parent_id": "8",
+    "code": "LAP",
+    "name": "Laptop",
+    "description": "Laptop, convertible notebook",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "11",
+    "parent_id": "8",
+    "code": "THI",
+    "name": "Tablet, Smartphone",
+    "description": "Tablet, HP Android, IOS",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "12",
+    "parent_id": "8",
+    "code": "STR",
+    "name": "Storage",
+    "description": "Hardisk, SSD, Kartu memori (SD Card, TransFlas...",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "13",
+    "parent_id": "8",
+    "code": "MON",
+    "name": "Monitor dan Projector",
+    "description": "Monitor CRT, LCD, OLED, Projector, Projector S...",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "14",
+    "parent_id": "8",
+    "code": "PPS",
+    "name": "Printer, Plotter, Scanner",
+    "description": "Printer, Scanner, Plotter",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "15",
+    "parent_id": "8",
+    "code": "KSK",
+    "name": "Komponen, Sukucadang Komputer, Tablet, Smartphone",
+    "description": "Kartu jaringan, Motherboard, RAM, Power supply...",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "16",
+    "parent_id": "8",
+    "code": "PAK",
+    "name": "Perlengkapan dan Aksesoris Komputer, Tablet, S...",
+    "description": "Card Reader, kabel USB, Adaptor, USB Hub, Char...",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "17",
+    "parent_id": "0",
+    "code": "NSI",
+    "name": "Network, Server, Infrastruktur",
+    "description": "",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "18",
+    "parent_id": "17",
+    "code": "SER",
+    "name": "Server",
+    "description": "Server, Rak, dan kelengkapannya",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "19",
+    "parent_id": "17",
+    "code": "RSH",
+    "name": "Router, Switch, Hub, Perangkat Jaringan",
+    "description": "Router, Switch, Hub, Firewall, Modem, Bandwidt...",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "20",
+    "parent_id": "17",
+    "code": "JDP",
+    "name": "Jaringan data, telepon dan power",
+    "description": "Instalasi jaringan data, telepon dan power",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "21",
+    "parent_id": "0",
+    "code": "PTO",
+    "name": "Foto dan Video",
+    "description": "",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "22",
+    "parent_id": "21",
+    "code": "KNC",
+    "name": "Camera & Camcorder",
+    "description": "SLR, DSLR, Mirrorless, Point and Shoot, Camcorder",
+    "specialist_bpid": "0",
+    "modified_date": "2022-05-27 16:00:47",
+    "modified_by": "7"
+  },
+  {
+    "id": "23",
+    "parent_id": "21",
+    "code": "LNS",
+    "name": "Lensa",
+    "description": "Semua detachable lenses",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "24",
+    "parent_id": "21",
+    "code": "VLG",
+    "name": "Lighting",
+    "description": "Speedlight, Floodlight, Monolight, Umbrella, S...",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "25",
+    "parent_id": "21",
+    "code": "AIN",
+    "name": "Audio Recorder",
+    "description": "Mic dan aksesorisnya",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "26",
+    "parent_id": "21",
+    "code": "PFV",
+    "name": "Perlengkapan dan Aksesoris Foto dan Video",
+    "description": "Card Reader, battery kamera, Filter, Charger, ...",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "27",
+    "parent_id": "21",
+    "code": "DRN",
+    "name": "Drone, Kelengkapan dan Aksesoris",
+    "description": "Drone, kelengkapan, aksesoris",
+    "specialist_bpid": "0",
+    "modified_date": "2020-12-02 12:23:31",
+    "modified_by": "151"
+  },
+  {
+    "id": "28",
+    "parent_id": "0",
+    "code": "KMK",
+    "name": "Telekomunikasi",
+    "description": "",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "29",
+    "parent_id": "28",
+    "code": "HTK",
+    "name": "HT (Radio Komunikasi)",
+    "description": "",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "30",
+    "parent_id": "28",
+    "code": "NVP",
+    "name": "Nomor Perdana, Voucher Pulsa, Paket Data",
+    "description": "",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "31",
+    "parent_id": "28",
+    "code": "TFP",
+    "name": "Telepon, Fax, PBX",
+    "description": "",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "32",
+    "parent_id": "0",
+    "code": "PRJ",
+    "name": "Perjamuan",
+    "description": "",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "33",
+    "parent_id": "32",
+    "code": "MNM",
+    "name": "Makanan dan Minuman",
+    "description": "Makanan, Minuman, Gula, Kopi, Paket Makanan, K...",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "34",
+    "parent_id": "32",
+    "code": "PNP",
+    "name": "Perlengkapan Perjamuan",
+    "description": "Piring kertas, Sendok Plastik, Kresek, Tisu ma...",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "35",
+    "parent_id": "0",
+    "code": "FFE",
+    "name": "Furniture, Fixtures, Equipment",
+    "description": "",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "36",
+    "parent_id": "35",
+    "code": "FUR",
+    "name": "Furniture",
+    "description": "Kursi, Sofa, Bangku, Stool, Lemari, Loker, Cab...",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "37",
+    "parent_id": "35",
+    "code": "FIX",
+    "name": "Fixture",
+    "description": "Lampu, Neon, Balast, Travo",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "38",
+    "parent_id": "35",
+    "code": "MEE",
+    "name": "Machine and Electronic Equipment",
+    "description": "Kulkas, Kipas Angin, AC Split, AC Portable, Fo...",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "39",
+    "parent_id": "35",
+    "code": "HND",
+    "name": "Home Decor",
+    "description": "Taplak, Seprei, Keset, Vas Bunga, Pigura, Luki...",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "40",
+    "parent_id": "0",
+    "code": "LAT",
+    "name": "Peralatan",
+    "description": "",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "41",
+    "parent_id": "40",
+    "code": "LAP",
+    "name": "Peralatan Pertukangan",
+    "description": "Solder, Crimping tools, multi tester, net test...",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "42",
+    "parent_id": "40",
+    "code": "LAK",
+    "name": "Peralatan Kebersihan",
+    "description": "Sapu, Pel",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "43",
+    "parent_id": "40",
+    "code": "PMP",
+    "name": "Peralatan Makan dan Perjamuan",
+    "description": "Cooking hob, Cooking hood, Panci, Pisau, Talen...",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "44",
+    "parent_id": "40",
+    "code": "AMP",
+    "name": "Alat-alat Makan dan Perjamuan",
+    "description": "",
+    "specialist_bpid": "0",
+    "modified_date": "2020-12-02 12:16:47",
+    "modified_by": "151"
+  },
+  {
+    "id": "45",
+    "parent_id": "0",
+    "code": "OMG",
+    "name": "Olahraga, Musik, Game, Hiburan",
+    "description": "Drum, Piano, Saxophone, Meja Pingpong, Net ten...",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "46",
+    "parent_id": "0",
+    "code": "PTS",
+    "name": "Pakaian, Tas, Sepatu",
+    "description": "",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "47",
+    "parent_id": "46",
+    "code": "TAS",
+    "name": "Tas",
+    "description": "Tote bag, backpack, koper, dll --> bedakan den...",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "48",
+    "parent_id": "46",
+    "code": "PAK",
+    "name": "Pakaian",
+    "description": "Kaos olahraga, kaos event --> bedakan dengan s...",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "49",
+    "parent_id": "46",
+    "code": "SSK",
+    "name": "Seragam Kerja, Sepatu Kerja",
+    "description": "Seragam FO, Jas, Operator",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "50",
+    "parent_id": "46",
+    "code": "ANP",
+    "name": "Aksesoris dan Perhiasan",
+    "description": "Pin (event/ hadiah), topi. ikat pinggang, jam ...",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "51",
+    "parent_id": "0",
+    "code": "TNB",
+    "name": "Tanah dan Bangunan",
+    "description": "",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "52",
+    "parent_id": "51",
+    "code": "TAN",
+    "name": "Tanah",
+    "description": "Tanah",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "53",
+    "parent_id": "51",
+    "code": "BGN",
+    "name": "Bangunan",
+    "description": "Rumah, Gedung, Ruko, dll",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "54",
+    "parent_id": "51",
+    "code": "KNG",
+    "name": "Keamanan Gedung",
+    "description": "CCTV, Akses Control, Alarm, DVR",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "55",
+    "parent_id": "51",
+    "code": "TRE",
+    "name": "Tanaman, Landscape",
+    "description": "",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "56",
+    "parent_id": "51",
+    "code": "MEL",
+    "name": "Mechanical Electrical",
+    "description": "",
+    "specialist_bpid": "0",
+    "modified_date": "2021-02-05 21:28:37",
+    "modified_by": "151"
+  },
+  {
+    "id": "57",
+    "parent_id": "51",
+    "code": "MNB",
+    "name": "Material Bangunan",
+    "description": "Semen, Pasir, Genteng, Raised Floor, Partisi, ...",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "58",
+    "parent_id": "0",
+    "code": "ATS",
+    "name": "Alat Tulis",
+    "description": "",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "59",
+    "parent_id": "58",
+    "code": "STS",
+    "name": "Stationary",
+    "description": "Kertas, Amplot, Balpen, Ordner, Binder, Staple...",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "60",
+    "parent_id": "58",
+    "code": "TNT",
+    "name": "Tinta dan Toner",
+    "description": "Tinta, Toner",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "61",
+    "parent_id": "0",
+    "code": "KES",
+    "name": "Kesehatan",
+    "description": "",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "62",
+    "parent_id": "61",
+    "code": "APD",
+    "name": "APD",
+    "description": "Rompi, APD, Sarung Tangan, Masker, Face Shield...",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "63",
+    "parent_id": "61",
+    "code": "OOB",
+    "name": "Obat-Obatan",
+    "description": "Vitamin, Alkohol,",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "64",
+    "parent_id": "61",
+    "code": "ASK",
+    "name": "Alat-Alat Kesehatan",
+    "description": "Tabung Oxigen, Isi oxigen, Thermometer, Tensim...",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "65",
+    "parent_id": "0",
+    "code": "CNT",
+    "name": "Cleaning and Toiletries",
+    "description": "Shampo, Sabun, sikat gigi, hand soap, toilet p...",
+    "specialist_bpid": "0",
+    "modified_date": "2024-07-19 14:29:24",
+    "modified_by": "1075"
+  },
+  {
+    "id": "66",
+    "parent_id": "0",
+    "code": "ANE",
+    "name": "Acara dan Event",
+    "description": "",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "67",
+    "parent_id": "66",
+    "code": "BBU",
+    "name": "Backdrop, Banner, Umbul-Umbul, Bendera, Brosur.",
+    "description": "",
+    "specialist_bpid": "0",
+    "modified_date": "2022-07-08 15:07:16",
+    "modified_by": "7"
+  },
+  {
+    "id": "68",
+    "parent_id": "66",
+    "code": "DEK",
+    "name": "Dekorasi",
+    "description": "Bunga, Taman Pot",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "69",
+    "parent_id": "66",
+    "code": "SOU",
+    "name": "Souvenir",
+    "description": "Kalender, Parcel, Karangan Bunga, Bunga papan,...",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "70",
+    "parent_id": "0",
+    "code": "SOF",
+    "name": "Software",
+    "description": "",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "71",
+    "parent_id": "70",
+    "code": "SOW",
+    "name": "Software",
+    "description": "PlugIns, Module, Update, Upgrade, Sistem Opera...",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "72",
+    "parent_id": "70",
+    "code": "JAP",
+    "name": "Jasa Pembuatan Aplikasi",
+    "description": "",
+    "specialist_bpid": "0",
+    "modified_date": "2022-10-12 17:01:30",
+    "modified_by": "151"
+  },
+  {
+    "id": "73",
+    "parent_id": "70",
+    "code": "INI",
+    "name": "Instalasi dan Implementasi",
+    "description": "",
+    "specialist_bpid": "-1",
+    "modified_date": "2020-10-27 23:20:39",
+    "modified_by": "0"
+  },
+  {
+    "id": "77",
+    "parent_id": "21",
+    "code": "",
+    "name": "Jasa Perbaikan",
+    "description": "",
+    "specialist_bpid": "0",
+    "modified_date": "2021-08-30 10:39:13",
+    "modified_by": "7"
+  },
+  {
+    "id": "78",
+    "parent_id": "0",
+    "code": "",
+    "name": "Outsourcing",
+    "description": "Outsourcing",
+    "specialist_bpid": "0",
+    "modified_date": "2021-09-06 15:28:12",
+    "modified_by": "301"
+  },
+  {
+    "id": "79",
+    "parent_id": "0",
+    "code": "",
+    "name": "Asuransi",
+    "description": "",
+    "specialist_bpid": "0",
+    "modified_date": "2021-10-21 15:42:46",
+    "modified_by": "1017"
+  },
+  {
+    "id": "80",
+    "parent_id": "51",
+    "code": "",
+    "name": "service charge",
+    "description": "",
+    "specialist_bpid": "0",
+    "modified_date": "2021-09-27 16:43:13",
+    "modified_by": "301"
+  },
+  {
+    "id": "81",
+    "parent_id": "0",
+    "code": "",
+    "name": "review Alat (Redaksi)",
+    "description": "review Alat (Redaksi)",
+    "specialist_bpid": "0",
+    "modified_date": "2021-10-22 12:49:23",
+    "modified_by": "1017"
+  },
+  {
+    "id": "82",
+    "parent_id": "66",
+    "code": "",
+    "name": "Voucher",
+    "description": "Voucher",
+    "specialist_bpid": "0",
+    "modified_date": "2023-01-12 10:29:12",
+    "modified_by": "165"
+  },
+  {
+    "id": "84",
+    "parent_id": "0",
+    "code": "",
+    "name": "Ongkos Kirim / Ekspedisi",
+    "description": "Ongkos Kirim / Ekspedisi",
+    "specialist_bpid": "0",
+    "modified_date": "2022-01-31 14:41:42",
+    "modified_by": "4"
+  },
+  {
+    "id": "85",
+    "parent_id": "51",
+    "code": "",
+    "name": "Jasa Renovasi",
+    "description": "Jasa Renovasi",
+    "specialist_bpid": "0",
+    "modified_date": "2022-01-31 16:41:32",
+    "modified_by": "4"
+  },
+  {
+    "id": "86",
+    "parent_id": "48",
+    "code": "",
+    "name": "Mukena",
+    "description": "Busana Sholat untuk wanita",
+    "specialist_bpid": "0",
+    "modified_date": "2022-04-18 10:16:04",
+    "modified_by": "165"
+  },
+  {
+    "id": "88",
+    "parent_id": "66",
+    "code": "",
+    "name": "Research",
+    "description": "",
+    "specialist_bpid": "0",
+    "modified_date": "2022-06-10 10:44:04",
+    "modified_by": "7"
+  },
+  {
+    "id": "89",
+    "parent_id": "59",
+    "code": "",
+    "name": "Finishing Map Arsip SDMU",
+    "description": "",
+    "specialist_bpid": "1846",
+    "modified_date": "2022-06-24 14:29:09",
+    "modified_by": "165"
+  },
+  {
+    "id": "90",
+    "parent_id": "3",
+    "code": "MDF",
+    "name": "Maintenance (Modifikasi) Kendaraan",
+    "description": "Modifikasi Kendaraan",
+    "specialist_bpid": "0",
+    "modified_date": "2022-10-04 11:03:46",
+    "modified_by": "3"
+  },
+  {
+    "id": "91",
+    "parent_id": "0",
+    "code": "",
+    "name": "Penterjemah Bahasa",
+    "description": "Ongkos Berita",
+    "specialist_bpid": "0",
+    "modified_date": "2023-12-07 16:14:14",
+    "modified_by": "1126"
+  },
+  {
+    "id": "92",
+    "parent_id": "66",
+    "code": "",
+    "name": "Boosting Audience",
+    "description": "",
+    "specialist_bpid": "0",
+    "modified_date": "2024-08-07 17:13:45",
+    "modified_by": "1075"
+  }
+]
