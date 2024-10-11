@@ -34,7 +34,7 @@ func Test_GenerateToken(t *testing.T) {
 		return gomega.NewWithT(t)
 	}
 
-	t.Run("GenerateTokenWithValidClaimsReturnsTokenSuccessfully", func(t *testing.T) {
+	t.Run("ValidClaimsReturnsTokenSuccessfully", func(t *testing.T) {
 		g := setup(t)
 		spec := ClaimSpec{UserID: "123"}
 
@@ -45,7 +45,7 @@ func Test_GenerateToken(t *testing.T) {
 		g.Expect(err).ShouldNot(gomega.HaveOccurred())
 	})
 
-	t.Run("GenerateTokenWithInvalidSecretReturnsError", func(t *testing.T) {
+	t.Run("InvalidSecretReturnsError", func(t *testing.T) {
 		g := setup(t)
 		spec := ClaimSpec{UserID: "123"}
 
@@ -58,7 +58,7 @@ func Test_GenerateToken(t *testing.T) {
 		g.Expect(err).Should(gomega.HaveOccurred())
 	})
 
-	t.Run("GenerateTokenWithInvalidSecretReturnsError", func(t *testing.T) {
+	t.Run("InvalidSecretReturnsError", func(t *testing.T) {
 		g := setup(t)
 		spec := ClaimSpec{UserID: "123"}
 
@@ -100,7 +100,7 @@ func Test_ValidateToken(t *testing.T) {
 		return gomega.NewWithT(t)
 	}
 
-	t.Run("ValidateTokenWithValidTokenReturnsClaimsSuccessfully", func(t *testing.T) {
+	t.Run("ValidTokenReturnsClaimsSuccessfully", func(t *testing.T) {
 		g := setup(t)
 		spec := ClaimSpec{UserID: "123"}
 
@@ -115,7 +115,7 @@ func Test_ValidateToken(t *testing.T) {
 		g.Expect(claims.Subject).Should(gomega.Equal("123"))
 	})
 
-	t.Run("ValidateTokenWithMalformedTokenReturnsError", func(t *testing.T) {
+	t.Run("MalformedTokenReturnsError", func(t *testing.T) {
 		g := setup(t)
 
 		// malformed token
@@ -129,7 +129,7 @@ func Test_ValidateToken(t *testing.T) {
 		g.Expect(errors.Is(err, jwt.ErrTokenMalformed)).Should(gomega.BeTrue())
 	})
 
-	t.Run("ValidateTokenWithInvalidSignatureReturnsError", func(t *testing.T) {
+	t.Run("InvalidSignatureReturnsError", func(t *testing.T) {
 		g := setup(t)
 		spec := ClaimSpec{UserID: "123"}
 
@@ -144,7 +144,7 @@ func Test_ValidateToken(t *testing.T) {
 		g.Expect(errors.Is(err, jwt.ErrSignatureInvalid)).Should(gomega.BeTrue())
 	})
 
-	t.Run("ValidateTokenWithInvalidConfigShouldReturnError", func(t *testing.T) {
+	t.Run("InvalidConfigShouldReturnError", func(t *testing.T) {
 		g := setup(t)
 		spec := ClaimSpec{UserID: "123"}
 
