@@ -11,6 +11,7 @@ import (
 	"os"
 
 	"github.com/benbjohnson/clock"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -34,7 +35,7 @@ func main() {
 	accountSvc := account.NewAccountService(conn, clock)
 
 	r := gin.Default()
-
+	r.Use(cors.Default())
 	router.NewVendorEngine(r, cfg.Routes.Vendor, vendorSvc)
 	router.NewProductEngine(r, cfg.Routes.Product, productSvc)
 	router.NewAccountEngine(r, cfg.Routes.Account, accountSvc)
