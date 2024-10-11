@@ -78,6 +78,45 @@ func (c *MockvendorDBAccessorGetAllCall) DoAndReturn(f func(context.Context, Get
 	return c
 }
 
+// GetAllLocations mocks base method.
+func (m *MockvendorDBAccessor) GetAllLocations(ctx context.Context) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllLocations", ctx)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllLocations indicates an expected call of GetAllLocations.
+func (mr *MockvendorDBAccessorMockRecorder) GetAllLocations(ctx any) *MockvendorDBAccessorGetAllLocationsCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllLocations", reflect.TypeOf((*MockvendorDBAccessor)(nil).GetAllLocations), ctx)
+	return &MockvendorDBAccessorGetAllLocationsCall{Call: call}
+}
+
+// MockvendorDBAccessorGetAllLocationsCall wrap *gomock.Call
+type MockvendorDBAccessorGetAllLocationsCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockvendorDBAccessorGetAllLocationsCall) Return(arg0 []string, arg1 error) *MockvendorDBAccessorGetAllLocationsCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockvendorDBAccessorGetAllLocationsCall) Do(f func(context.Context) ([]string, error)) *MockvendorDBAccessorGetAllLocationsCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockvendorDBAccessorGetAllLocationsCall) DoAndReturn(f func(context.Context) ([]string, error)) *MockvendorDBAccessorGetAllLocationsCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // GetById mocks base method.
 func (m *MockvendorDBAccessor) GetById(ctx context.Context, id string) (*Vendor, error) {
 	m.ctrl.T.Helper()

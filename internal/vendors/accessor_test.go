@@ -1248,6 +1248,63 @@ func TestVendorAccessor_UpdateDetail(t *testing.T) {
 	})
 }
 
+func Test_GetAllLocations(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		var (
+			ctx = context.Background()
+			c   = setupVendorAccessorTestComponent(t, WithQueryMatcher(sqlmock.QueryMatcherRegexp))
+		)
+		defer c.db.Close()
+
+		rows := sqlmock.NewRows([]string{"area_group_name"}).
+			AddRow("Location1").
+			AddRow("Location2")
+
+		c.mock.ExpectQuery(getAllLocationsQuery).WillReturnRows(rows)
+
+		results, err := c.accessor.GetAllLocations(ctx)
+
+		c.g.Expect(err).To(gomega.BeNil())
+		c.g.Expect(results).To(gomega.Equal([]string{"Location1", "Location2"}))
+	})
+
+	t.Run("error - query execution", func(t *testing.T) {
+		var (
+			ctx = context.Background()
+			c   = setupVendorAccessorTestComponent(t, WithQueryMatcher(sqlmock.QueryMatcherRegexp))
+		)
+		defer c.db.Close()
+
+		c.mock.ExpectQuery(getAllLocationsQuery).WillReturnError(sql.ErrConnDone)
+
+		results, err := c.accessor.GetAllLocations(ctx)
+
+		c.g.Expect(err).ToNot(gomega.BeNil())
+		c.g.Expect(err).To(gomega.Equal(sql.ErrConnDone))
+		c.g.Expect(results).To(gomega.BeNil())
+	})
+
+	t.Run("error - row scan", func(t *testing.T) {
+		var (
+			ctx = context.Background()
+			c   = setupVendorAccessorTestComponent(t, WithQueryMatcher(sqlmock.QueryMatcherRegexp))
+		)
+		defer c.db.Close()
+
+		rows := sqlmock.NewRows([]string{"area_group_name"}).
+			AddRow(nil)
+
+		c.mock.ExpectQuery(getAllLocationsQuery).WillReturnRows(rows)
+
+		results, err := c.accessor.GetAllLocations(ctx)
+
+		c.g.Expect(err).ToNot(gomega.BeNil())
+		c.g.Expect(results).To(gomega.BeNil())
+	})
+}
+
 func Test_writeProductVendor(t *testing.T) {
 	t.Parallel()
 

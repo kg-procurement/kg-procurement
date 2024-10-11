@@ -2,6 +2,7 @@ package vendors
 
 import (
 	"context"
+	"errors"
 	"kg/procurement/internal/common/database"
 	"testing"
 	"time"
@@ -286,5 +287,78 @@ func TestVendorService_UpdateDetail(t *testing.T) {
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(res).To(gomega.Equal(tt.want))
 
+	}
+}
+
+func TestVendorService_GetLocations(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	type fields struct {
+		mockVendorDBAccessor *MockvendorDBAccessor
+	}
+
+	type args struct {
+		ctx context.Context
+	}
+
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    []string
+		wantErr error
+	}{
+		{
+			name: "success",
+			fields: fields{
+				mockVendorDBAccessor: NewMockvendorDBAccessor(ctrl),
+			},
+			args: args{
+				ctx: context.Background(),
+			},
+			want:    []string{"Location1", "Location2"},
+			wantErr: nil,
+		},
+		{
+			name: "database error",
+			fields: fields{
+				mockVendorDBAccessor: NewMockvendorDBAccessor(ctrl),
+			},
+			args: args{
+				ctx: context.Background(),
+			},
+			want:    nil,
+			wantErr: errors.New("database error"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := gomega.NewWithT(t)
+			v := &VendorService{
+				vendorDBAccessor: tt.fields.mockVendorDBAccessor,
+			}
+
+			if tt.name == "success" {
+				tt.fields.mockVendorDBAccessor.EXPECT().
+					GetAllLocations(tt.args.ctx).
+					Return(tt.want, nil)
+			} else if tt.name == "database error" {
+				tt.fields.mockVendorDBAccessor.EXPECT().
+					GetAllLocations(tt.args.ctx).
+					Return(nil, errors.New("database error"))
+			}
+
+			got, err := v.GetLocations(tt.args.ctx)
+
+			if tt.wantErr == nil {
+				g.Expect(err).To(gomega.BeNil())
+				g.Expect(got).To(gomega.Equal(tt.want))
+			} else {
+				g.Expect(err).ToNot(gomega.BeNil())
+				g.Expect(err.Error()).To(gomega.ContainSubstring(tt.wantErr.Error()))
+			}
+		})
 	}
 }

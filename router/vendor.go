@@ -78,4 +78,16 @@ func NewVendorEngine(
 		ctx.JSON(http.StatusOK, res)
 
 	})
+
+	r.GET(cfg.GetLocations, func(ctx *gin.Context) {
+		res, err := vendorSvc.GetLocations(ctx)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, res)
+	})
 }
