@@ -24,7 +24,7 @@ const (
 	productTypeFixtureFile     = "./fixtures/product/product_type.jsonc"
 	uomFixtureFile             = "./fixtures/product/uom.jsonc"
 	vendorFixtureFile          = "./fixtures/vendor/vendor.jsonc"
-	productVendorFixtureFile   = "./fixtures/product/vendor_product.jsonc"
+	productVendorFixtureFile   = "./fixtures/product/product_vendor.jsonc"
 )
 
 var (
@@ -34,7 +34,7 @@ var (
 
 func main() {
 	if len(os.Args) < 2 {
-		log.Println("Usage: go run scripts/seeder/main.go [product|product_category|product_type|uom|vendor|product-vendor].")
+		log.Println("Usage: go run scripts/seeder/main.go [product|product_category|product_type|uom|vendor|product_vendor].")
 		return
 	}
 
@@ -53,11 +53,11 @@ func main() {
 	case "uom":
 		seedUOM(ctx)
 	case "vendor":
-		seedvendor(ctx)
-	case "product-vendor":
+		seedVendor(ctx)
+	case "product_vendor":
 		seedProductVendor(ctx)
 	default:
-		log.Println("Usage: go run scripts/seeder/main.go [product|product_category|product_type|uom|vendor|product-vendor].")
+		log.Println("Usage: go run scripts/seeder/main.go [product|product_category|product_type|uom|vendor|product_vendor].")
 	}
 }
 
@@ -176,7 +176,7 @@ func seedUOM(ctx context.Context) {
 	}
 }
 
-func seedvendor(ctx context.Context) {
+func seedVendor(ctx context.Context) {
 	var listOfVendor []vendors.Vendor
 
 	var temp []struct {
@@ -205,19 +205,11 @@ func seedvendor(ctx context.Context) {
 func seedProductVendor(ctx context.Context) {
 	var listOfProductVendor []product.ProductVendor
 
-	// var temp []product.ProductVendor
 	byteValue := readBytesFromFixture(productVendorFixtureFile)
 	if err := json.Unmarshal(byteValue, &listOfProductVendor); err != nil {
 		log.Println("Error unmarshalling")
 		panic(err)
 	}
-
-	// for _, tempVendor := range temp {
-	// 	theVendor := tempVendor.Vendor
-	// 	theVendor.ModifiedDate, _ = time.Parse(time.DateTime, tempVendor.ModifiedDate)
-	// 	theVendor.Date, _ = time.Parse(time.DateOnly, tempVendor.Date)
-	// 	listOfVendor = append(listOfVendor, theVendor)
-	// }
 
 	if err := productSeeder.SetupProductVendor(ctx, listOfProductVendor); err != nil {
 		panic(err)
