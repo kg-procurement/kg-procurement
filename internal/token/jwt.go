@@ -29,11 +29,7 @@ func (s *jwtManager) GenerateToken(spec ClaimSpec) (string, error) {
 		},
 	})
 
-	token, err := tokenObject.SignedString([]byte(s.cfg.Secret))
-	if err != nil {
-		return "", err
-	}
-
+	token, _ := tokenObject.SignedString([]byte(s.cfg.Secret))
 	return token, nil
 }
 

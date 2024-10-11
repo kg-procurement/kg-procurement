@@ -73,7 +73,7 @@ func Test_GenerateToken(t *testing.T) {
 		})
 
 		// sign the token with an invalid secret
-		token, err := tokenObject.SignedString("haha")
+		token, err := tokenObject.SignedString(false)
 
 		g.Expect(token).Should(gomega.Equal(""))
 		g.Expect(err).Should(gomega.HaveOccurred())
