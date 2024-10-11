@@ -121,4 +121,20 @@ func Test_ValidateToken(t *testing.T) {
 		g.Expect(err).Should(gomega.HaveOccurred())
 		g.Expect(errors.Is(err, jwt.ErrSignatureInvalid)).Should(gomega.BeTrue())
 	})
+
+	t.Run("ValidateTokenWithInvalidConfigShouldReturnError", func(t *testing.T) {
+		g := setup(t)
+		spec := ClaimSpec{UserID: "123"}
+
+		// create a valid token
+		token, err := jwtMgr.GenerateToken(spec)
+
+		// validate the token
+		jwtMgr.cfg.Secret = ""
+		_, err = jwtMgr.ValidateToken(token)
+
+		// assertions
+		g.Expect(err).Should(gomega.HaveOccurred())
+		g.Expect(err.Error()).Should(gomega.ContainSubstring("secret key is empty"))
+	})
 }

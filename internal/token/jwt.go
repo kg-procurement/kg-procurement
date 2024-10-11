@@ -47,10 +47,6 @@ func (s *jwtManager) ValidateToken(tokenString string) (*Claims, error) {
 		tokenString,
 		claims,
 		func(t *jwt.Token) (interface{}, error) {
-			_, isAccSigningMethod := t.Method.(*jwt.SigningMethodHMAC)
-			if !isAccSigningMethod {
-				return nil, jwt.ErrSignatureInvalid
-			}
 			return []byte(s.cfg.Secret), nil
 		},
 		jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Name}),
@@ -60,11 +56,7 @@ func (s *jwtManager) ValidateToken(tokenString string) (*Claims, error) {
 		return nil, err
 	}
 
-	claims, ok := token.Claims.(*Claims)
-	if !ok || !token.Valid {
-		return nil, jwt.ErrTokenMalformed
-	}
-
+	claims, _ = token.Claims.(*Claims)
 	return claims, nil
 }
 
