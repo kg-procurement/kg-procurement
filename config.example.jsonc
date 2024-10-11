@@ -20,6 +20,9 @@
       "update-product": "/product/:id",
       "update-price": "/product/price/:id"
     },
+    "token": {
+      "secret": "secret"
+    },
     "account": {
       "register": "/account/register"
     }
