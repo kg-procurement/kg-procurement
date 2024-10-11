@@ -13,6 +13,7 @@ type vendorDBAccessor interface {
 	GetAll(ctx context.Context, spec GetAllVendorSpec) (*AccessorGetAllPaginationData, error)
 	GetById(ctx context.Context, id string) (*Vendor, error)
 	UpdateDetail(ctx context.Context, spec Vendor) (*Vendor, error)
+	GetAllLocations(ctx context.Context) ([]string, error)
 }
 
 type VendorService struct {
@@ -33,6 +34,10 @@ func (v *VendorService) GetAll(ctx context.Context, spec GetAllVendorSpec) (*Acc
 
 func (v *VendorService) UpdateDetail(ctx context.Context, vendor Vendor) (*Vendor, error) {
 	return v.vendorDBAccessor.UpdateDetail(ctx, vendor)
+}
+
+func (v *VendorService) GetLocations(ctx context.Context) ([]string, error) {
+	return v.vendorDBAccessor.GetAllLocations(ctx)
 }
 
 func NewVendorService(
