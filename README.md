@@ -42,3 +42,14 @@ Set the following on the `Connection` tab:
 
 - Apply all available migrations: `make migrate-up`
 - Role back single migrations from the current version: `make migrate-down`
+
+## Running database seeders
+
+- Execute seeder command for product category: `make seed-product-category`
+- Execute seeder command for product type: `make seed-product-category`
+- Execute seeder command for product uom: `make seed-product-category`
+- Execute seeder command for product product: `make seed-product-category`
+- Execute seeder command for product vendor: `make seed-product-category`
+- Execute seeder command for product product_vendor (many2many): `make seed-product-category`
+
+It is recommended to execute the commands in the following the order to avoid foreign key errors
