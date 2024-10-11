@@ -7,6 +7,7 @@ import (
 	"kg/procurement/cmd/config"
 	"kg/procurement/cmd/dependency"
 	"kg/procurement/internal/product"
+	"kg/procurement/internal/vendors"
 	"log"
 	"os"
 	"path/filepath"
@@ -22,15 +23,18 @@ const (
 	productCategoryFixtureFile = "./fixtures/product/product_category.jsonc"
 	productTypeFixtureFile     = "./fixtures/product/product_type.jsonc"
 	uomFixtureFile             = "./fixtures/product/uom.jsonc"
+	vendorFixtureFile          = "./fixtures/vendor/vendor.jsonc"
+	productVendorFixtureFile   = "./fixtures/product/product_vendor.jsonc"
 )
 
 var (
 	productSeeder *product.Seeder
+	vendorSeeder  *vendors.Seeder
 )
 
 func main() {
 	if len(os.Args) < 2 {
-		log.Println("Usage: go run scripts/seeder/main.go [product|product_category|product_type|uom].")
+		log.Println("Usage: go run scripts/seeder/main.go [product|product_category|product_type|uom|vendor|product_vendor].")
 		return
 	}
 
@@ -48,8 +52,12 @@ func main() {
 		seedProductType(ctx)
 	case "uom":
 		seedUOM(ctx)
+	case "vendor":
+		seedVendor(ctx)
+	case "product_vendor":
+		seedProductVendor(ctx)
 	default:
-		log.Println("Usage: go run scripts/seeder/main.go [product|product_category|product_type|uom].")
+		log.Println("Usage: go run scripts/seeder/main.go [product|product_category|product_type|uom|vendor|product_vendor].")
 	}
 }
 
@@ -61,6 +69,10 @@ func bootstrapSeeder() {
 
 	productSeeder = product.NewSeeder(
 		product.NewDBSeederWriter(db, clock),
+	)
+
+	vendorSeeder = vendors.NewSeeder(
+		vendors.NewDBSeederWriter(db, clock),
 	)
 }
 
@@ -160,6 +172,46 @@ func seedUOM(ctx context.Context) {
 	}
 
 	if err := productSeeder.SetupUOM(ctx, uoms); err != nil {
+		panic(err)
+	}
+}
+
+func seedVendor(ctx context.Context) {
+	var listOfVendor []vendors.Vendor
+
+	var temp []struct {
+		vendors.Vendor
+		ModifiedDate string `json:"modified_date"`
+		Date         string `json:"dt"`
+	}
+	byteValue := readBytesFromFixture(vendorFixtureFile)
+	if err := json.Unmarshal(byteValue, &temp); err != nil {
+		log.Println("Error unmarshalling")
+		panic(err)
+	}
+
+	for _, tempVendor := range temp {
+		theVendor := tempVendor.Vendor
+		theVendor.ModifiedDate, _ = time.Parse(time.DateTime, tempVendor.ModifiedDate)
+		theVendor.Date, _ = time.Parse(time.DateOnly, tempVendor.Date)
+		listOfVendor = append(listOfVendor, theVendor)
+	}
+
+	if err := vendorSeeder.SetupVendors(ctx, listOfVendor); err != nil {
+		panic(err)
+	}
+}
+
+func seedProductVendor(ctx context.Context) {
+	var listOfProductVendor []product.ProductVendor
+
+	byteValue := readBytesFromFixture(productVendorFixtureFile)
+	if err := json.Unmarshal(byteValue, &listOfProductVendor); err != nil {
+		log.Println("Error unmarshalling")
+		panic(err)
+	}
+
+	if err := productSeeder.SetupProductVendor(ctx, listOfProductVendor); err != nil {
 		panic(err)
 	}
 }

@@ -11,10 +11,9 @@
   "routes": {
     "vendor": {
       "get-all": "/vendor",
-      "get-by-location": "/vendor/location",
-      "get-by-product": "/vendor/product",
       "update-detail": "/vendor/:id",
-      "get-by-id": "/vendor/:id"
+      "get-by-id": "/vendor/:id",
+      "get-locations": "/vendor/location"
     },
     "product": {
       "get-products-by-vendor": "/product/vendor/:vendor_id",
@@ -23,6 +22,9 @@
     },
     "token": {
       "secret": "secret"
+    },
+    "account": {
+      "register": "/account/register"
     }
   }
 }
