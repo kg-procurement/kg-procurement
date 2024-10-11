@@ -21,6 +21,7 @@ const (
 		VALUES 
 			(:id, :name, :description, :bp_id, :bp_name, :rating, :area_group_id, :area_group_name, :sap_code, :modified_date, :modified_by, :dt)
 	`
+	getAllLocationsQuery = `SELECT DISTINCT area_group_name FROM vendor`
 )
 
 // GetSomeStuff is just an example
@@ -241,6 +242,29 @@ func (p *postgresVendorAccessor) UpdateDetail(ctx context.Context, vendor Vendor
 	}
 
 	return updatedVendor, nil
+}
+
+func (p *postgresVendorAccessor) GetAllLocations(ctx context.Context) ([]string, error) {
+	rows, err := p.db.Query(getAllLocationsQuery)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var results []string
+	for rows.Next() {
+		var name string
+		if err := rows.Scan(&name); err != nil {
+			return nil, err
+		}
+		results = append(results, name)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return results, nil
 }
 
 func (p *postgresVendorAccessor) writeVendor(ctx context.Context, vendor Vendor) error {
