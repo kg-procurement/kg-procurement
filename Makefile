@@ -27,6 +27,10 @@ seed-product-type:
 	@go run scripts/seeder/main.go product_type
 seed-uom:
 	@go run scripts/seeder/main.go uom
+seed-vendor:
+	@go run scripts/seeder/main.go vendor
+seed-product-vendor:
+	@go run scripts/seeder/main.go product_vendor
 
 
 migrate-up:
