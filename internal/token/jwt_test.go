@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/benbjohnson/clock"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/onsi/gomega"
 	"kg/procurement/cmd/config"
 	"testing"
@@ -54,6 +55,27 @@ func Test_GenerateToken(t *testing.T) {
 
 		// assertions
 		g.Expect(token).Should(gomega.BeEmpty())
+		g.Expect(err).Should(gomega.HaveOccurred())
+	})
+
+	t.Run("GenerateTokenWithInvalidSecretReturnsError", func(t *testing.T) {
+		g := setup(t)
+		spec := ClaimSpec{UserID: "123"}
+
+		// create a valid token
+		tokenObject := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
+			RegisteredClaims: jwt.RegisteredClaims{
+				Subject:   spec.UserID,
+				ExpiresAt: jwt.NewNumericDate(mockClock.Now().UTC().Add(30 * 24 * time.Hour)),
+				IssuedAt:  jwt.NewNumericDate(mockClock.Now().UTC()),
+				ID:        uuid.NewString(),
+			},
+		})
+
+		// sign the token with an invalid secret
+		token, err := tokenObject.SignedString("haha")
+
+		g.Expect(token).Should(gomega.Equal(""))
 		g.Expect(err).Should(gomega.HaveOccurred())
 	})
 }
