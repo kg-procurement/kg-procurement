@@ -62,7 +62,6 @@ func NewVendorEngine(
 		}
 
 		ctx.JSON(http.StatusOK, res)
-
 	})
 
 	r.GET(cfg.GetById, func(ctx *gin.Context) {
@@ -76,7 +75,6 @@ func NewVendorEngine(
 		}
 
 		ctx.JSON(http.StatusOK, res)
-
 	})
 
 	r.GET(cfg.GetLocations, func(ctx *gin.Context) {
@@ -88,6 +86,8 @@ func NewVendorEngine(
 			return
 		}
 
-		ctx.JSON(http.StatusOK, res)
+		ctx.JSON(http.StatusOK, gin.H{
+			"locations": res,
+		})
 	})
 }

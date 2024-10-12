@@ -5,23 +5,23 @@ import (
 )
 
 type PaginationSpec struct {
-	Limit   int
-	Page    int
-	Order   string
-	OrderBy string
+	Limit   int    `json:"limit"`
+	Page    int    `json:"page"`
+	Order   string `json:"order"`
+	OrderBy string `json:"order_by"`
 }
 
 type PaginationArgs struct {
-	Limit   int
-	Offset  int
-	Order   string
-	OrderBy string
+	Limit   int    `json:"limit"`
+	Offset  int    `json:"offset"`
+	Order   string `json:"order"`
+	OrderBy string `json:"order_by"`
 }
 
 type PaginationMetadata struct {
-	TotalPage    int
-	CurrentPage  int
-	TotalEntries int
+	TotalPage    int `json:"total_page"`
+	CurrentPage  int `json:"current_page"`
+	TotalEntries int `json:"total_entries"`
 }
 
 func validateOrderString(order string) string {

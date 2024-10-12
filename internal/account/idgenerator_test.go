@@ -34,6 +34,8 @@ func Test_GenerateRandomID(t *testing.T) {
 		g.Expect(id1).ToNot(gomega.Equal(id2))
 	})
 
+	// if you use apple silicon, run this `go env -w GOARCH=amd64`
+	// https://stackoverflow.com/questions/74112738/underfined-function-error-in-go-jmptofunctionvalue
 	t.Run("error - random generation failure", func(t *testing.T) {
 		g := gomega.NewWithT(t)
 
