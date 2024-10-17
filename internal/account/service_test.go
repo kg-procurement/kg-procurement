@@ -14,7 +14,7 @@ import (
 )
 
 func Test_NewAccountService(t *testing.T) {
-	_ = NewAccountService(nil, nil)
+	_ = NewAccountService(nil, nil, nil)
 }
 
 func TestAccountService_RegisterAccount(t *testing.T) {
