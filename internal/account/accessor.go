@@ -21,6 +21,11 @@ const (
 			:modified_date
 		)
 	`
+	findAccountByEmailQuery = `
+		SELECT id, email, password, modified_date, created_at
+		FROM account
+		WHERE email = :email
+	`
 )
 
 type postgresAccountAccessor struct {
@@ -35,6 +40,15 @@ func (r *postgresAccountAccessor) RegisterAccount(ctx context.Context, account A
 		return err
 	}
 	return nil
+}
+
+func (r *postgresAccountAccessor) FindAccountByEmail(ctx context.Context, email string) (*Account, error) {
+	account := &Account{}
+	err := r.db.Get(account, findAccountByEmailQuery, email)
+	if err != nil {
+		return nil, err
+	}
+	return account, nil
 }
 
 // newPostgresAccountAccessor is only accessible by the Product package
