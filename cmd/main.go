@@ -6,6 +6,7 @@ import (
 	"kg/procurement/internal/account"
 	"kg/procurement/internal/product"
 	"kg/procurement/internal/vendors"
+	"kg/procurement/internal/token"
 	"kg/procurement/router"
 	"log"
 	"os"
@@ -32,7 +33,8 @@ func main() {
 
 	vendorSvc := vendors.NewVendorService(conn, clock)
 	productSvc := product.NewProductService(conn, clock)
-	accountSvc := account.NewAccountService(conn, clock)
+	tokenSvc := token.NewTokenService(cfg.Token, clock)
+	accountSvc := account.NewAccountService(conn, clock, tokenSvc)
 
 	r := gin.Default()
 	r.Use(cors.Default())
