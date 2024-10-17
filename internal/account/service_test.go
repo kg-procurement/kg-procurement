@@ -9,6 +9,8 @@ import (
 	"github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
 	"golang.org/x/crypto/bcrypt"
+
+	"kg/procurement/internal/token"
 )
 
 func Test_NewAccountService(t *testing.T) {
@@ -25,7 +27,7 @@ func TestAccountService_RegisterAccount(t *testing.T) {
 
 	type args struct {
 		ctx  context.Context
-		spec RegisterAccountSpec
+		spec AccountCredentialSpec
 	}
 
 	tests := []struct {
@@ -41,7 +43,7 @@ func TestAccountService_RegisterAccount(t *testing.T) {
 			},
 			args: args{
 				ctx: context.Background(),
-				spec: RegisterAccountSpec{
+				spec: AccountCredentialSpec{
 					Email:    "test@example.com",
 					Password: "password123",
 				},
@@ -52,7 +54,7 @@ func TestAccountService_RegisterAccount(t *testing.T) {
 			name: "invalid email",
 			args: args{
 				ctx: context.Background(),
-				spec: RegisterAccountSpec{
+				spec: AccountCredentialSpec{
 					Email:    "invalid-email",
 					Password: "password123",
 				},
@@ -66,7 +68,7 @@ func TestAccountService_RegisterAccount(t *testing.T) {
 			},
 			args: args{
 				ctx: context.Background(),
-				spec: RegisterAccountSpec{
+				spec: AccountCredentialSpec{
 					Email:    "test@example.com",
 					Password: "password123",
 				},
@@ -80,7 +82,7 @@ func TestAccountService_RegisterAccount(t *testing.T) {
 			},
 			args: args{
 				ctx: context.Background(),
-				spec: RegisterAccountSpec{
+				spec: AccountCredentialSpec{
 					Email:    "test@example.com",
 					Password: "password123",
 				},
@@ -94,7 +96,7 @@ func TestAccountService_RegisterAccount(t *testing.T) {
 			},
 			args: args{
 				ctx: context.Background(),
-				spec: RegisterAccountSpec{
+				spec: AccountCredentialSpec{
 					Email:    "test@example.com",
 					Password: "password123",
 				},
@@ -136,6 +138,164 @@ func TestAccountService_RegisterAccount(t *testing.T) {
 
 			if tt.wantErr == nil {
 				g.Expect(err).To(gomega.BeNil())
+			} else {
+				g.Expect(err).ToNot(gomega.BeNil())
+				g.Expect(err.Error()).To(gomega.ContainSubstring(tt.wantErr.Error()))
+			}
+		})
+	}
+}
+
+func TestAccountService_Login(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	type fields struct {
+		mockAccountDBAccessor *MockaccountDBAccessor
+		mockTokenService      *MocktokenService
+	}
+
+	type args struct {
+		ctx  context.Context
+		spec AccountCredentialSpec
+	}
+
+	tests := []struct {
+		name      string
+		fields    fields
+		args      args
+		wantErr   error
+		wantToken string
+	}{
+		{
+			name: "success",
+			fields: fields{
+				mockAccountDBAccessor: NewMockaccountDBAccessor(ctrl),
+				mockTokenService:      NewMocktokenService(ctrl),
+			},
+			args: args{
+				ctx: context.Background(),
+				spec: AccountCredentialSpec{
+					Email:    "test@example.com",
+					Password: "password123",
+				},
+			},
+			wantErr:   nil,
+			wantToken: "mockToken",
+		},
+		{
+			name: "account not found",
+			fields: fields{
+				mockAccountDBAccessor: NewMockaccountDBAccessor(ctrl),
+				mockTokenService:      NewMocktokenService(ctrl),
+			},
+			args: args{
+				ctx: context.Background(),
+				spec: AccountCredentialSpec{
+					Email:    "test@example.com",
+					Password: "password123",
+				},
+			},
+			wantErr: errors.New("account not found: account not found"),
+		},
+		{
+			name: "invalid password",
+			fields: fields{
+				mockAccountDBAccessor: NewMockaccountDBAccessor(ctrl),
+				mockTokenService:      NewMocktokenService(ctrl),
+			},
+			args: args{
+				ctx: context.Background(),
+				spec: AccountCredentialSpec{
+					Email:    "test@example.com",
+					Password: "wrongpassword",
+				},
+			},
+			wantErr: errors.New("invalid password"),
+		},
+		{
+			name: "failed to generate token",
+			fields: fields{
+				mockAccountDBAccessor: NewMockaccountDBAccessor(ctrl),
+				mockTokenService:      NewMocktokenService(ctrl),
+			},
+			args: args{
+				ctx: context.Background(),
+				spec: AccountCredentialSpec{
+					Email:    "test@example.com",
+					Password: "password123",
+				},
+			},
+			wantErr: errors.New("failed to generate token: token generation error"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := gomega.NewWithT(t)
+			a := &AccountService{
+				accountDBAccessor: tt.fields.mockAccountDBAccessor,
+				tokenService:      tt.fields.mockTokenService,
+			}
+
+			hashedPassword, err := bcrypt.GenerateFromPassword([]byte("password123"), bcrypt.DefaultCost)
+			if err != nil {
+				t.Fatalf("failed to hash password: %v", err)
+			}
+
+			if tt.name == "success" {
+				// Mock successful account retrieval and password verification
+				hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("password123"), bcrypt.DefaultCost)
+				account := &Account{
+					ID:       "1",
+					Email:    "test@example.com",
+					Password: string(hashedPassword),
+				}
+				tt.fields.mockAccountDBAccessor.EXPECT().
+					FindAccountByEmail(tt.args.ctx, tt.args.spec.Email).
+					Return(account, nil)
+
+				// Mock successful token generation
+				tt.fields.mockTokenService.EXPECT().
+					GenerateToken(token.ClaimSpec{UserID: account.ID}).
+					Return(tt.wantToken, nil)
+			} else if tt.name == "account not found" {
+				// Mock account not found error
+				tt.fields.mockAccountDBAccessor.EXPECT().
+					FindAccountByEmail(tt.args.ctx, tt.args.spec.Email).
+					Return(nil, errors.New("account not found"))
+			} else if tt.name == "invalid password" {
+				// Mock successful account retrieval
+				account := &Account{
+					ID:       "1",
+					Email:    "test@example.com",
+					Password: string(hashedPassword),
+				}
+				tt.fields.mockAccountDBAccessor.EXPECT().
+					FindAccountByEmail(tt.args.ctx, tt.args.spec.Email).
+					Return(account, nil)
+			} else if tt.name == "failed to generate token" {
+				// Mock successful account retrieval
+				account := &Account{
+					ID:       "1",
+					Email:    "test@example.com",
+					Password: string(hashedPassword),
+				}
+				tt.fields.mockAccountDBAccessor.EXPECT().
+					FindAccountByEmail(tt.args.ctx, tt.args.spec.Email).
+					Return(account, nil)
+
+				// Mock token generation error
+				tt.fields.mockTokenService.EXPECT().
+					GenerateToken(token.ClaimSpec{UserID: account.ID}).
+					Return("", errors.New("token generation error"))
+			}
+
+			token, err := a.Login(tt.args.ctx, tt.args.spec)
+
+			if tt.wantErr == nil {
+				g.Expect(err).To(gomega.BeNil())
+				g.Expect(token).To(gomega.Equal(tt.wantToken))
 			} else {
 				g.Expect(err).ToNot(gomega.BeNil())
 				g.Expect(err.Error()).To(gomega.ContainSubstring(tt.wantErr.Error()))

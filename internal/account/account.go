@@ -10,7 +10,7 @@ type Account struct {
 	CreatedAt    time.Time `json:"created_at" db:"created_at"`
 }
 
-type RegisterAccountSpec struct {
+type AccountCredentialSpec struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
