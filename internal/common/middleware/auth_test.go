@@ -69,4 +69,21 @@ func TestAuthMiddleware_MustAuthenticated(t *testing.T) {
 		g.Expect(w.Code).To(gomega.Equal(http.StatusBadRequest))
 		g.Expect(w.Body.String()).To(gomega.ContainSubstring(ErrorAuthInvalid))
 	})
+
+	t.Run("InvalidAuthorizationTypeReturnsError", func(t *testing.T) {
+		setup(t)
+		defer teardown()
+
+		req, _ := http.NewRequest("GET", "/", nil)
+		req.Header.Set(AuthorizationHeader, "Basic token123")
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Request = req
+
+		handler := authMiddleware.MustAuthenticated()
+		handler(c)
+
+		g.Expect(w.Code).To(gomega.Equal(http.StatusBadRequest))
+		g.Expect(w.Body.String()).To(gomega.ContainSubstring(ErrorAuthType))
+	})
 }
