@@ -52,4 +52,21 @@ func TestAuthMiddleware_MustAuthenticated(t *testing.T) {
 		g.Expect(w.Code).To(gomega.Equal(http.StatusBadRequest))
 		g.Expect(w.Body.String()).To(gomega.ContainSubstring(ErrorAuthHeader))
 	})
+
+	t.Run("InvalidAuthorizationHeaderReturnsError", func(t *testing.T) {
+		setup(t)
+		defer teardown()
+
+		req, _ := http.NewRequest("GET", "/", nil)
+		req.Header.Set(AuthorizationHeader, "InvalidHeader")
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Request = req
+
+		handler := authMiddleware.MustAuthenticated()
+		handler(c)
+
+		g.Expect(w.Code).To(gomega.Equal(http.StatusBadRequest))
+		g.Expect(w.Body.String()).To(gomega.ContainSubstring(ErrorAuthInvalid))
+	})
 }
