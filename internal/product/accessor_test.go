@@ -657,6 +657,32 @@ func Test_GetProductsByVendor(t *testing.T) {
 		c.g.Expect(err).ToNot(gomega.BeNil())
 		c.g.Expect(res).To(gomega.BeNil())
 	})
+
+	t.Run("error while querying count", func(t *testing.T) {
+		var (
+			ctx            = context.Background()
+			c              = setupProductAccessorTestComponent(t)
+			expectedResult = sqlmock.NewRows(productColumns).
+					AddRow(products[0].ID, "", "", "", "", products[0].Name, "", products[0].ModifiedDate, "").
+					AddRow(products[1].ID, "", "", "", "", products[1].Name, "", products[1].ModifiedDate, "")
+		)
+		defer c.db.Close()
+
+		query := getProductsByVendorQuery + " LIMIT $2 OFFSET $3"
+		c.mock.ExpectQuery(query).
+			WithArgs(vendorID, args.Limit, args.Offset).
+			WillReturnRows(expectedResult)
+
+		totalRows := sqlmock.NewRows([]string{"count"}).RowError(1, fmt.Errorf("row error"))
+		countQuery := `SELECT COUNT(*) FROM product_vendor WHERE vendor_id=$1`
+		c.mock.ExpectQuery(countQuery).
+			WithArgs(vendorID).
+			WillReturnRows(totalRows)
+
+		res, err := c.accessor.GetProductsByVendor(ctx, vendorID, spec)
+		c.g.Expect(err).ToNot(gomega.BeNil())
+		c.g.Expect(res).To(gomega.BeNil())
+	})
 }
 
 func Test_writeProduct(t *testing.T) {
