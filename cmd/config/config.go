@@ -10,6 +10,15 @@ type Application struct {
 	Common Common `mapstructure:"common" validate:"required"`
 	Routes Routes `mapstructure:"routes" validate:"required"`
 	Token  Token  `mapstructure:"token" validate:"required"`
+	SMTP   SMTP   `mapstructure:"smtp" validate:"required"`
+}
+
+type SMTP struct {
+	Host         string `mapstructure:"host" validate:"required"`
+	Port         string `mapstructure:"port" validate:"required"`
+	SenderName   string `mapstructure:"sender_name" validate:"required"`
+	AuthEmail    string `mapstructure:"auth_email" validate:"required"`
+	AuthPassword string `mapstructure:"auth_password" validate:"required"`
 }
 
 type Common struct {
