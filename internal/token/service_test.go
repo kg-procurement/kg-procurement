@@ -29,7 +29,7 @@ func TestTokenService_GenerateToken(t *testing.T) {
 		mockTokenMgr.EXPECT().GenerateToken(claimSpec).Return(expectedToken, nil)
 
 		svc := &TokenService{
-			tokenManager: mockTokenMgr,
+			TokenManager: mockTokenMgr,
 		}
 		tokenString, err := svc.GenerateToken(claimSpec)
 
@@ -51,7 +51,7 @@ func TestTokenService_GenerateToken(t *testing.T) {
 		mockTokenMgr.EXPECT().GenerateToken(claimSpec).Return("", expectedErr)
 
 		svc := &TokenService{
-			tokenManager: mockTokenMgr,
+			TokenManager: mockTokenMgr,
 		}
 		tokenString, err := svc.GenerateToken(claimSpec)
 
@@ -73,7 +73,7 @@ func TestTokenService_GenerateToken(t *testing.T) {
 		mockTokenMgr.EXPECT().GenerateToken(claimSpec).Return("", expectedErr)
 
 		svc := &TokenService{
-			tokenManager: mockTokenMgr,
+			TokenManager: mockTokenMgr,
 		}
 		tokenString, err := svc.GenerateToken(claimSpec)
 
@@ -103,7 +103,7 @@ func TestTokenService_ValidateToken(t *testing.T) {
 		mockTokenMgr.EXPECT().ValidateToken(tokenString).Return(expectedClaims, nil)
 
 		svc := &TokenService{
-			tokenManager: mockTokenMgr,
+			TokenManager: mockTokenMgr,
 		}
 		claims, err := svc.ValidateToken(tokenString)
 
@@ -124,7 +124,7 @@ func TestTokenService_ValidateToken(t *testing.T) {
 		mockTokenMgr.EXPECT().ValidateToken(tokenString).Return(nil, expectedErr)
 
 		svc := &TokenService{
-			tokenManager: mockTokenMgr,
+			TokenManager: mockTokenMgr,
 		}
 		claims, err := svc.ValidateToken(tokenString)
 
@@ -147,7 +147,7 @@ func TestTokenService_ValidateToken(t *testing.T) {
 			Return(nil, expectedErr)
 
 		svc := &TokenService{
-			tokenManager: mockTokenMgr,
+			TokenManager: mockTokenMgr,
 		}
 		claims, err := svc.ValidateToken(tokenString)
 
