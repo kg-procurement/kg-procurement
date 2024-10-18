@@ -3,7 +3,9 @@ package account
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"log"
 	"kg/procurement/internal/common/database"
 	"kg/procurement/internal/token"
 	"net/mail"
@@ -11,6 +13,8 @@ import (
 	"github.com/benbjohnson/clock"
 	"golang.org/x/crypto/bcrypt"
 )
+
+var ErrLoginFailed = errors.New("login failed")
 
 type accountDBAccessor interface {
 	RegisterAccount(ctx context.Context, account Account) error
@@ -55,28 +59,29 @@ func (a *AccountService) RegisterAccount(ctx context.Context, spec AccountCreden
 }
 
 func (a *AccountService) Login(ctx context.Context, spec AccountCredentialSpec) (string, error) {
-	var loginError = fmt.Errorf("login failed")
 
 	// Find the account by email
 	account, err := a.accountDBAccessor.FindAccountByEmail(ctx, spec.Email)
 	if err != nil {
-		return "", loginError
+		log.Printf("account not found: %s", spec.Email)
+		return "", ErrLoginFailed
 	}
 
 	// Verify the password
 	if err := account.VerifyPassword(spec.Password); err != nil {
-		return "", loginError
+		log.Printf("invalid password for email: %s", spec.Email)
+		return "", ErrLoginFailed
 	}
 
 	// Generate a JWT token
 	token, err := a.tokenService.GenerateToken(token.ClaimSpec{UserID: account.ID})
 	if err != nil {
-		return "", loginError
+		log.Printf("failed to generate token for email: %s, error: %v", spec.Email, err)
+		return "", ErrLoginFailed
 	}
 
 	return token, nil
 }
-
 
 func NewAccountService(
 	conn database.DBConnector,

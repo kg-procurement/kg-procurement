@@ -21,7 +21,8 @@
       "update-price": "/product/price/:id"
     },
     "account": {
-      "register": "/account/register"
+      "register": "/account/register",
+      "login": "/account/login"
     }
   },
   "token": {
