@@ -40,10 +40,10 @@ func (m *MockproductDBAccessor) EXPECT() *MockproductDBAccessorMockRecorder {
 }
 
 // GetProductsByVendor mocks base method.
-func (m *MockproductDBAccessor) GetProductsByVendor(ctx context.Context, vendorID string, spec GetProductsByVendorSpec) ([]Product, error) {
+func (m *MockproductDBAccessor) GetProductsByVendor(ctx context.Context, vendorID string, spec GetProductsByVendorSpec) (*AccessorGetProductsByVendorPaginationData, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetProductsByVendor", ctx, vendorID, spec)
-	ret0, _ := ret[0].([]Product)
+	ret0, _ := ret[0].(*AccessorGetProductsByVendorPaginationData)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -61,19 +61,19 @@ type MockproductDBAccessorGetProductsByVendorCall struct {
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockproductDBAccessorGetProductsByVendorCall) Return(arg0 []Product, arg1 error) *MockproductDBAccessorGetProductsByVendorCall {
+func (c *MockproductDBAccessorGetProductsByVendorCall) Return(arg0 *AccessorGetProductsByVendorPaginationData, arg1 error) *MockproductDBAccessorGetProductsByVendorCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockproductDBAccessorGetProductsByVendorCall) Do(f func(context.Context, string, GetProductsByVendorSpec) ([]Product, error)) *MockproductDBAccessorGetProductsByVendorCall {
+func (c *MockproductDBAccessorGetProductsByVendorCall) Do(f func(context.Context, string, GetProductsByVendorSpec) (*AccessorGetProductsByVendorPaginationData, error)) *MockproductDBAccessorGetProductsByVendorCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockproductDBAccessorGetProductsByVendorCall) DoAndReturn(f func(context.Context, string, GetProductsByVendorSpec) ([]Product, error)) *MockproductDBAccessorGetProductsByVendorCall {
+func (c *MockproductDBAccessorGetProductsByVendorCall) DoAndReturn(f func(context.Context, string, GetProductsByVendorSpec) (*AccessorGetProductsByVendorPaginationData, error)) *MockproductDBAccessorGetProductsByVendorCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

@@ -23,7 +23,7 @@ const (
 	productCategoryFixtureFile = "./fixtures/product/product_category.jsonc"
 	productTypeFixtureFile     = "./fixtures/product/product_type.jsonc"
 	uomFixtureFile             = "./fixtures/product/uom.jsonc"
-	vendorFixtureFile          = "./fixtures/vendor/vendor.jsonc"
+	vendorFixtureFile          = "./fixtures/vendors/vendor.jsonc"
 	productVendorFixtureFile   = "./fixtures/product/product_vendor.jsonc"
 )
 

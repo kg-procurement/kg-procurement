@@ -86,19 +86,28 @@ type postgresProductAccessor struct {
 	clock clock.Clock
 }
 
+type AccessorGetProductsByVendorPaginationData struct {
+	Products []Product                   `json:"products"`
+	Metadata database.PaginationMetadata `json:"metadata"`
+}
+
 func (p *postgresProductAccessor) GetProductsByVendor(
 	_ context.Context,
 	vendorID string,
 	spec GetProductsByVendorSpec,
-) ([]Product, error) {
+) (*AccessorGetProductsByVendorPaginationData, error) {
 	paginationArgs := database.BuildPaginationArgs(spec.PaginationSpec)
 
 	// Initialize clauses and arguments
 	var (
-		whereClauses []string
-		extraClauses []string
-		args         = []interface{}{vendorID}
-		argsIndex    = 2 // start at 2 because the query already have $1
+		whereClauses    []string
+		extraClauses    []string
+		args            = []interface{}{vendorID}
+		argsIndex       = 2 // start at 2 because the query already have $1
+		extraClausesRaw = []string{
+			"LIMIT $%d",
+			"OFFSET $%d",
+		}
 	)
 
 	// Build WHERE clauses for product
@@ -116,6 +125,13 @@ func (p *postgresProductAccessor) GetProductsByVendor(
 		extraClauses = append(extraClauses, fmt.Sprintf("ORDER BY %s %s",
 			paginationArgs.OrderBy, paginationArgs.Order))
 	}
+
+	// Pagination clause
+	for _, clause := range extraClausesRaw {
+		extraClauses = append(extraClauses, fmt.Sprintf(clause, argsIndex))
+		argsIndex++
+	}
+	args = append(args, paginationArgs.Limit, paginationArgs.Offset)
 
 	// Build the query
 	query := getProductsByVendorQuery
@@ -141,12 +157,21 @@ func (p *postgresProductAccessor) GetProductsByVendor(
 		}
 		res = append(res, product)
 	}
-
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 
-	return res, nil
+	countQuery := `SELECT COUNT(*) FROM product_vendor WHERE vendor_id=$1`
+	var totalEntries int
+	row := p.db.QueryRow(countQuery, vendorID)
+	if err = row.Scan(&totalEntries); err != nil {
+		return nil, fmt.Errorf("failed to execute count query: %w", err)
+	}
+
+	return &AccessorGetProductsByVendorPaginationData{
+		Products: res,
+		Metadata: database.GeneratePaginationMetadata(spec.PaginationSpec, totalEntries),
+	}, nil
 }
 
 func (p *postgresProductAccessor) UpdateProduct(_ context.Context, payload Product) (Product, error) {

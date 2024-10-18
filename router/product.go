@@ -37,9 +37,7 @@ func NewProductEngine(
 			})
 		}
 
-		ctx.JSON(http.StatusOK, gin.H{
-			"products": res,
-		})
+		ctx.JSON(http.StatusOK, res)
 	})
 
 	r.PUT(cfg.UpdateProduct, func(ctx *gin.Context) {
