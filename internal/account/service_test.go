@@ -196,7 +196,7 @@ func TestAccountService_Login(t *testing.T) {
 					Password: "password123",
 				},
 			},
-			wantErr: errors.New("account not found: account not found"),
+			wantErr: errors.New("login failed"),
 		},
 		{
 			name: "invalid password",
@@ -211,7 +211,7 @@ func TestAccountService_Login(t *testing.T) {
 					Password: "wrongpassword",
 				},
 			},
-			wantErr: errors.New("invalid password"),
+			wantErr: errors.New("login failed"),
 		},
 		{
 			name: "failed to generate token",
@@ -226,7 +226,7 @@ func TestAccountService_Login(t *testing.T) {
 					Password: "password123",
 				},
 			},
-			wantErr: errors.New("failed to generate token: token generation error"),
+			wantErr: errors.New("login failed"),
 		},
 	}
 

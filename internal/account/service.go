@@ -55,21 +55,23 @@ func (a *AccountService) RegisterAccount(ctx context.Context, spec AccountCreden
 }
 
 func (a *AccountService) Login(ctx context.Context, spec AccountCredentialSpec) (string, error) {
+	var loginError = fmt.Errorf("login failed")
+
 	// Find the account by email
 	account, err := a.accountDBAccessor.FindAccountByEmail(ctx, spec.Email)
 	if err != nil {
-		return "", fmt.Errorf("account not found: %w", err)
+		return "", loginError
 	}
 
 	// Verify the password
 	if err := account.VerifyPassword(spec.Password); err != nil {
-		return "", fmt.Errorf("invalid password: %w", err)
+		return "", loginError
 	}
 
 	// Generate a JWT token
 	token, err := a.tokenService.GenerateToken(token.ClaimSpec{UserID: account.ID})
 	if err != nil {
-		return "", fmt.Errorf("failed to generate token: %w", err)
+		return "", loginError
 	}
 
 	return token, nil
