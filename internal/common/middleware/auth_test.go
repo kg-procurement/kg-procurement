@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
@@ -85,5 +86,26 @@ func TestAuthMiddleware_MustAuthenticated(t *testing.T) {
 
 		g.Expect(w.Code).To(gomega.Equal(http.StatusBadRequest))
 		g.Expect(w.Body.String()).To(gomega.ContainSubstring(ErrorAuthType))
+	})
+
+	t.Run("TokenValidationErrorReturnsError", func(t *testing.T) {
+		setup(t)
+		defer teardown()
+
+		mockTokenMgr.EXPECT().
+			ValidateToken("invalidtoken").
+			Return(nil, errors.New("token validation error"))
+
+		req, _ := http.NewRequest("GET", "/", nil)
+		req.Header.Set(AuthorizationHeader, "Bearer invalidtoken")
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Request = req
+
+		handler := authMiddleware.MustAuthenticated()
+		handler(c)
+
+		g.Expect(w.Code).To(gomega.Equal(http.StatusInternalServerError))
+		g.Expect(w.Body.String()).To(gomega.ContainSubstring("token validation error"))
 	})
 }
