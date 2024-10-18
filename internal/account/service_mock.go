@@ -11,6 +11,7 @@ package account
 
 import (
 	context "context"
+	token "kg/procurement/internal/token"
 	reflect "reflect"
 
 	gomock "go.uber.org/mock/gomock"
@@ -37,6 +38,45 @@ func NewMockaccountDBAccessor(ctrl *gomock.Controller) *MockaccountDBAccessor {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockaccountDBAccessor) EXPECT() *MockaccountDBAccessorMockRecorder {
 	return m.recorder
+}
+
+// FindAccountByEmail mocks base method.
+func (m *MockaccountDBAccessor) FindAccountByEmail(ctx context.Context, email string) (*Account, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindAccountByEmail", ctx, email)
+	ret0, _ := ret[0].(*Account)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindAccountByEmail indicates an expected call of FindAccountByEmail.
+func (mr *MockaccountDBAccessorMockRecorder) FindAccountByEmail(ctx, email any) *MockaccountDBAccessorFindAccountByEmailCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAccountByEmail", reflect.TypeOf((*MockaccountDBAccessor)(nil).FindAccountByEmail), ctx, email)
+	return &MockaccountDBAccessorFindAccountByEmailCall{Call: call}
+}
+
+// MockaccountDBAccessorFindAccountByEmailCall wrap *gomock.Call
+type MockaccountDBAccessorFindAccountByEmailCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockaccountDBAccessorFindAccountByEmailCall) Return(arg0 *Account, arg1 error) *MockaccountDBAccessorFindAccountByEmailCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockaccountDBAccessorFindAccountByEmailCall) Do(f func(context.Context, string) (*Account, error)) *MockaccountDBAccessorFindAccountByEmailCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockaccountDBAccessorFindAccountByEmailCall) DoAndReturn(f func(context.Context, string) (*Account, error)) *MockaccountDBAccessorFindAccountByEmailCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
 }
 
 // RegisterAccount mocks base method.
@@ -73,6 +113,68 @@ func (c *MockaccountDBAccessorRegisterAccountCall) Do(f func(context.Context, Ac
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockaccountDBAccessorRegisterAccountCall) DoAndReturn(f func(context.Context, Account) error) *MockaccountDBAccessorRegisterAccountCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// MocktokenService is a mock of tokenService interface.
+type MocktokenService struct {
+	ctrl     *gomock.Controller
+	recorder *MocktokenServiceMockRecorder
+}
+
+// MocktokenServiceMockRecorder is the mock recorder for MocktokenService.
+type MocktokenServiceMockRecorder struct {
+	mock *MocktokenService
+}
+
+// NewMocktokenService creates a new mock instance.
+func NewMocktokenService(ctrl *gomock.Controller) *MocktokenService {
+	mock := &MocktokenService{ctrl: ctrl}
+	mock.recorder = &MocktokenServiceMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MocktokenService) EXPECT() *MocktokenServiceMockRecorder {
+	return m.recorder
+}
+
+// GenerateToken mocks base method.
+func (m *MocktokenService) GenerateToken(spec token.ClaimSpec) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GenerateToken", spec)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GenerateToken indicates an expected call of GenerateToken.
+func (mr *MocktokenServiceMockRecorder) GenerateToken(spec any) *MocktokenServiceGenerateTokenCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenerateToken", reflect.TypeOf((*MocktokenService)(nil).GenerateToken), spec)
+	return &MocktokenServiceGenerateTokenCall{Call: call}
+}
+
+// MocktokenServiceGenerateTokenCall wrap *gomock.Call
+type MocktokenServiceGenerateTokenCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MocktokenServiceGenerateTokenCall) Return(arg0 string, arg1 error) *MocktokenServiceGenerateTokenCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MocktokenServiceGenerateTokenCall) Do(f func(token.ClaimSpec) (string, error)) *MocktokenServiceGenerateTokenCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MocktokenServiceGenerateTokenCall) DoAndReturn(f func(token.ClaimSpec) (string, error)) *MocktokenServiceGenerateTokenCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
