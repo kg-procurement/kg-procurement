@@ -16,12 +16,12 @@ const (
 )
 
 type AuthMiddleware struct {
-	tokenService *token.TokenService
+	tokenManager token.TokenManager
 }
 
-func NewAuthMiddleware(svc *token.TokenService) *AuthMiddleware {
+func NewAuthMiddleware(manager token.TokenManager) *AuthMiddleware {
 	return &AuthMiddleware{
-		tokenService: svc,
+		tokenManager: manager,
 	}
 }
 
@@ -56,7 +56,7 @@ func (m *AuthMiddleware) MustAuthenticated() gin.HandlerFunc {
 
 		// claim claims
 		tokenStr := fields[1]
-		claims, err := m.tokenService.ValidateToken(tokenStr)
+		claims, err := m.tokenManager.ValidateToken(tokenStr)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),

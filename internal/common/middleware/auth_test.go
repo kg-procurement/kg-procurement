@@ -21,7 +21,6 @@ func TestAuthMiddleware_MustAuthenticated(t *testing.T) {
 		g              *gomega.WithT
 		mockCtrl       *gomock.Controller
 		mockTokenMgr   *token.MocktokenManager
-		tokenSvc       *token.TokenService
 		authMiddleware *AuthMiddleware
 	)
 
@@ -29,10 +28,7 @@ func TestAuthMiddleware_MustAuthenticated(t *testing.T) {
 		g = gomega.NewWithT(t)
 		mockCtrl = gomock.NewController(t)
 		mockTokenMgr = token.NewMocktokenManager(mockCtrl)
-		tokenSvc = &token.TokenService{
-			TokenManager: mockTokenMgr,
-		}
-		authMiddleware = NewAuthMiddleware(tokenSvc)
+		authMiddleware = NewAuthMiddleware(mockTokenMgr)
 	}
 
 	teardown := func() {
