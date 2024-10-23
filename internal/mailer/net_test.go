@@ -1,4 +1,4 @@
-package smtp_provider
+package mailer
 
 import (
 	"errors"

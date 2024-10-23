@@ -1,5 +1,5 @@
-//go:generate mockgen -typed -source=email.go -destination=email_mock.go -package=smtp_provider
-package smtp_provider
+//go:generate mockgen -typed -source=mailer.go -destination=mailer_mock.go -package=mailer
+package mailer
 
 type Email struct {
 	From    string

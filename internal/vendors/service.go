@@ -5,7 +5,7 @@ import (
 	"context"
 	"kg/procurement/cmd/config"
 	"kg/procurement/internal/common/database"
-	"kg/procurement/internal/smtp_provider"
+	"kg/procurement/internal/mailer"
 	"log"
 	"strings"
 	"sync"
@@ -25,7 +25,7 @@ type vendorDBAccessor interface {
 type VendorService struct {
 	cfg config.Application
 	vendorDBAccessor
-	smtpProvider smtp_provider.EmailProvider
+	smtpProvider mailer.EmailProvider
 }
 
 func (v *VendorService) GetSomeStuff(ctx context.Context) ([]string, error) {
@@ -66,7 +66,7 @@ func (v *VendorService) BlastEmail(ctx context.Context, vendorIDs []string, temp
 
 			// replaces {{name}} keyword to vendor name
 			bodyWithVendorName := strings.Replace(template.Body, "{{name}}", vendor.Name, -1)
-			err := v.smtpProvider.SendEmail(smtp_provider.Email{
+			err := v.smtpProvider.SendEmail(mailer.Email{
 				From:    v.cfg.SMTP.AuthEmail,
 				To:      []string{vendor.Email},
 				Subject: template.Subject,
@@ -89,7 +89,7 @@ func NewVendorService(
 	cfg config.Application,
 	conn database.DBConnector,
 	clock clock.Clock,
-	smtpProvider smtp_provider.EmailProvider,
+	smtpProvider mailer.EmailProvider,
 ) *VendorService {
 	return &VendorService{
 		cfg:              cfg,

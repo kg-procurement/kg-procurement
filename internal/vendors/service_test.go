@@ -5,7 +5,7 @@ import (
 	"errors"
 	"kg/procurement/cmd/config"
 	"kg/procurement/internal/common/database"
-	"kg/procurement/internal/smtp_provider"
+	"kg/procurement/internal/mailer"
 	"testing"
 	"time"
 
@@ -370,14 +370,14 @@ func TestVendorService_BlastEmail(t *testing.T) {
 
 	var (
 		mockVendorAccessor *MockvendorDBAccessor
-		mockEmailProvider  *smtp_provider.MockEmailProvider
+		mockEmailProvider  *mailer.MockEmailProvider
 		subject            *VendorService
 	)
 
 	setup := func(t *testing.T) *gomega.GomegaWithT {
 		ctrl := gomock.NewController(t)
 		mockVendorAccessor = NewMockvendorDBAccessor(ctrl)
-		mockEmailProvider = smtp_provider.NewMockEmailProvider(ctrl)
+		mockEmailProvider = mailer.NewMockEmailProvider(ctrl)
 		subject = &VendorService{
 			cfg:              config.Application{},
 			vendorDBAccessor: mockVendorAccessor,
