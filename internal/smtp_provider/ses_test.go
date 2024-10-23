@@ -1,4 +1,4 @@
-package smtp
+package smtp_provider
 
 import (
 	"context"

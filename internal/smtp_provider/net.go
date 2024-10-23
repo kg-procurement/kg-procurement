@@ -1,5 +1,5 @@
 //go:generate mockgen -typed -source=net.go -destination=net_mock.go -package=smtp
-package smtp
+package smtp_provider
 
 import (
 	"fmt"
