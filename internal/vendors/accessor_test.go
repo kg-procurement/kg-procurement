@@ -1345,6 +1345,30 @@ func Test_BulkGetByIDs(t *testing.T) {
 		c.g.Expect(results).To(gomega.Equal(vendors))
 	})
 
+	t.Run("error on rows", func(t *testing.T) {
+		var (
+			ctx = context.Background()
+			c   = setupVendorAccessorTestComponent(t)
+		)
+		defer c.db.Close()
+
+		rows := sqlmock.NewRows(vendorColumns).
+			AddRow("1", "ferryganteng@outlook.com").
+			AddRow("2", "valenganteng@gmail.com").
+			RowError(1, errors.New("oh no"))
+
+		vendorIDs := []string{"1", "2"}
+		query, _, _ := sqlx.In(getBulkByID, vendorIDs)
+		c.mock.ExpectQuery(query).
+			WithArgs("1", "2").
+			WillReturnRows(rows)
+
+		results, err := c.accessor.BulkGetByIDs(ctx, vendorIDs)
+
+		c.g.Expect(err).ToNot(gomega.BeNil())
+		c.g.Expect(results).To(gomega.BeNil())
+	})
+
 	t.Run("error - query execution", func(t *testing.T) {
 		var (
 			ctx = context.Background()
@@ -1377,6 +1401,25 @@ func Test_BulkGetByIDs(t *testing.T) {
 			WillReturnRows(rows)
 
 		results, err := c.accessor.BulkGetByIDs(ctx, []string{"1"})
+		c.g.Expect(err).ToNot(gomega.BeNil())
+		c.g.Expect(results).To(gomega.BeNil())
+	})
+
+	t.Run("error - empty slice", func(t *testing.T) {
+		var (
+			ctx = context.Background()
+			c   = setupVendorAccessorTestComponent(t)
+		)
+		defer c.db.Close()
+
+		rows := sqlmock.NewRows(vendorColumns).
+			AddRow("1", "ferryganteng@outlook.com").
+			AddRow("2", "valenganteng@gmail.com")
+
+		c.mock.ExpectQuery(getBulkByID).
+			WillReturnRows(rows)
+
+		results, err := c.accessor.BulkGetByIDs(ctx, []string{})
 		c.g.Expect(err).ToNot(gomega.BeNil())
 		c.g.Expect(results).To(gomega.BeNil())
 	})

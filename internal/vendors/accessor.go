@@ -280,6 +280,7 @@ func (p *postgresVendorAccessor) BulkGetByIDs(_ context.Context, ids []string) (
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	res := []Vendor{}
 	for rows.Next() {
