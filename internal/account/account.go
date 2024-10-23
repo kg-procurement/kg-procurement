@@ -1,6 +1,9 @@
 package account
 
-import "time"
+import (
+	"golang.org/x/crypto/bcrypt"
+	"time"
+)
 
 type Account struct {
 	ID           string    `json:"id" db:"id"`
@@ -10,7 +13,11 @@ type Account struct {
 	CreatedAt    time.Time `json:"created_at" db:"created_at"`
 }
 
-type RegisterAccountSpec struct {
+type AccountCredentialSpec struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+}
+
+func (a *Account) VerifyPassword(password string) error {
+	return bcrypt.CompareHashAndPassword([]byte(a.Password), []byte(password))
 }
