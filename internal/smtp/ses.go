@@ -31,9 +31,7 @@ func (s sesProvider) SendEmail(email Email) error {
 func (s sesProvider) sendEmail(ctx context.Context, client SESSendEmailAPI, email Email) error {
 	inputPayload := s.buildInputPayload(email)
 
-	result, err := client.SendEmail(ctx, inputPayload, func(o *ses.Options) {
-		o.RetryMaxAttempts = 3
-	})
+	result, err := client.SendEmail(ctx, inputPayload)
 	if err != nil {
 		log.Printf("failed executing SendEmail : %v", err)
 		return err
