@@ -33,6 +33,7 @@ func TestProductService_GetProductsByVendor(t *testing.T) {
 				ModifiedDate: now,
 			},
 		}
+		paginationSpec = database.PaginationSpec{Limit: 10, Order: "DESC", Page: 1}
 	)
 
 	t.Run("success", func(t *testing.T) {
@@ -41,18 +42,27 @@ func TestProductService_GetProductsByVendor(t *testing.T) {
 			ctx                 = context.Background()
 			mockCtrl            = gomock.NewController(t)
 			mockProductAccessor = NewMockproductDBAccessor(mockCtrl)
-			spec                = GetProductsByVendorSpec{}
+			spec                = GetProductsByVendorSpec{PaginationSpec: paginationSpec}
 		)
 
 		svc := &ProductService{
 			mockProductAccessor,
 		}
 
+		expect := &AccessorGetProductsByVendorPaginationData{
+			Products: products,
+			Metadata: database.PaginationMetadata{
+				TotalPage:    1,
+				CurrentPage:  1,
+				TotalEntries: 2,
+			},
+		}
+
 		mockProductAccessor.EXPECT().GetProductsByVendor(ctx, vendorID, spec).
-			Return(products, nil)
+			Return(expect, nil)
 
 		res, err := svc.GetProductsByVendor(ctx, vendorID, spec)
-		g.Expect(res).Should(gomega.BeComparableTo(products))
+		g.Expect(res).Should(gomega.BeComparableTo(expect))
 		g.Expect(err).To(gomega.BeNil())
 	})
 
@@ -72,11 +82,20 @@ func TestProductService_GetProductsByVendor(t *testing.T) {
 			mockProductAccessor,
 		}
 
+		expect := &AccessorGetProductsByVendorPaginationData{
+			Products: products[1:],
+			Metadata: database.PaginationMetadata{
+				TotalPage:    1,
+				CurrentPage:  1,
+				TotalEntries: 2,
+			},
+		}
+
 		mockProductAccessor.EXPECT().GetProductsByVendor(ctx, vendorID, spec).
-			Return(products[1:], nil)
+			Return(expect, nil)
 
 		res, err := svc.GetProductsByVendor(ctx, vendorID, spec)
-		g.Expect(res).Should(gomega.BeComparableTo(products[1:]))
+		g.Expect(res).Should(gomega.BeComparableTo(expect))
 		g.Expect(err).To(gomega.BeNil())
 	})
 

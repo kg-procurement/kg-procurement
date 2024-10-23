@@ -418,9 +418,15 @@ func Test_GetProductsByVendor(t *testing.T) {
 	t.Parallel()
 
 	var (
-		now            = time.Now()
-		vendorID       = "1234"
-		spec           = GetProductsByVendorSpec{}
+		now      = time.Now()
+		vendorID = "1234"
+		spec     = GetProductsByVendorSpec{
+			PaginationSpec: database.PaginationSpec{
+				Limit: 10,
+				Page:  1,
+			},
+		}
+		args           = database.BuildPaginationArgs(spec.PaginationSpec)
 		productColumns = []string{"id", "product_category_id", "uom_id", "income_tax_id", "product_type_id", "name", "description", "modified_date", "modified_by"}
 		products       = []Product{
 			{
@@ -446,14 +452,29 @@ func Test_GetProductsByVendor(t *testing.T) {
 		)
 		defer c.db.Close()
 
-		c.mock.ExpectQuery(getProductsByVendorQuery).
-			WithArgs(vendorID).
+		query := getProductsByVendorQuery + " LIMIT $2 OFFSET $3"
+		c.mock.ExpectQuery(query).
+			WithArgs(vendorID, args.Limit, args.Offset).
 			WillReturnRows(expectedResult)
 
-		res, err := c.accessor.GetProductsByVendor(ctx, vendorID, spec)
+		totalRows := sqlmock.NewRows([]string{"count"}).AddRow(2)
+		countQuery := `SELECT COUNT(*) FROM product_vendor WHERE vendor_id=$1`
+		c.mock.ExpectQuery(countQuery).
+			WithArgs(vendorID).
+			WillReturnRows(totalRows)
 
+		expect := &AccessorGetProductsByVendorPaginationData{
+			Products: products,
+			Metadata: database.PaginationMetadata{
+				TotalPage:    1,
+				CurrentPage:  1,
+				TotalEntries: 2,
+			},
+		}
+
+		res, err := c.accessor.GetProductsByVendor(ctx, vendorID, spec)
 		c.g.Expect(err).To(gomega.BeNil())
-		c.g.Expect(res).To(gomega.BeComparableTo(products))
+		c.g.Expect(res).To(gomega.BeComparableTo(expect))
 	})
 
 	t.Run("success with filter by name", func(t *testing.T) {
@@ -463,20 +484,35 @@ func Test_GetProductsByVendor(t *testing.T) {
 			expectedResult = sqlmock.NewRows(productColumns).
 					AddRow(products[1].ID, "", "", "", "", products[1].Name, "", products[1].ModifiedDate, "")
 			customSpec = GetProductsByVendorSpec{
-				Name: "Rice Cooker",
+				Name:           "Rice Cooker",
+				PaginationSpec: spec.PaginationSpec,
 			}
 		)
 		defer c.db.Close()
 
 		productNameList := strings.Fields(customSpec.Name)
-		c.mock.ExpectQuery(getProductsByVendorQuery+" AND p.name iLIKE $2 AND p.name iLIKE $3").
-			WithArgs(vendorID, "%"+productNameList[0]+"%", "%"+productNameList[1]+"%").
+		c.mock.ExpectQuery(getProductsByVendorQuery+" AND p.name iLIKE $2 AND p.name iLIKE $3"+" LIMIT $4 OFFSET $5").
+			WithArgs(vendorID, "%"+productNameList[0]+"%", "%"+productNameList[1]+"%", args.Limit, args.Offset).
 			WillReturnRows(expectedResult)
 
-		res, err := c.accessor.GetProductsByVendor(ctx, vendorID, customSpec)
+		totalRows := sqlmock.NewRows([]string{"count"}).AddRow(1)
+		countQuery := `SELECT COUNT(*) FROM product_vendor WHERE vendor_id=$1`
+		c.mock.ExpectQuery(countQuery).
+			WithArgs(vendorID).
+			WillReturnRows(totalRows)
 
+		expect := &AccessorGetProductsByVendorPaginationData{
+			Products: products[1:],
+			Metadata: database.PaginationMetadata{
+				TotalPage:    1,
+				CurrentPage:  1,
+				TotalEntries: 1,
+			},
+		}
+
+		res, err := c.accessor.GetProductsByVendor(ctx, vendorID, customSpec)
 		c.g.Expect(err).To(gomega.BeNil())
-		c.g.Expect(res).To(gomega.BeComparableTo(products[1:]))
+		c.g.Expect(res).To(gomega.BeComparableTo(expect))
 	})
 
 	t.Run("success with order by", func(t *testing.T) {
@@ -487,19 +523,37 @@ func Test_GetProductsByVendor(t *testing.T) {
 					AddRow(products[0].ID, "", "", "", "", products[0].Name, "", products[0].ModifiedDate, "").
 					AddRow(products[1].ID, "", "", "", "", products[1].Name, "", products[1].ModifiedDate, "")
 			customSpec = GetProductsByVendorSpec{
-				PaginationSpec: database.PaginationSpec{OrderBy: "name"},
+				PaginationSpec: database.PaginationSpec{
+					OrderBy: "name",
+					Limit:   10,
+					Page:    1,
+				},
 			}
 		)
 		defer c.db.Close()
 
-		c.mock.ExpectQuery(getProductsByVendorQuery + " ORDER BY name ASC").
-			WithArgs(vendorID).
+		c.mock.ExpectQuery(getProductsByVendorQuery+" ORDER BY name ASC LIMIT $2 OFFSET $3").
+			WithArgs(vendorID, args.Limit, args.Offset).
 			WillReturnRows(expectedResult)
 
-		res, err := c.accessor.GetProductsByVendor(ctx, vendorID, customSpec)
+		totalRows := sqlmock.NewRows([]string{"count"}).AddRow(2)
+		countQuery := `SELECT COUNT(*) FROM product_vendor WHERE vendor_id=$1`
+		c.mock.ExpectQuery(countQuery).
+			WithArgs(vendorID).
+			WillReturnRows(totalRows)
 
+		expect := &AccessorGetProductsByVendorPaginationData{
+			Products: products,
+			Metadata: database.PaginationMetadata{
+				TotalPage:    1,
+				CurrentPage:  1,
+				TotalEntries: 2,
+			},
+		}
+
+		res, err := c.accessor.GetProductsByVendor(ctx, vendorID, customSpec)
 		c.g.Expect(err).To(gomega.BeNil())
-		c.g.Expect(res).To(gomega.BeComparableTo(products))
+		c.g.Expect(res).To(gomega.BeComparableTo(expect))
 	})
 
 	t.Run("success with order by and filter by name", func(t *testing.T) {
@@ -509,22 +563,40 @@ func Test_GetProductsByVendor(t *testing.T) {
 			expectedResult = sqlmock.NewRows(productColumns).
 					AddRow(products[1].ID, "", "", "", "", products[1].Name, "", products[1].ModifiedDate, "")
 			customSpec = GetProductsByVendorSpec{
-				Name:           "Rice Cooker",
-				PaginationSpec: database.PaginationSpec{OrderBy: "name"},
+				Name: "Rice Cooker",
+				PaginationSpec: database.PaginationSpec{
+					OrderBy: "name",
+					Limit:   10,
+					Page:    1,
+				},
 			}
 		)
 		defer c.db.Close()
 
 		productNameList := strings.Fields(customSpec.Name)
 		c.mock.ExpectQuery(getProductsByVendorQuery+
-			" AND p.name iLIKE $2 AND p.name iLIKE $3 ORDER BY name ASC").
-			WithArgs(vendorID, "%"+productNameList[0]+"%", "%"+productNameList[1]+"%").
+			" AND p.name iLIKE $2 AND p.name iLIKE $3 ORDER BY name ASC LIMIT $4 OFFSET $5").
+			WithArgs(vendorID, "%"+productNameList[0]+"%", "%"+productNameList[1]+"%", args.Limit, args.Offset).
 			WillReturnRows(expectedResult)
 
-		res, err := c.accessor.GetProductsByVendor(ctx, vendorID, customSpec)
+		totalRows := sqlmock.NewRows([]string{"count"}).AddRow(1)
+		countQuery := `SELECT COUNT(*) FROM product_vendor WHERE vendor_id=$1`
+		c.mock.ExpectQuery(countQuery).
+			WithArgs(vendorID).
+			WillReturnRows(totalRows)
 
+		expect := &AccessorGetProductsByVendorPaginationData{
+			Products: products[1:],
+			Metadata: database.PaginationMetadata{
+				TotalPage:    1,
+				CurrentPage:  1,
+				TotalEntries: 1,
+			},
+		}
+
+		res, err := c.accessor.GetProductsByVendor(ctx, vendorID, customSpec)
 		c.g.Expect(err).To(gomega.BeNil())
-		c.g.Expect(res).To(gomega.BeComparableTo(products[1:]))
+		c.g.Expect(res).To(gomega.BeComparableTo(expect))
 	})
 
 	t.Run("error on query execution", func(t *testing.T) {
@@ -534,8 +606,8 @@ func Test_GetProductsByVendor(t *testing.T) {
 		)
 		defer c.db.Close()
 
-		c.mock.ExpectQuery(getProductsByVendorQuery).
-			WithArgs(vendorID).
+		c.mock.ExpectQuery(getProductsByVendorQuery+" LIMIT $1 OFFSET $2").
+			WithArgs(vendorID, args.Limit, args.Offset).
 			WillReturnError(errors.New("error"))
 
 		res, err := c.accessor.GetProductsByVendor(ctx, vendorID, spec)
@@ -555,8 +627,8 @@ func Test_GetProductsByVendor(t *testing.T) {
 		)
 		defer c.db.Close()
 
-		c.mock.ExpectQuery(getProductsByVendorQuery).
-			WithArgs(vendorID).
+		c.mock.ExpectQuery(getProductsByVendorQuery+" LIMIT $1 OFFSET $2").
+			WithArgs(vendorID, args.Limit, args.Offset).
 			WillReturnRows(expectedResult)
 
 		res, err := c.accessor.GetProductsByVendor(ctx, vendorID, spec)
@@ -576,12 +648,38 @@ func Test_GetProductsByVendor(t *testing.T) {
 		)
 		defer c.db.Close()
 
-		c.mock.ExpectQuery(getProductsByVendorQuery).
-			WithArgs(vendorID).
+		c.mock.ExpectQuery(getProductsByVendorQuery+" LIMIT $1 OFFSET $2").
+			WithArgs(vendorID, args.Limit, args.Offset).
 			WillReturnRows(expectedResult)
 
 		res, err := c.accessor.GetProductsByVendor(ctx, vendorID, spec)
 
+		c.g.Expect(err).ToNot(gomega.BeNil())
+		c.g.Expect(res).To(gomega.BeNil())
+	})
+
+	t.Run("error while querying count", func(t *testing.T) {
+		var (
+			ctx            = context.Background()
+			c              = setupProductAccessorTestComponent(t)
+			expectedResult = sqlmock.NewRows(productColumns).
+					AddRow(products[0].ID, "", "", "", "", products[0].Name, "", products[0].ModifiedDate, "").
+					AddRow(products[1].ID, "", "", "", "", products[1].Name, "", products[1].ModifiedDate, "")
+		)
+		defer c.db.Close()
+
+		query := getProductsByVendorQuery + " LIMIT $2 OFFSET $3"
+		c.mock.ExpectQuery(query).
+			WithArgs(vendorID, args.Limit, args.Offset).
+			WillReturnRows(expectedResult)
+
+		totalRows := sqlmock.NewRows([]string{"count"}).RowError(1, fmt.Errorf("row error"))
+		countQuery := `SELECT COUNT(*) FROM product_vendor WHERE vendor_id=$1`
+		c.mock.ExpectQuery(countQuery).
+			WithArgs(vendorID).
+			WillReturnRows(totalRows)
+
+		res, err := c.accessor.GetProductsByVendor(ctx, vendorID, spec)
 		c.g.Expect(err).ToNot(gomega.BeNil())
 		c.g.Expect(res).To(gomega.BeNil())
 	})
