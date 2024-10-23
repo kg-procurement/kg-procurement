@@ -11,6 +11,7 @@ type Application struct {
 	Routes Routes `mapstructure:"routes" validate:"required"`
 	Token  Token  `mapstructure:"token" validate:"required"`
 	SMTP   SMTP   `mapstructure:"smtp" validate:"required"`
+	AWS    AWS    `mapstructure:"aws" validate:"required"`
 }
 
 type SMTP struct {
@@ -19,6 +20,12 @@ type SMTP struct {
 	SenderName   string `mapstructure:"sender_name" validate:"required"`
 	AuthEmail    string `mapstructure:"auth_email" validate:"required"`
 	AuthPassword string `mapstructure:"auth_password" validate:"required"`
+}
+
+type AWS struct {
+	AccessKey       string `mapstructure:"access-key" validate:"required"`
+	SecretAccessKey string `mapstructure:"secret-access-key" validate:"required"`
+	Region          string `mapstructure:"region" validate:"required"`
 }
 
 type Common struct {
@@ -58,7 +65,7 @@ type Token struct {
 
 type AccountRoutes struct {
 	Register string `mapstructure:"register" validate:"required"`
-	Login string `mapstructure:"login" validate:"required"`
+	Login    string `mapstructure:"login" validate:"required"`
 }
 
 func Load() Application {

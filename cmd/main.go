@@ -5,8 +5,9 @@ import (
 	"kg/procurement/cmd/dependency"
 	"kg/procurement/internal/account"
 	"kg/procurement/internal/product"
-	"kg/procurement/internal/vendors"
+	"kg/procurement/internal/smtp"
 	"kg/procurement/internal/token"
+	"kg/procurement/internal/vendors"
 	"kg/procurement/router"
 	"log"
 	"os"
@@ -28,6 +29,9 @@ func main() {
 		}
 		_ = os.Stdout.Sync()
 	}()
+
+	awsCfg := dependency.NewAWSConfig(cfg.AWS)
+	_ = smtp.NewSESProvider(*awsCfg)
 
 	clock := clock.New()
 

@@ -34,5 +34,13 @@
     "sender_name": "lee ji eun <iu@gmail.com>",
     "auth_email": "leejieun@gmail.com",
     "auth_password": "dlwlrma"
+  },
+  "aws": {
+    "access-key": "your-access-key",
+    "secret-access-key": "your-secret-access-key",
+    "region": "ap-southeast-1",
+    "ses": {
+      "domain": "your-domain"
+    }
   }
 }
