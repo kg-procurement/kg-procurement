@@ -1305,6 +1305,83 @@ func Test_GetAllLocations(t *testing.T) {
 	})
 }
 
+func Test_BulkGetByIDs(t *testing.T) {
+	t.Parallel()
+
+	var (
+		vendorColumns = []string{"id", "email"}
+		vendors       = []Vendor{
+			{
+				ID:    "1",
+				Email: "ferryganteng@outlook.com",
+			},
+			{
+				ID:    "2",
+				Email: "valenganteng@gmail.com",
+			},
+		}
+	)
+
+	t.Run("success", func(t *testing.T) {
+		var (
+			ctx = context.Background()
+			c   = setupVendorAccessorTestComponent(t)
+		)
+		defer c.db.Close()
+
+		rows := sqlmock.NewRows(vendorColumns).
+			AddRow("1", "ferryganteng@outlook.com").
+			AddRow("2", "valenganteng@gmail.com")
+
+		vendorIDs := []string{"1", "2"}
+		query, _, _ := sqlx.In(getBulkByID, vendorIDs)
+		c.mock.ExpectQuery(query).
+			WithArgs("1", "2").
+			WillReturnRows(rows)
+
+		results, err := c.accessor.BulkGetByIDs(ctx, vendorIDs)
+
+		c.g.Expect(err).To(gomega.BeNil())
+		c.g.Expect(results).To(gomega.Equal(vendors))
+	})
+
+	t.Run("error - query execution", func(t *testing.T) {
+		var (
+			ctx = context.Background()
+			c   = setupVendorAccessorTestComponent(t)
+		)
+		defer c.db.Close()
+
+		vendorIDs := []string{"1", "2"}
+		query, _, _ := sqlx.In(getBulkByID, vendorIDs)
+		c.mock.ExpectQuery(query).
+			WillReturnError(sql.ErrConnDone)
+
+		results, err := c.accessor.BulkGetByIDs(ctx, vendorIDs)
+
+		c.g.Expect(err).ToNot(gomega.BeNil())
+		c.g.Expect(results).To(gomega.BeNil())
+	})
+
+	t.Run("error - row scan", func(t *testing.T) {
+		var (
+			ctx = context.Background()
+			c   = setupVendorAccessorTestComponent(t)
+		)
+		defer c.db.Close()
+
+		rows := sqlmock.NewRows(vendorColumns).
+			AddRow(nil, nil)
+
+		c.mock.ExpectQuery(getBulkByID).
+			WillReturnRows(rows)
+
+		results, err := c.accessor.BulkGetByIDs(ctx, []string{"1"})
+		c.g.Expect(err).ToNot(gomega.BeNil())
+		c.g.Expect(results).To(gomega.BeNil())
+	})
+}
+
 func Test_writeProductVendor(t *testing.T) {
 	t.Parallel()
 
