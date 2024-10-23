@@ -1,4 +1,4 @@
-//go:generate mockgen -typed -source=net.go -destination=net_mock.go -package=smtp
+//go:generate mockgen -typed -source=net.go -destination=net_mock.go -package=smtp_provider
 package smtp_provider
 
 import (

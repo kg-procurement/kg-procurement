@@ -1,4 +1,4 @@
-//go:generate mockgen -typed -source=email.go -destination=email_mock.go -package=smtp
+//go:generate mockgen -typed -source=email.go -destination=email_mock.go -package=smtp_provider
 package smtp_provider
 
 type Email struct {
@@ -9,6 +9,6 @@ type Email struct {
 	Body    string
 }
 
-type EmailSender interface {
+type EmailProvider interface {
 	SendEmail(email Email) error
 }
