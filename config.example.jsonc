@@ -13,7 +13,8 @@
       "get-all": "/vendor",
       "update-detail": "/vendor/:id",
       "get-by-id": "/vendor/:id",
-      "get-locations": "/vendor/location"
+      "get-locations": "/vendor/location",
+      "email-blast": "/vendor/blast"
     },
     "product": {
       "get-products-by-vendor": "/product/vendor/:vendor_id",

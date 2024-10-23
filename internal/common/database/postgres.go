@@ -21,6 +21,7 @@ type DBConnector interface {
 	NamedExec(query string, arg interface{}) (sql.Result, error)
 	Select(dest interface{}, query string, args ...interface{}) error
 	Get(dest interface{}, query string, args ...interface{}) error
+	Rebind(query string) string
 	Close() error
 }
 
@@ -67,6 +68,10 @@ func (c *Conn) Select(dest interface{}, query string, args ...interface{}) error
 
 func (c *Conn) Get(dest interface{}, query string, args ...interface{}) error {
 	return c.db.Get(dest, query, args...)
+}
+
+func (c *Conn) Rebind(query string) string {
+	return c.db.Rebind(query)
 }
 
 func NewConn(host, user, password, name, port string) *Conn {

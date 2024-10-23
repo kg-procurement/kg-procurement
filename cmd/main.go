@@ -35,7 +35,9 @@ func main() {
 
 	clock := clock.New()
 
-	vendorSvc := vendors.NewVendorService(conn, clock)
+	netSMTP := smtp_provider.NewNativeSMTP(cfg.SMTP)
+
+	vendorSvc := vendors.NewVendorService(cfg, conn, clock, netSMTP)
 	productSvc := product.NewProductService(conn, clock)
 	tokenSvc := token.NewTokenService(cfg.Token, clock)
 	accountSvc := account.NewAccountService(conn, clock, tokenSvc)
@@ -46,7 +48,7 @@ func main() {
 	router.NewProductEngine(r, cfg.Routes.Product, productSvc)
 	router.NewAccountEngine(r, cfg.Routes.Account, accountSvc)
 
-	if err := r.Run(":8080"); err != nil {
+	if err := r.Run(":8081"); err != nil {
 		log.Fatalf("failed to run server, err: %v", err)
 	}
 }
