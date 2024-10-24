@@ -3,6 +3,7 @@ package vendors
 
 import (
 	"context"
+	"fmt"
 	"kg/procurement/cmd/config"
 	"kg/procurement/internal/common/database"
 	"kg/procurement/internal/mailer"
@@ -48,10 +49,10 @@ func (v *VendorService) GetLocations(ctx context.Context) ([]string, error) {
 	return v.vendorDBAccessor.GetAllLocations(ctx)
 }
 
-func (v *VendorService) BlastEmail(ctx context.Context, vendorIDs []string, template emailTemplate) error {
+func (v *VendorService) BlastEmail(ctx context.Context, vendorIDs []string, template emailTemplate) ([]string, error) {
 	vendors, err := v.vendorDBAccessor.BulkGetByIDs(ctx, vendorIDs)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	errCh := make(chan error, len(vendors))
@@ -77,12 +78,19 @@ func (v *VendorService) BlastEmail(ctx context.Context, vendorIDs []string, temp
 	}
 	wg.Wait()
 
+	var errList []string
 	for i := 0; i < len(vendors); i++ {
 		if err := <-errCh; err != nil {
 			log.Printf("ERROR: fail sending email %v", err)
+			errList = append(errList, err.Error())
 		}
 	}
-	return nil
+
+	if len(errList) > 0 {
+		return errList, fmt.Errorf("fail sending emails")
+	}
+
+	return nil, nil
 }
 
 func NewVendorService(

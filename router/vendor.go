@@ -100,8 +100,14 @@ func NewVendorEngine(
 			return
 		}
 
-		err := vendorSvc.BlastEmail(ctx, payload.VendorIDs, payload.EmailTemplate)
+		errList, err := vendorSvc.BlastEmail(ctx, payload.VendorIDs, payload.EmailTemplate)
 		if err != nil {
+			if len(errList) > 0 {
+				ctx.JSON(http.StatusMultiStatus, gin.H{
+					"error": errList,
+				})
+				return
+			}
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
 			})
@@ -109,7 +115,7 @@ func NewVendorEngine(
 		}
 
 		ctx.JSON(http.StatusOK, gin.H{
-			"message": "Request successfully sent",
+			"message": "Emails successfully sent",
 		})
 	})
 }
