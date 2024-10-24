@@ -414,11 +414,12 @@ func TestVendorService_BlastEmail(t *testing.T) {
 			Return(nil).
 			Times(2)
 
-		err := subject.BlastEmail(ctx, vendorIDs, emailTemplate{
+		errList, err := subject.BlastEmail(ctx, vendorIDs, emailTemplate{
 			Subject: "test",
 			Body:    "email body here uwaa",
 		})
 		g.Expect(err).To(gomega.BeNil())
+		g.Expect(errList).To(gomega.BeNil())
 	})
 
 	t.Run("error", func(t *testing.T) {
@@ -430,11 +431,12 @@ func TestVendorService_BlastEmail(t *testing.T) {
 			BulkGetByIDs(ctx, vendorIDs).
 			Return(nil, errors.New("oh noo"))
 
-		err := subject.BlastEmail(ctx, vendorIDs, emailTemplate{
+		errList, err := subject.BlastEmail(ctx, vendorIDs, emailTemplate{
 			Subject: "test",
 			Body:    "email body here uwaa",
 		})
 		g.Expect(err).ToNot(gomega.BeNil())
+		g.Expect(errList).To(gomega.BeNil())
 	})
 
 	t.Run("does not return error even if sending email fails", func(t *testing.T) {
@@ -454,10 +456,11 @@ func TestVendorService_BlastEmail(t *testing.T) {
 			SendEmail(gomock.Any()).
 			Return(nil)
 
-		err := subject.BlastEmail(ctx, vendorIDs, emailTemplate{
+		errList, err := subject.BlastEmail(ctx, vendorIDs, emailTemplate{
 			Subject: "test",
 			Body:    "email body here uwaa",
 		})
-		g.Expect(err).To(gomega.BeNil())
+		g.Expect(err).ToNot(gomega.BeNil())
+		g.Expect(errList).To(gomega.HaveLen(1))
 	})
 }
