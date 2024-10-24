@@ -18,8 +18,17 @@ func GetPaginationSpec(r *http.Request) database.PaginationSpec {
 	order := queryParam.Get("order")
 	orderBy := queryParam.Get("order_by")
 
+	limitStr := queryParam.Get("limit")
+	limit := 10 // Default value
+	if limitStr != "" {
+		limit, err = strconv.Atoi(limitStr)
+		if err != nil {
+			limit = 10
+		}
+	}
+
 	spec := database.PaginationSpec{
-		Limit:   10,
+		Limit:   limit,
 		Order:   order,
 		Page:    page,
 		OrderBy: orderBy,
