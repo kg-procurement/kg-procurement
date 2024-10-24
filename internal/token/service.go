@@ -6,25 +6,25 @@ import (
 	"kg/procurement/cmd/config"
 )
 
-type tokenManager interface {
+type TokenManager interface {
 	GenerateToken(spec ClaimSpec) (string, error)
 	ValidateToken(tokenString string) (*Claims, error)
 }
 
 type TokenService struct {
-	tokenManager
+	TokenManager
 }
 
 func (s *TokenService) GenerateToken(spec ClaimSpec) (string, error) {
-	return s.tokenManager.GenerateToken(spec)
+	return s.TokenManager.GenerateToken(spec)
 }
 
 func (s *TokenService) ValidateToken(tokenString string) (*Claims, error) {
-	return s.tokenManager.ValidateToken(tokenString)
+	return s.TokenManager.ValidateToken(tokenString)
 }
 
 func NewTokenService(cfg config.Token, clock clock.Clock) *TokenService {
 	return &TokenService{
-		tokenManager: newJWTManager(cfg, clock),
+		TokenManager: newJWTManager(cfg, clock),
 	}
 }
