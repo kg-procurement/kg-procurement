@@ -27,6 +27,7 @@ func NewVendorEngine(
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
 			})
+			return
 		}
 
 		ctx.JSON(http.StatusOK, res)
@@ -40,6 +41,7 @@ func NewVendorEngine(
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
 			})
+			return
 		}
 
 		newVendor := vendors.Vendor{
@@ -59,6 +61,7 @@ func NewVendorEngine(
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
 			})
+			return
 		}
 
 		ctx.JSON(http.StatusOK, res)
@@ -72,6 +75,7 @@ func NewVendorEngine(
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
 			})
+			return
 		}
 
 		ctx.JSON(http.StatusOK, res)
