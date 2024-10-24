@@ -9,6 +9,7 @@ import (
 // i.e. name, etc
 type Vendor struct {
 	ID            string    `db:"id" json:"id"`
+	Email         string    `db:"email" json:"email"`
 	Name          string    `db:"name" json:"name"`
 	Description   string    `db:"description" json:"description"`
 	BpID          string    `db:"bp_id" json:"bp_id"`

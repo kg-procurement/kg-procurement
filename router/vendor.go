@@ -90,4 +90,32 @@ func NewVendorEngine(
 			"locations": res,
 		})
 	})
+
+	r.POST(cfg.EmailBlast, func(ctx *gin.Context) {
+		payload := vendors.EmailBlastContract{}
+		if err := ctx.ShouldBindJSON(&payload); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"error": "Invalid request payload",
+			})
+			return
+		}
+
+		errList, err := vendorSvc.BlastEmail(ctx, payload.VendorIDs, payload.EmailTemplate)
+		if err != nil {
+			if len(errList) > 0 {
+				ctx.JSON(http.StatusMultiStatus, gin.H{
+					"error": errList,
+				})
+				return
+			}
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, gin.H{
+			"message": "Emails successfully sent",
+		})
+	})
 }

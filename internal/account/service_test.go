@@ -27,7 +27,7 @@ func TestAccountService_RegisterAccount(t *testing.T) {
 
 	type args struct {
 		ctx  context.Context
-		spec AccountCredentialSpec
+		spec RegisterContract
 	}
 
 	tests := []struct {
@@ -43,7 +43,7 @@ func TestAccountService_RegisterAccount(t *testing.T) {
 			},
 			args: args{
 				ctx: context.Background(),
-				spec: AccountCredentialSpec{
+				spec: RegisterContract{
 					Email:    "test@example.com",
 					Password: "password123",
 				},
@@ -54,7 +54,7 @@ func TestAccountService_RegisterAccount(t *testing.T) {
 			name: "invalid email",
 			args: args{
 				ctx: context.Background(),
-				spec: AccountCredentialSpec{
+				spec: RegisterContract{
 					Email:    "invalid-email",
 					Password: "password123",
 				},
@@ -68,7 +68,7 @@ func TestAccountService_RegisterAccount(t *testing.T) {
 			},
 			args: args{
 				ctx: context.Background(),
-				spec: AccountCredentialSpec{
+				spec: RegisterContract{
 					Email:    "test@example.com",
 					Password: "password123",
 				},
@@ -82,7 +82,7 @@ func TestAccountService_RegisterAccount(t *testing.T) {
 			},
 			args: args{
 				ctx: context.Background(),
-				spec: AccountCredentialSpec{
+				spec: RegisterContract{
 					Email:    "test@example.com",
 					Password: "password123",
 				},
@@ -96,7 +96,7 @@ func TestAccountService_RegisterAccount(t *testing.T) {
 			},
 			args: args{
 				ctx: context.Background(),
-				spec: AccountCredentialSpec{
+				spec: RegisterContract{
 					Email:    "test@example.com",
 					Password: "password123",
 				},
@@ -157,7 +157,7 @@ func TestAccountService_Login(t *testing.T) {
 
 	type args struct {
 		ctx  context.Context
-		spec AccountCredentialSpec
+		spec LoginContract
 	}
 
 	tests := []struct {
@@ -175,7 +175,7 @@ func TestAccountService_Login(t *testing.T) {
 			},
 			args: args{
 				ctx: context.Background(),
-				spec: AccountCredentialSpec{
+				spec: LoginContract{
 					Email:    "test@example.com",
 					Password: "password123",
 				},
@@ -191,7 +191,7 @@ func TestAccountService_Login(t *testing.T) {
 			},
 			args: args{
 				ctx: context.Background(),
-				spec: AccountCredentialSpec{
+				spec: LoginContract{
 					Email:    "test@example.com",
 					Password: "password123",
 				},
@@ -206,7 +206,7 @@ func TestAccountService_Login(t *testing.T) {
 			},
 			args: args{
 				ctx: context.Background(),
-				spec: AccountCredentialSpec{
+				spec: LoginContract{
 					Email:    "test@example.com",
 					Password: "wrongpassword",
 				},
@@ -221,7 +221,7 @@ func TestAccountService_Login(t *testing.T) {
 			},
 			args: args{
 				ctx: context.Background(),
-				spec: AccountCredentialSpec{
+				spec: LoginContract{
 					Email:    "test@example.com",
 					Password: "password123",
 				},

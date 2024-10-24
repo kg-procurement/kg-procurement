@@ -5,9 +5,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"kg/procurement/internal/common/database"
 	"kg/procurement/internal/token"
+	"log"
 	"net/mail"
 
 	"github.com/benbjohnson/clock"
@@ -30,7 +30,7 @@ type AccountService struct {
 	tokenService
 }
 
-func (a *AccountService) RegisterAccount(ctx context.Context, spec AccountCredentialSpec) error {
+func (a *AccountService) RegisterAccount(ctx context.Context, spec RegisterContract) error {
 	// Validate email
 	if _, err := mail.ParseAddress(spec.Email); err != nil {
 		return fmt.Errorf("invalid email: %w", err)
@@ -58,7 +58,7 @@ func (a *AccountService) RegisterAccount(ctx context.Context, spec AccountCreden
 	return a.accountDBAccessor.RegisterAccount(ctx, account)
 }
 
-func (a *AccountService) Login(ctx context.Context, spec AccountCredentialSpec) (string, error) {
+func (a *AccountService) Login(ctx context.Context, spec LoginContract) (string, error) {
 
 	// Find the account by email
 	account, err := a.accountDBAccessor.FindAccountByEmail(ctx, spec.Email)
