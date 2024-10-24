@@ -7,7 +7,7 @@
 //
 
 // Package smtp is a generated GoMock package.
-package smtp
+package smtp_provider
 
 import (
 	reflect "reflect"
