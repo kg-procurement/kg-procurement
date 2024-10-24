@@ -35,6 +35,7 @@ func NewProductEngine(
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
 			})
+			return
 		}
 
 		ctx.JSON(http.StatusOK, res)
@@ -48,6 +49,7 @@ func NewProductEngine(
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
 			})
+			return
 		}
 		newProduct := product.Product{
 			ID:                product.ProductID(id),
@@ -63,6 +65,7 @@ func NewProductEngine(
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
 			})
+			return
 		}
 		ctx.JSON(http.StatusOK, res)
 	})
@@ -107,6 +110,7 @@ func NewProductEngine(
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
 			})
+			return
 		}
 		ctx.JSON(http.StatusOK, res)
 	})
