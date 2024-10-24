@@ -39,6 +39,45 @@ func (m *MockvendorDBAccessor) EXPECT() *MockvendorDBAccessorMockRecorder {
 	return m.recorder
 }
 
+// BulkGetByIDs mocks base method.
+func (m *MockvendorDBAccessor) BulkGetByIDs(arg0 context.Context, ids []string) ([]Vendor, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BulkGetByIDs", arg0, ids)
+	ret0, _ := ret[0].([]Vendor)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// BulkGetByIDs indicates an expected call of BulkGetByIDs.
+func (mr *MockvendorDBAccessorMockRecorder) BulkGetByIDs(arg0, ids any) *MockvendorDBAccessorBulkGetByIDsCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BulkGetByIDs", reflect.TypeOf((*MockvendorDBAccessor)(nil).BulkGetByIDs), arg0, ids)
+	return &MockvendorDBAccessorBulkGetByIDsCall{Call: call}
+}
+
+// MockvendorDBAccessorBulkGetByIDsCall wrap *gomock.Call
+type MockvendorDBAccessorBulkGetByIDsCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockvendorDBAccessorBulkGetByIDsCall) Return(arg0 []Vendor, arg1 error) *MockvendorDBAccessorBulkGetByIDsCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockvendorDBAccessorBulkGetByIDsCall) Do(f func(context.Context, []string) ([]Vendor, error)) *MockvendorDBAccessorBulkGetByIDsCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockvendorDBAccessorBulkGetByIDsCall) DoAndReturn(f func(context.Context, []string) ([]Vendor, error)) *MockvendorDBAccessorBulkGetByIDsCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // GetAll mocks base method.
 func (m *MockvendorDBAccessor) GetAll(ctx context.Context, spec GetAllVendorSpec) (*AccessorGetAllPaginationData, error) {
 	m.ctrl.T.Helper()

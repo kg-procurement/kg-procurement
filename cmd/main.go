@@ -4,8 +4,8 @@ import (
 	"kg/procurement/cmd/config"
 	"kg/procurement/cmd/dependency"
 	"kg/procurement/internal/account"
+	"kg/procurement/internal/mailer"
 	"kg/procurement/internal/product"
-	"kg/procurement/internal/smtp_provider"
 	"kg/procurement/internal/token"
 	"kg/procurement/internal/vendors"
 	"kg/procurement/router"
@@ -31,11 +31,13 @@ func main() {
 	}()
 
 	awsCfg := dependency.NewAWSConfig(cfg.AWS)
-	_ = smtp_provider.NewSESProvider(*awsCfg)
+	_ = mailer.NewSESProvider(*awsCfg)
 
 	clock := clock.New()
 
-	vendorSvc := vendors.NewVendorService(conn, clock)
+	netSMTP := mailer.NewNativeSMTP(cfg.SMTP)
+
+	vendorSvc := vendors.NewVendorService(cfg, conn, clock, netSMTP)
 	productSvc := product.NewProductService(conn, clock)
 	tokenSvc := token.NewTokenService(cfg.Token, clock)
 	accountSvc := account.NewAccountService(conn, clock, tokenSvc)

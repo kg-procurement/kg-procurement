@@ -1,5 +1,5 @@
-//go:generate mockgen -typed -source=ses.go -destination=ses_mock.go -package=smtp
-package smtp_provider
+//go:generate mockgen -typed -source=ses.go -destination=ses_mock.go -package=mailer
+package mailer
 
 import (
 	"context"

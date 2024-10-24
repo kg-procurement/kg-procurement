@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/benbjohnson/clock"
+	"github.com/jmoiron/sqlx"
 )
 
 type postgresVendorAccessor struct {
@@ -17,10 +18,11 @@ type postgresVendorAccessor struct {
 const (
 	insertVendor = `
 		INSERT INTO vendor
-			(id, name, description, bp_id, bp_name, rating, area_group_id, area_group_name, sap_code, modified_date, modified_by, dt)
+			(id, name, email, description, bp_id, bp_name, rating, area_group_id, area_group_name, sap_code, modified_date, modified_by, dt)
 		VALUES 
-			(:id, :name, :description, :bp_id, :bp_name, :rating, :area_group_id, :area_group_name, :sap_code, :modified_date, :modified_by, :dt)
+			(:id, :name, :email, :description, :bp_id, :bp_name, :rating, :area_group_id, :area_group_name, :sap_code, :modified_date, :modified_by, :dt)
 	`
+	getBulkByID          = `SELECT * FROM vendor WHERE id IN (?)`
 	getAllLocationsQuery = `SELECT DISTINCT area_group_name FROM vendor`
 )
 
@@ -265,6 +267,34 @@ func (p *postgresVendorAccessor) GetAllLocations(ctx context.Context) ([]string,
 	}
 
 	return results, nil
+}
+
+func (p *postgresVendorAccessor) BulkGetByIDs(_ context.Context, ids []string) ([]Vendor, error) {
+	query, args, err := sqlx.In(getBulkByID, ids)
+	if err != nil {
+		return nil, err
+	}
+
+	query = p.db.Rebind(query)
+	rows, err := p.db.Queryx(query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	res := []Vendor{}
+	for rows.Next() {
+		var vendor Vendor
+		if err := rows.StructScan(&vendor); err != nil {
+			return nil, err
+		}
+		res = append(res, vendor)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }
 
 func (p *postgresVendorAccessor) writeVendor(ctx context.Context, vendor Vendor) error {
