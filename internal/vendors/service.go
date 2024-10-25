@@ -58,10 +58,17 @@ func (v *VendorService) BlastEmail(ctx context.Context, vendorIDs []string, temp
 	errCh := make(chan error, len(vendors))
 	defer close(errCh)
 
+	// limit the number of concurrent workers to 20
+	workerLimit := 20
+	sem := make(chan struct{}, workerLimit)
+
 	var wg sync.WaitGroup
 
 	for _, vendor := range vendors {
 		wg.Add(1)
+
+		sem <- struct{}{}
+
 		go func(vendor Vendor) {
 			defer wg.Done()
 
@@ -74,6 +81,8 @@ func (v *VendorService) BlastEmail(ctx context.Context, vendorIDs []string, temp
 				Body:    bodyWithVendorName,
 			})
 			errCh <- err
+
+			<-sem
 		}(vendor)
 	}
 	wg.Wait()
