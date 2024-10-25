@@ -118,6 +118,7 @@ func (p *postgresVendorAccessor) GetAll(ctx context.Context, spec GetAllVendorSp
 		SELECT DISTINCT
 			v.id,
 			v.name,
+			v.email,
 			v.description,
 			v.bp_id,
 			v.bp_name,
