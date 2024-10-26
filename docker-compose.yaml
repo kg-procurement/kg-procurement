@@ -29,6 +29,16 @@ services:
     volumes:
       - pgadmin-local:/var/lib/pgadmin
 
+  server:
+    build:
+      context: .
+    ports:
+      - "7070:7070"
+    depends_on:
+      - postgres-local
+    volumes:
+      - ./config.jsonc:/work/config.jsonc
+
 volumes:
   postgres-local:
   pgadmin-local:
