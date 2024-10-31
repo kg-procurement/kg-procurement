@@ -59,6 +59,12 @@ const (
 		VALUES 
 			(:id, :product_id, :code, :name, :income_tax_id, :income_tax_name, :income_tax_percentage, :description, :uom_id, :sap_code, :modified_date, :modified_by)
 	`
+	insertPrice = `
+		INSERT INTO price
+			(id, purchasing_org_id, purchasing_org_name, vendor_id, product_vendor_id, quantity_min, quantity_max, quantity_uom_id, lead_time_min, lead_time_max, currency_id, currency_name, currency_code, price, price_quantity, price_uom_id, valid_from, valid_to, valid_pattern_id, valid_pattern_name, area_group_id, area_group_name, reference_number, reference_date, document_type_id, document_type_name, document_id, item_id, term_of_payment_id, term_of_payment_days, term_of_payment_text, invocation_order, modified_date, modified_by)
+		VALUES 
+			(:id, :purchasing_org_id, :purchasing_org_name, :vendor_id, :product_vendor_id, :quantity_min, :quantity_max, :quantity_uom_id, :lead_time_min, :lead_time_max, :currency_id, :currency_name, :currency_code, :price, :price_quantity, :price_uom_id, :valid_from, :valid_to, :valid_pattern_id, :valid_pattern_name, :area_group_id, :area_group_name, :reference_number, :reference_date, :document_type_id, :document_type_name, :document_id, :item_id, :term_of_payment_id, :term_of_payment_days, :term_of_payment_text, :invocation_order, :modified_date, :modified_by)
+	`
 	updateProduct = `UPDATE product SET
         product_category_id = $2,
         uom_id = $3,
@@ -363,6 +369,14 @@ func (p *postgresProductAccessor) writeUOM(_ context.Context, uom UOM) error {
 func (p *postgresProductAccessor) writeProductVendor(_ context.Context, pv ProductVendor) error {
 	if _, err := p.db.NamedExec(insertProductVendor, pv); err != nil {
 		log.Printf("failed inserting product_vendor: %s, product_id: %s", pv.ID, pv.ProductID)
+		return err
+	}
+	return nil
+}
+
+func (p *postgresProductAccessor) writePrice(_ context.Context, price Price) error {
+	if _, err := p.db.NamedExec(insertPrice, price); err != nil {
+		log.Printf("failed inserting price: %s", price.ID)
 		return err
 	}
 	return nil

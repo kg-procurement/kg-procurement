@@ -923,6 +923,52 @@ func Test_writeProductVendor(t *testing.T) {
 	})
 }
 
+func Test_writePrice(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		var (
+			ctx   = context.Background()
+			c     = setupProductAccessorTestComponent(t, WithQueryMatcher(sqlmock.QueryMatcherRegexp))
+			price = Price{ID: "321"}
+		)
+
+		transformedQuery, args, _ := sqlx.Named(insertPrice, price)
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectExec(regexp.QuoteMeta(transformedQuery)).WithArgs(
+			driverArgs...,
+		).WillReturnResult(sqlmock.NewResult(1, 1))
+
+		err := c.accessor.writePrice(ctx, price)
+		c.g.Expect(err).Should(gomega.BeNil())
+	})
+
+	t.Run("error", func(t *testing.T) {
+		var (
+			ctx   = context.Background()
+			c     = setupProductAccessorTestComponent(t)
+			price = Price{ID: "321"}
+		)
+
+		transformedQuery, args, _ := sqlx.Named(insertPrice, price)
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectExec(regexp.QuoteMeta(transformedQuery)).WithArgs(
+			driverArgs...,
+		).WillReturnError(errors.New("error"))
+
+		err := c.accessor.writePrice(ctx, price)
+		c.g.Expect(err).ShouldNot(gomega.BeNil())
+	})
+}
+
 func Test_Close(t *testing.T) {
 	t.Parallel()
 
