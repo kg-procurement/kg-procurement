@@ -205,10 +205,21 @@ func seedVendor(ctx context.Context) {
 func seedProductVendor(ctx context.Context) {
 	var listOfProductVendor []product.ProductVendor
 
+	// parsing issue from data given not conforming to RFC3339 format
+	var temp []struct {
+		product.ProductVendor
+		ModifiedDate string `json:"modified_date"`
+	}
 	byteValue := readBytesFromFixture(productVendorFixtureFile)
-	if err := json.Unmarshal(byteValue, &listOfProductVendor); err != nil {
+	if err := json.Unmarshal(byteValue, &temp); err != nil {
 		log.Println("Error unmarshalling")
 		panic(err)
+	}
+
+	for _, tProductVendor := range temp {
+		pv := tProductVendor.ProductVendor
+		pv.ModifiedDate, _ = time.Parse(time.DateTime, tProductVendor.ModifiedDate)
+		listOfProductVendor = append(listOfProductVendor, pv)
 	}
 
 	if err := productSeeder.SetupProductVendor(ctx, listOfProductVendor); err != nil {
