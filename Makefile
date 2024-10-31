@@ -31,7 +31,10 @@ seed-vendor:
 	@go run scripts/seeder/main.go vendor
 seed-product-vendor:
 	@go run scripts/seeder/main.go product_vendor
+seed-price:
+	@go run scripts/seeder/main.go price
 
+seed-all: seed-product-category seed-product-type seed-uom seed-product seed-vendor seed-product-vendor seed-price
 
 migrate-up:
 	@goose -dir migrations postgres "password=postgres user=postgres port=5432 dbname=kg-procurement host=localhost sslmode=disable" up
