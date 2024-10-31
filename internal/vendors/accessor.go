@@ -36,18 +36,6 @@ const (
 		WHERE
 			p.name = :product_name
 	`
-	getAllVendorJoinProduct = `
-		SELECT 
-			*
-		FROM
-			vendor v
-		JOIN
-			product_vendor pv ON pv.vendor_id = v.id
-		JOIN 
-			product p ON pv.product_id = p.id
-		LIMIT 10
-
-	`
 )
 
 // GetSomeStuff is just an example
