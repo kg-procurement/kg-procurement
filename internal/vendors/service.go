@@ -21,6 +21,7 @@ type vendorDBAccessor interface {
 	UpdateDetail(ctx context.Context, spec Vendor) (*Vendor, error)
 	GetAllLocations(ctx context.Context) ([]string, error)
 	BulkGetByIDs(_ context.Context, ids []string) ([]Vendor, error)
+	getAllVendorIdByProductName(ctx context.Context, productName string) ([]string, error)
 }
 
 type VendorService struct {
@@ -100,6 +101,11 @@ func (v *VendorService) BlastEmail(ctx context.Context, vendorIDs []string, temp
 	}
 
 	return nil, nil
+}
+
+func (v *VendorService) AutomatedEmailBlast(ctx context.Context, productName string) ([]string, error) {
+	return v.vendorDBAccessor.getAllVendorIdByProductName(ctx, productName)
+
 }
 
 func NewVendorService(

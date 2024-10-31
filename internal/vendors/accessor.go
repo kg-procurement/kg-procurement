@@ -22,8 +22,32 @@ const (
 		VALUES 
 			(:id, :name, :email, :description, :bp_id, :bp_name, :rating, :area_group_id, :area_group_name, :sap_code, :modified_date, :modified_by, :dt)
 	`
-	getBulkByID          = `SELECT * FROM vendor WHERE id IN (?)`
-	getAllLocationsQuery = `SELECT DISTINCT area_group_name FROM vendor`
+	getBulkByID                 = `SELECT * FROM vendor WHERE id IN (?)`
+	getAllLocationsQuery        = `SELECT DISTINCT area_group_name FROM vendor`
+	getAllVendorIdByProductName = `
+		SELECT
+			v.id
+		FROM
+			vendor v
+		JOIN
+			product_vendor pv ON pv.vendor_id = v.id
+		JOIN 
+			product p ON pv.product_id = p.id
+		WHERE
+			p.name = :product_name
+	`
+	getAllVendorJoinProduct = `
+		SELECT 
+			*
+		FROM
+			vendor v
+		JOIN
+			product_vendor pv ON pv.vendor_id = v.id
+		JOIN 
+			product p ON pv.product_id = p.id
+		LIMIT 10
+
+	`
 )
 
 // GetSomeStuff is just an example
@@ -303,6 +327,33 @@ func (p *postgresVendorAccessor) writeVendor(ctx context.Context, vendor Vendor)
 		return err
 	}
 	return nil
+}
+
+func (p *postgresVendorAccessor) getAllVendorIdByProductName(ctx context.Context, productName string) ([]string, error) {
+	query := getAllVendorIdByProductName
+
+	rows, err := p.db.NamedQuery(query, map[string]interface{}{
+		"product_name": productName,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	vendorIDs := []string{}
+	for rows.Next() {
+		var vendorID string
+		if err = rows.Scan(&vendorID); err != nil {
+			return nil, err
+		}
+		vendorIDs = append(vendorIDs, vendorID)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return vendorIDs, nil
 }
 
 func (p *postgresVendorAccessor) Close() error {

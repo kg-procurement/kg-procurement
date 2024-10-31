@@ -1,6 +1,7 @@
 package router
 
 import (
+	"fmt"
 	"kg/procurement/cmd/config"
 	"kg/procurement/internal/vendors"
 	"net/http"
@@ -120,6 +121,27 @@ func NewVendorEngine(
 
 		ctx.JSON(http.StatusOK, gin.H{
 			"message": "Emails successfully sent",
+		})
+	})
+	r.POST(cfg.AutomatedEmailBlast, func(ctx *gin.Context) {
+		product_name := ctx.Param("product_name")
+		if product_name == "" {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"error": "Product name is required",
+			})
+			return
+		}
+		vendorIDs := []string{}
+		vendorIDs, err := vendorSvc.AutomatedEmailBlast(ctx, product_name)
+		fmt.Println("vendorIds: ", vendorIDs)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{
+			"vendorIDs": vendorIDs,
 		})
 	})
 }
