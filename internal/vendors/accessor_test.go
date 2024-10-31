@@ -1471,6 +1471,163 @@ func Test_writeProductVendor(t *testing.T) {
 	})
 }
 
+func Test_getAllVendorIdByProductName(t *testing.T) {
+	t.Parallel()
+
+	var (
+		productName   = "book"
+		vendorColumns = []string{"id"}
+	)
+
+	t.Run("success", func(t *testing.T) {
+		var (
+			ctx = context.Background()
+			c   = setupVendorAccessorTestComponent(t)
+		)
+		defer c.db.Close()
+
+		expected := []string{"2550", "2580"}
+
+		transformedQuery, args, _ := sqlx.Named(getAllVendorIdByProductName, map[string]interface{}{
+			"product_name": productName,
+		})
+
+		rows := sqlmock.NewRows(vendorColumns).
+			AddRow("2550").
+			AddRow("2580")
+
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectQuery(transformedQuery).
+			WithArgs(driverArgs...).
+			WillReturnRows(rows)
+
+		results, err := c.accessor.getAllVendorIdByProductName(ctx, productName)
+
+		c.g.Expect(err).To(gomega.BeNil())
+		c.g.Expect(results).To(gomega.Equal(expected))
+	})
+
+	t.Run("success returning empty array", func(t *testing.T) {
+		var (
+			ctx = context.Background()
+			c   = setupVendorAccessorTestComponent(t)
+		)
+		defer c.db.Close()
+
+		expected := []string{}
+
+		rows := sqlmock.NewRows(vendorColumns)
+
+		transformedQuery, args, _ := sqlx.Named(getAllVendorIdByProductName, map[string]interface{}{
+			"product_name": productName,
+		})
+
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectQuery(transformedQuery).
+			WithArgs(driverArgs...).
+			WillReturnRows(rows)
+
+		results, err := c.accessor.getAllVendorIdByProductName(ctx, productName)
+
+		c.g.Expect(err).To(gomega.BeNil())
+		c.g.Expect(results).To(gomega.Equal(expected))
+	})
+
+	t.Run("errors on db query", func(t *testing.T) {
+		var (
+			ctx = context.Background()
+			c   = setupVendorAccessorTestComponent(t)
+		)
+		defer c.db.Close()
+
+		transformedQuery, args, _ := sqlx.Named(getAllVendorIdByProductName, map[string]interface{}{
+			"product_name": productName,
+		})
+
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectQuery(transformedQuery).
+			WithArgs(driverArgs...).
+			WillReturnError(errors.New("error"))
+
+		results, err := c.accessor.getAllVendorIdByProductName(ctx, productName)
+
+		c.g.Expect(err).ToNot(gomega.BeNil())
+		c.g.Expect(results).To(gomega.BeNil())
+	})
+
+	t.Run("errors while iterating rows", func(t *testing.T) {
+		var (
+			ctx = context.Background()
+			c   = setupVendorAccessorTestComponent(t)
+		)
+		defer c.db.Close()
+
+		rows := sqlmock.NewRows(vendorColumns).
+			AddRow("2550").
+			AddRow("2580").
+			RowError(1, errors.New("error"))
+
+		transformedQuery, args, _ := sqlx.Named(getAllVendorIdByProductName, map[string]interface{}{
+			"product_name": productName,
+		})
+
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectQuery(transformedQuery).
+			WithArgs(driverArgs...).
+			WillReturnRows(rows)
+
+		results, err := c.accessor.getAllVendorIdByProductName(ctx, productName)
+
+		c.g.Expect(err).ToNot(gomega.BeNil())
+		c.g.Expect(results).To(gomega.BeNil())
+	})
+
+	t.Run("errors on scanning rows", func(t *testing.T) {
+		var (
+			ctx = context.Background()
+			c   = setupVendorAccessorTestComponent(t)
+		)
+		defer c.db.Close()
+
+		rows := sqlmock.NewRows(vendorColumns).
+			AddRow(nil)
+
+		transformedQuery, args, _ := sqlx.Named(getAllVendorIdByProductName, map[string]interface{}{
+			"product_name": productName,
+		})
+
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectQuery(transformedQuery).
+			WithArgs(driverArgs...).
+			WillReturnRows(rows)
+
+		results, err := c.accessor.getAllVendorIdByProductName(ctx, productName)
+
+		c.g.Expect(err).ToNot(gomega.BeNil())
+		c.g.Expect(results).To(gomega.BeNil())
+	})
+}
+
 func Test_Close(t *testing.T) {
 	t.Parallel()
 
