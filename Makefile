@@ -19,14 +19,14 @@ docker-up:
 docker-down:
 	docker-compose -f docker-compose.yaml down
 
-seed-product:
-	@go run scripts/seeder/main.go product
 seed-product-category:
 	@go run scripts/seeder/main.go product_category
 seed-product-type:
 	@go run scripts/seeder/main.go product_type
 seed-uom:
 	@go run scripts/seeder/main.go uom
+seed-product:
+	@go run scripts/seeder/main.go product
 seed-vendor:
 	@go run scripts/seeder/main.go vendor
 seed-product-vendor:

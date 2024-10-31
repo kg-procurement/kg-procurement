@@ -53,8 +53,18 @@ type UOM struct {
 }
 
 type ProductVendor struct {
-	ProductID string `db:"product_id" json:"product_id"`
-	VendorID  string `db:"vendor_id" json:"vendor_id"`
+	ID                  string    `db:"id" json:"id"`
+	ProductID           string    `db:"product_id" json:"product_id"`
+	Code                string    `db:"code" json:"code"`
+	Name                string    `db:"name" json:"name"`
+	IncomeTaxID         string    `db:"income_tax_id" json:"income_tax_id"`
+	IncomeTaxName       string    `db:"income_tax_name" json:"income_tax_name"`
+	IncomeTaxPercentage string    `db:"income_tax_percentage" json:"income_tax_percentage"`
+	Description         string    `db:"description" json:"description"`
+	UOMID               string    `db:"uom_id" json:"uom_id"`
+	SAPCode             string    `db:"sap_code" json:"sap_code"`
+	ModifiedDate        time.Time `db:"modified_date" json:"modified_date"`
+	ModifiedBy          string    `db:"modified_by" json:"modified_by"`
 }
 
 type Price struct {
