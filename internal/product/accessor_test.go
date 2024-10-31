@@ -884,7 +884,7 @@ func Test_writeProductVendor(t *testing.T) {
 		var (
 			ctx = context.Background()
 			c   = setupProductAccessorTestComponent(t, WithQueryMatcher(sqlmock.QueryMatcherRegexp))
-			pv  = ProductVendor{ProductID: "123", VendorID: "321"}
+			pv  = ProductVendor{ProductID: "123", ID: "321"}
 		)
 
 		transformedQuery, args, _ := sqlx.Named(insertProductVendor, pv)
@@ -905,7 +905,7 @@ func Test_writeProductVendor(t *testing.T) {
 		var (
 			ctx = context.Background()
 			c   = setupProductAccessorTestComponent(t)
-			pv  = ProductVendor{ProductID: "123", VendorID: "321"}
+			pv  = ProductVendor{ProductID: "123", ID: "321"}
 		)
 
 		transformedQuery, args, _ := sqlx.Named(insertProductVendor, pv)
