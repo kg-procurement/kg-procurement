@@ -17,14 +17,24 @@ var FatalLogger *log.Logger
 // TODO
 // Use builder pattern to create a more descriptive logging functions
 func init() {
-	absPath, err := filepath.Abs(`\ppl\kompas-gramedia\be\log`)
+	projectRoot, err := filepath.Abs("./")
 	if err != nil {
-		fmt.Println("Error reading abs path: ", err)
+		fmt.Println("Error finding project root path:", err)
+		return
 	}
-	generalLog, err := os.OpenFile(absPath+"/general-log.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+
+	logFilePath := filepath.Join(projectRoot, "log", "general-log.log")
+
+	logDir := filepath.Dir(logFilePath)
+	if err := os.MkdirAll(logDir, os.ModePerm); err != nil {
+		fmt.Println("Failed to create log directory:", err)
+		return
+	}
+
+	generalLog, err := os.OpenFile(logFilePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		fmt.Println("error opening file: ", err)
-		os.Exit(1)
+		return
 	}
 	GeneralLogger = log.New(generalLog, "General Logger:\t", log.Ldate|log.Ltime|log.Lshortfile)
 	ErrorLogger = log.New(generalLog, "Error:\t", log.Ldate|log.Ltime|log.Lshortfile)
