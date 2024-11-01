@@ -3,6 +3,7 @@ package product
 
 import (
 	"context"
+	u "kg/procurement/cmd/utils"
 	"kg/procurement/internal/common/database"
 
 	"github.com/benbjohnson/clock"
@@ -23,15 +24,42 @@ func (p *ProductService) GetProductsByVendor(
 	vendorID string,
 	spec GetProductsByVendorSpec,
 ) (*AccessorGetProductsByVendorPaginationData, error) {
-	return p.productDBAccessor.GetProductsByVendor(ctx, vendorID, spec)
+	u.GeneralLogger.Println("Starting getProductsByVendor process in service layer")
+
+	result, err := p.productDBAccessor.GetProductsByVendor(ctx, vendorID, spec)
+	if err != nil {
+		u.ErrorLogger.Println("Errors occured: ", err.Error())
+	}
+
+	u.GeneralLogger.Println("ProductsByVendor successfully fetched from service layer")
+
+	return result, err
 }
 
 func (p *ProductService) UpdateProduct(ctx context.Context, payload Product) (Product, error) {
-	return p.productDBAccessor.UpdateProduct(ctx, payload)
+	u.GeneralLogger.Println("Starting updateProduct process in service layer")
+
+	result, err := p.productDBAccessor.UpdateProduct(ctx, payload)
+
+	if err != nil {
+		u.ErrorLogger.Println("Errors occured: ", err.Error())
+	}
+
+	u.ErrorLogger.Println("Product successfully udpated from service layer")
+
+	return result, err
 }
 
 func (p *ProductService) UpdatePrice(ctx context.Context, price Price) (Price, error) {
-	return p.productDBAccessor.UpdatePrice(ctx, price)
+	u.GeneralLogger.Println("Starting updateProductPrice process in service layer")
+
+	result, err := p.productDBAccessor.UpdatePrice(ctx, price)
+
+	if err != nil {
+		u.ErrorLogger.Println("Errors occured: ", err.Error())
+	}
+
+	return result, err
 }
 
 func NewProductService(

@@ -1,0 +1,8 @@
+General Logger:	2024/11/01 13:56:31 main.go:24: Starting...
+General Logger:	2024/11/01 13:56:31 main.go:26: Loading configurations
+General Logger:	2024/11/01 13:56:31 main.go:29: Creating database connection
+General Logger:	2024/11/01 13:56:31 main.go:39: Loading AWS Configurations
+General Logger:	2024/11/01 13:56:31 main.go:45: Creating SMTP provider
+General Logger:	2024/11/01 13:56:31 main.go:48: Preparing application services
+General Logger:	2024/11/01 13:56:31 main.go:54: Initiating application routing engine
+General Logger:	2024/11/01 13:56:31 main.go:61: Application starts listening
