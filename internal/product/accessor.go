@@ -98,6 +98,7 @@ const (
 			pr.currency_code, 
 			pr.price, 
 			pr.price_quantity,
+			v.id AS vendor_id,
 			v.name AS vendor_name, 
 			v.rating AS vendor_rating,
 			pv.income_tax_id, 
@@ -249,13 +250,7 @@ func (p *postgresProductAccessor) GetAllProductVendors(
 
 	// Pagination clause
 	extraClauses = append(extraClauses, extraClausesRaw...)
-	// for _, clause := range extraClausesRaw {
-	// 	// extraClauses = append(extraClauses, fmt.Sprintf(clause, argsIndex))
-	// 	extraClauses = append(extraClauses, clause)
-	// 	// argsIndex++
-	// }
 
-	// args = append(args, paginationArgs.Limit, paginationArgs.Offset)
 	args = map[string]interface{}{
 		"limit":  paginationArgs.Limit,
 		"offset": paginationArgs.Offset,
