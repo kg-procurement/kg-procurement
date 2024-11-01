@@ -139,7 +139,7 @@ func NewVendorEngine(
 			return
 		}
 		ctx.JSON(http.StatusOK, gin.H{
-			"vendorIDs": vendorIDs,
+			"vendor_ids": vendorIDs,
 		})
 	})
 }
