@@ -24,7 +24,7 @@ func Test_WriteEmailStatus(t *testing.T) {
 			ctx     = context.Background()
 			c       = setupEmailStatusAccessorTestComponent(t, WithQueryMatcher(sqlmock.QueryMatcherRegexp))
 			now     = c.cmock.Now()
-			product = EmailStatus{
+			emailStatus = EmailStatus{
 				ID:           "123",
 				EmailTo:      "email@email.com",
 				Status:       "sent",
@@ -32,7 +32,7 @@ func Test_WriteEmailStatus(t *testing.T) {
 			}
 		)
 
-		transformedQuery, args, _ := sqlx.Named(insertEmailStatus, product)
+		transformedQuery, args, _ := sqlx.Named(insertEmailStatus, emailStatus)
 		driverArgs := make([]driver.Value, len(args))
 		for i, arg := range args {
 			driverArgs[i] = arg
@@ -42,8 +42,35 @@ func Test_WriteEmailStatus(t *testing.T) {
 			driverArgs...,
 		).WillReturnResult(sqlmock.NewResult(1, 1))
 
-		err := c.accessor.WriteEmailStatus(ctx, product)
+		err := c.accessor.WriteEmailStatus(ctx, emailStatus)
 		c.g.Expect(err).Should(gomega.BeNil())
+	})
+
+	t.Run("returns error on db failure", func(t *testing.T) {
+		var (
+			ctx     = context.Background()
+			c       = setupEmailStatusAccessorTestComponent(t)
+			now     = c.cmock.Now()
+			emailStatus = EmailStatus{
+				ID:           "123",
+				EmailTo:      "email@email.com",
+				Status:       "sent",
+				ModifiedDate: now,
+			}
+		)
+
+		transformedQuery, args, _ := sqlx.Named(insertEmailStatus, emailStatus)
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectExec(regexp.QuoteMeta(transformedQuery)).WithArgs(
+			driverArgs...,
+		).WillReturnError(sql.ErrConnDone)
+
+		err := c.accessor.WriteEmailStatus(ctx, emailStatus)
+		c.g.Expect(err).Should(gomega.HaveOccurred())
 	})
 }
 
