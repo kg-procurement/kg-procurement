@@ -13,5 +13,5 @@ CREATE TABLE product_vendor
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE product_vendor;
+-- DROP TABLE product_vendor;
 -- +goose StatementEnd
