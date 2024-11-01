@@ -414,21 +414,21 @@ func Test_UpdatePrice(t *testing.T) {
 	})
 }
 
-func Test_GetProductsByVendor(t *testing.T) {
+func Test_GetProductVendorsByVendor(t *testing.T) {
 	t.Parallel()
 
 	var (
 		now      = time.Now()
 		vendorID = "1234"
-		spec     = GetProductsByVendorSpec{
+		spec     = GetProductVendorByVendorSpec{
 			PaginationSpec: database.PaginationSpec{
 				Limit: 10,
 				Page:  1,
 			},
 		}
 		args           = database.BuildPaginationArgs(spec.PaginationSpec)
-		productColumns = []string{"id", "product_category_id", "uom_id", "income_tax_id", "product_type_id", "name", "description", "modified_date", "modified_by"}
-		products       = []Product{
+		productColumns = []string{"id", "product_id", "code", "name", "income_tax_id", "income_tax_name", "income_tax_percentage", "description", "uom_id", "sap_code", "modified_date", "modified_by"}
+		productVendors = []ProductVendor{
 			{
 				ID:           "1111",
 				Name:         "Mixer",
@@ -447,24 +447,28 @@ func Test_GetProductsByVendor(t *testing.T) {
 			ctx            = context.Background()
 			c              = setupProductAccessorTestComponent(t)
 			expectedResult = sqlmock.NewRows(productColumns).
-					AddRow(products[0].ID, "", "", "", "", products[0].Name, "", products[0].ModifiedDate, "").
-					AddRow(products[1].ID, "", "", "", "", products[1].Name, "", products[1].ModifiedDate, "")
+					AddRow(productVendors[0].ID, "", "", productVendors[0].Name, "", "", "", "", "", "", productVendors[0].ModifiedDate, "").
+					AddRow(productVendors[1].ID, "", "", productVendors[1].Name, "", "", "", "", "", "", productVendors[1].ModifiedDate, "")
 		)
 		defer c.db.Close()
 
-		query := getProductsByVendorQuery + " LIMIT $2 OFFSET $3"
+		query := getProductVendorsByVendorQuery + " LIMIT $2 OFFSET $3"
 		c.mock.ExpectQuery(query).
 			WithArgs(vendorID, args.Limit, args.Offset).
 			WillReturnRows(expectedResult)
 
 		totalRows := sqlmock.NewRows([]string{"count"}).AddRow(2)
-		countQuery := `SELECT COUNT(*) FROM product_vendor WHERE vendor_id=$1`
+		countQuery := `SELECT COUNT(*)
+			FROM product_vendor pv
+			JOIN price pr ON pr.product_vendor_id = pv.id
+			WHERE pr.vendor_id = $1
+		`
 		c.mock.ExpectQuery(countQuery).
 			WithArgs(vendorID).
 			WillReturnRows(totalRows)
 
-		expect := &AccessorGetProductsByVendorPaginationData{
-			Products: products,
+		expect := &AccessorGetProductVendorsByVendorPaginationData{
+			ProductVendors: productVendors,
 			Metadata: database.PaginationMetadata{
 				TotalPage:    1,
 				CurrentPage:  1,
@@ -472,7 +476,7 @@ func Test_GetProductsByVendor(t *testing.T) {
 			},
 		}
 
-		res, err := c.accessor.GetProductsByVendor(ctx, vendorID, spec)
+		res, err := c.accessor.GetProductVendorsByVendor(ctx, vendorID, spec)
 		c.g.Expect(err).To(gomega.BeNil())
 		c.g.Expect(res).To(gomega.BeComparableTo(expect))
 	})
@@ -482,8 +486,8 @@ func Test_GetProductsByVendor(t *testing.T) {
 			ctx            = context.Background()
 			c              = setupProductAccessorTestComponent(t)
 			expectedResult = sqlmock.NewRows(productColumns).
-					AddRow(products[1].ID, "", "", "", "", products[1].Name, "", products[1].ModifiedDate, "")
-			customSpec = GetProductsByVendorSpec{
+					AddRow(productVendors[1].ID, "", "", productVendors[1].Name, "", "", "", "", "", "", productVendors[1].ModifiedDate, "")
+			customSpec = GetProductVendorByVendorSpec{
 				Name:           "Rice Cooker",
 				PaginationSpec: spec.PaginationSpec,
 			}
@@ -491,18 +495,23 @@ func Test_GetProductsByVendor(t *testing.T) {
 		defer c.db.Close()
 
 		productNameList := strings.Fields(customSpec.Name)
-		c.mock.ExpectQuery(getProductsByVendorQuery+" AND p.name iLIKE $2 AND p.name iLIKE $3"+" LIMIT $4 OFFSET $5").
+		c.mock.ExpectQuery(getProductVendorsByVendorQuery+" AND p.name iLIKE $2 AND p.name iLIKE $3"+" LIMIT $4 OFFSET $5").
 			WithArgs(vendorID, "%"+productNameList[0]+"%", "%"+productNameList[1]+"%", args.Limit, args.Offset).
 			WillReturnRows(expectedResult)
 
 		totalRows := sqlmock.NewRows([]string{"count"}).AddRow(1)
-		countQuery := `SELECT COUNT(*) FROM product_vendor WHERE vendor_id=$1`
+		countQuery := `SELECT COUNT(*)
+			FROM product_vendor pv
+			JOIN price pr ON pr.product_vendor_id = pv.id
+			WHERE pr.vendor_id = $1
+		`
+
 		c.mock.ExpectQuery(countQuery).
 			WithArgs(vendorID).
 			WillReturnRows(totalRows)
 
-		expect := &AccessorGetProductsByVendorPaginationData{
-			Products: products[1:],
+		expect := &AccessorGetProductVendorsByVendorPaginationData{
+			ProductVendors: productVendors[1:],
 			Metadata: database.PaginationMetadata{
 				TotalPage:    1,
 				CurrentPage:  1,
@@ -510,7 +519,7 @@ func Test_GetProductsByVendor(t *testing.T) {
 			},
 		}
 
-		res, err := c.accessor.GetProductsByVendor(ctx, vendorID, customSpec)
+		res, err := c.accessor.GetProductVendorsByVendor(ctx, vendorID, customSpec)
 		c.g.Expect(err).To(gomega.BeNil())
 		c.g.Expect(res).To(gomega.BeComparableTo(expect))
 	})
@@ -520,9 +529,9 @@ func Test_GetProductsByVendor(t *testing.T) {
 			ctx            = context.Background()
 			c              = setupProductAccessorTestComponent(t)
 			expectedResult = sqlmock.NewRows(productColumns).
-					AddRow(products[0].ID, "", "", "", "", products[0].Name, "", products[0].ModifiedDate, "").
-					AddRow(products[1].ID, "", "", "", "", products[1].Name, "", products[1].ModifiedDate, "")
-			customSpec = GetProductsByVendorSpec{
+					AddRow(productVendors[0].ID, "", "", productVendors[0].Name, "", "", "", "", "", "", productVendors[0].ModifiedDate, "").
+					AddRow(productVendors[1].ID, "", "", productVendors[1].Name, "", "", "", "", "", "", productVendors[1].ModifiedDate, "")
+			customSpec = GetProductVendorByVendorSpec{
 				PaginationSpec: database.PaginationSpec{
 					OrderBy: "name",
 					Limit:   10,
@@ -532,18 +541,23 @@ func Test_GetProductsByVendor(t *testing.T) {
 		)
 		defer c.db.Close()
 
-		c.mock.ExpectQuery(getProductsByVendorQuery+" ORDER BY name ASC LIMIT $2 OFFSET $3").
+		c.mock.ExpectQuery(getProductVendorsByVendorQuery+" ORDER BY name ASC LIMIT $2 OFFSET $3").
 			WithArgs(vendorID, args.Limit, args.Offset).
 			WillReturnRows(expectedResult)
 
 		totalRows := sqlmock.NewRows([]string{"count"}).AddRow(2)
-		countQuery := `SELECT COUNT(*) FROM product_vendor WHERE vendor_id=$1`
+		countQuery := `SELECT COUNT(*)
+			FROM product_vendor pv
+			JOIN price pr ON pr.product_vendor_id = pv.id
+			WHERE pr.vendor_id = $1
+		`
+
 		c.mock.ExpectQuery(countQuery).
 			WithArgs(vendorID).
 			WillReturnRows(totalRows)
 
-		expect := &AccessorGetProductsByVendorPaginationData{
-			Products: products,
+		expect := &AccessorGetProductVendorsByVendorPaginationData{
+			ProductVendors: productVendors,
 			Metadata: database.PaginationMetadata{
 				TotalPage:    1,
 				CurrentPage:  1,
@@ -551,7 +565,7 @@ func Test_GetProductsByVendor(t *testing.T) {
 			},
 		}
 
-		res, err := c.accessor.GetProductsByVendor(ctx, vendorID, customSpec)
+		res, err := c.accessor.GetProductVendorsByVendor(ctx, vendorID, customSpec)
 		c.g.Expect(err).To(gomega.BeNil())
 		c.g.Expect(res).To(gomega.BeComparableTo(expect))
 	})
@@ -561,8 +575,8 @@ func Test_GetProductsByVendor(t *testing.T) {
 			ctx            = context.Background()
 			c              = setupProductAccessorTestComponent(t)
 			expectedResult = sqlmock.NewRows(productColumns).
-					AddRow(products[1].ID, "", "", "", "", products[1].Name, "", products[1].ModifiedDate, "")
-			customSpec = GetProductsByVendorSpec{
+					AddRow(productVendors[1].ID, "", "", productVendors[1].Name, "", "", "", "", "", "", productVendors[1].ModifiedDate, "")
+			customSpec = GetProductVendorByVendorSpec{
 				Name: "Rice Cooker",
 				PaginationSpec: database.PaginationSpec{
 					OrderBy: "name",
@@ -574,19 +588,24 @@ func Test_GetProductsByVendor(t *testing.T) {
 		defer c.db.Close()
 
 		productNameList := strings.Fields(customSpec.Name)
-		c.mock.ExpectQuery(getProductsByVendorQuery+
+		c.mock.ExpectQuery(getProductVendorsByVendorQuery+
 			" AND p.name iLIKE $2 AND p.name iLIKE $3 ORDER BY name ASC LIMIT $4 OFFSET $5").
 			WithArgs(vendorID, "%"+productNameList[0]+"%", "%"+productNameList[1]+"%", args.Limit, args.Offset).
 			WillReturnRows(expectedResult)
 
 		totalRows := sqlmock.NewRows([]string{"count"}).AddRow(1)
-		countQuery := `SELECT COUNT(*) FROM product_vendor WHERE vendor_id=$1`
+		countQuery := `SELECT COUNT(*)
+			FROM product_vendor pv
+			JOIN price pr ON pr.product_vendor_id = pv.id
+			WHERE pr.vendor_id = $1
+		`
+
 		c.mock.ExpectQuery(countQuery).
 			WithArgs(vendorID).
 			WillReturnRows(totalRows)
 
-		expect := &AccessorGetProductsByVendorPaginationData{
-			Products: products[1:],
+		expect := &AccessorGetProductVendorsByVendorPaginationData{
+			ProductVendors: productVendors[1:],
 			Metadata: database.PaginationMetadata{
 				TotalPage:    1,
 				CurrentPage:  1,
@@ -594,7 +613,7 @@ func Test_GetProductsByVendor(t *testing.T) {
 			},
 		}
 
-		res, err := c.accessor.GetProductsByVendor(ctx, vendorID, customSpec)
+		res, err := c.accessor.GetProductVendorsByVendor(ctx, vendorID, customSpec)
 		c.g.Expect(err).To(gomega.BeNil())
 		c.g.Expect(res).To(gomega.BeComparableTo(expect))
 	})
@@ -606,11 +625,11 @@ func Test_GetProductsByVendor(t *testing.T) {
 		)
 		defer c.db.Close()
 
-		c.mock.ExpectQuery(getProductsByVendorQuery+" LIMIT $1 OFFSET $2").
+		c.mock.ExpectQuery(getProductVendorsByVendorQuery+" LIMIT $1 OFFSET $2").
 			WithArgs(vendorID, args.Limit, args.Offset).
 			WillReturnError(errors.New("error"))
 
-		res, err := c.accessor.GetProductsByVendor(ctx, vendorID, spec)
+		res, err := c.accessor.GetProductVendorsByVendor(ctx, vendorID, spec)
 
 		c.g.Expect(err).ShouldNot(gomega.BeNil())
 		c.g.Expect(res).To(gomega.BeNil())
@@ -621,17 +640,17 @@ func Test_GetProductsByVendor(t *testing.T) {
 			ctx            = context.Background()
 			c              = setupProductAccessorTestComponent(t)
 			expectedResult = sqlmock.NewRows(productColumns).
-					AddRow(products[0].ID, "", "", "", "", products[0].Name, "", products[0].ModifiedDate, "").
-					AddRow(products[1].ID, "", "", "", "", products[1].Name, "", products[1].ModifiedDate, "").
-					AddRow(nil, nil, nil, nil, nil, nil, nil, nil, nil)
+					AddRow(productVendors[0].ID, "", "", productVendors[0].Name, "", "", "", "", "", "", productVendors[0].ModifiedDate, "").
+					AddRow(productVendors[1].ID, "", "", productVendors[1].Name, "", "", "", "", "", "", productVendors[1].ModifiedDate, "").
+					AddRow(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 		)
 		defer c.db.Close()
 
-		c.mock.ExpectQuery(getProductsByVendorQuery+" LIMIT $1 OFFSET $2").
+		c.mock.ExpectQuery(getProductVendorsByVendorQuery+" LIMIT $1 OFFSET $2").
 			WithArgs(vendorID, args.Limit, args.Offset).
 			WillReturnRows(expectedResult)
 
-		res, err := c.accessor.GetProductsByVendor(ctx, vendorID, spec)
+		res, err := c.accessor.GetProductVendorsByVendor(ctx, vendorID, spec)
 
 		c.g.Expect(err).ShouldNot(gomega.BeNil())
 		c.g.Expect(res).To(gomega.BeNil())
@@ -642,17 +661,17 @@ func Test_GetProductsByVendor(t *testing.T) {
 			ctx            = context.Background()
 			c              = setupProductAccessorTestComponent(t)
 			expectedResult = sqlmock.NewRows(productColumns).
-					AddRow(products[0].ID, "", "", "", "", products[0].Name, "", products[0].ModifiedDate, "").
-					AddRow(products[1].ID, "", "", "", "", products[1].Name, "", products[1].ModifiedDate, "").
+					AddRow(productVendors[0].ID, "", "", productVendors[0].Name, "", "", "", "", "", "", productVendors[0].ModifiedDate, "").
+					AddRow(productVendors[1].ID, "", "", productVendors[1].Name, "", "", "", "", "", "", productVendors[1].ModifiedDate, "").
 					RowError(0, fmt.Errorf("some error"))
 		)
 		defer c.db.Close()
 
-		c.mock.ExpectQuery(getProductsByVendorQuery+" LIMIT $1 OFFSET $2").
+		c.mock.ExpectQuery(getProductVendorsByVendorQuery+" LIMIT $1 OFFSET $2").
 			WithArgs(vendorID, args.Limit, args.Offset).
 			WillReturnRows(expectedResult)
 
-		res, err := c.accessor.GetProductsByVendor(ctx, vendorID, spec)
+		res, err := c.accessor.GetProductVendorsByVendor(ctx, vendorID, spec)
 
 		c.g.Expect(err).ToNot(gomega.BeNil())
 		c.g.Expect(res).To(gomega.BeNil())
@@ -663,23 +682,28 @@ func Test_GetProductsByVendor(t *testing.T) {
 			ctx            = context.Background()
 			c              = setupProductAccessorTestComponent(t)
 			expectedResult = sqlmock.NewRows(productColumns).
-					AddRow(products[0].ID, "", "", "", "", products[0].Name, "", products[0].ModifiedDate, "").
-					AddRow(products[1].ID, "", "", "", "", products[1].Name, "", products[1].ModifiedDate, "")
+					AddRow(productVendors[0].ID, "", "", productVendors[0].Name, "", "", "", "", "", "", productVendors[0].ModifiedDate, "").
+					AddRow(productVendors[1].ID, "", "", productVendors[1].Name, "", "", "", "", "", "", productVendors[1].ModifiedDate, "")
 		)
 		defer c.db.Close()
 
-		query := getProductsByVendorQuery + " LIMIT $2 OFFSET $3"
+		query := getProductVendorsByVendorQuery + " LIMIT $2 OFFSET $3"
 		c.mock.ExpectQuery(query).
 			WithArgs(vendorID, args.Limit, args.Offset).
 			WillReturnRows(expectedResult)
 
 		totalRows := sqlmock.NewRows([]string{"count"}).RowError(1, fmt.Errorf("row error"))
-		countQuery := `SELECT COUNT(*) FROM product_vendor WHERE vendor_id=$1`
+		countQuery := `SELECT COUNT(*)
+			FROM product_vendor pv
+			JOIN price pr ON pr.product_vendor_id = pv.id
+			WHERE pr.vendor_id = $1
+		`
+
 		c.mock.ExpectQuery(countQuery).
 			WithArgs(vendorID).
 			WillReturnRows(totalRows)
 
-		res, err := c.accessor.GetProductsByVendor(ctx, vendorID, spec)
+		res, err := c.accessor.GetProductVendorsByVendor(ctx, vendorID, spec)
 		c.g.Expect(err).ToNot(gomega.BeNil())
 		c.g.Expect(res).To(gomega.BeNil())
 	})
@@ -919,6 +943,52 @@ func Test_writeProductVendor(t *testing.T) {
 		).WillReturnError(errors.New("error"))
 
 		err := c.accessor.writeProductVendor(ctx, pv)
+		c.g.Expect(err).ShouldNot(gomega.BeNil())
+	})
+}
+
+func Test_writePrice(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		var (
+			ctx   = context.Background()
+			c     = setupProductAccessorTestComponent(t, WithQueryMatcher(sqlmock.QueryMatcherRegexp))
+			price = Price{ID: "321"}
+		)
+
+		transformedQuery, args, _ := sqlx.Named(insertPrice, price)
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectExec(regexp.QuoteMeta(transformedQuery)).WithArgs(
+			driverArgs...,
+		).WillReturnResult(sqlmock.NewResult(1, 1))
+
+		err := c.accessor.writePrice(ctx, price)
+		c.g.Expect(err).Should(gomega.BeNil())
+	})
+
+	t.Run("error", func(t *testing.T) {
+		var (
+			ctx   = context.Background()
+			c     = setupProductAccessorTestComponent(t)
+			price = Price{ID: "321"}
+		)
+
+		transformedQuery, args, _ := sqlx.Named(insertPrice, price)
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectExec(regexp.QuoteMeta(transformedQuery)).WithArgs(
+			driverArgs...,
+		).WillReturnError(errors.New("error"))
+
+		err := c.accessor.writePrice(ctx, price)
 		c.g.Expect(err).ShouldNot(gomega.BeNil())
 	})
 }

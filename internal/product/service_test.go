@@ -19,18 +19,21 @@ func TestProductService_GetProductsByVendor(t *testing.T) {
 	t.Parallel()
 
 	var (
-		now      = time.Now()
-		vendorID = "1234"
-		products = []Product{
+		now            = time.Now()
+		vendorID       = "1234"
+		productVendors = []ProductVendor{
 			{
 				ID:           "1111",
 				Name:         "Mixer",
 				ModifiedDate: now,
 			},
-			{
-				ID:           "2222",
-				Name:         "Rice Cooker",
-				ModifiedDate: now,
+		}
+		accessorResponse = &AccessorGetProductVendorsByVendorPaginationData{
+			ProductVendors: productVendors,
+			Metadata: database.PaginationMetadata{
+				TotalPage:    1,
+				CurrentPage:  1,
+				TotalEntries: 2,
 			},
 		}
 		paginationSpec = database.PaginationSpec{Limit: 10, Order: "DESC", Page: 1}
@@ -42,15 +45,22 @@ func TestProductService_GetProductsByVendor(t *testing.T) {
 			ctx                 = context.Background()
 			mockCtrl            = gomock.NewController(t)
 			mockProductAccessor = NewMockproductDBAccessor(mockCtrl)
-			spec                = GetProductsByVendorSpec{PaginationSpec: paginationSpec}
+			spec                = GetProductVendorByVendorSpec{PaginationSpec: paginationSpec}
 		)
 
 		svc := &ProductService{
 			mockProductAccessor,
 		}
 
-		expect := &AccessorGetProductsByVendorPaginationData{
-			Products: products,
+		expect := &GetProductVendorsByVendorResponse{
+			ProductVendors: []ProductVendorResponse{
+				{
+					ID:           productVendors[0].ID,
+					Product:      ProductResponse{},
+					Name:         productVendors[0].Name,
+					ModifiedDate: productVendors[0].ModifiedDate,
+				},
+			},
 			Metadata: database.PaginationMetadata{
 				TotalPage:    1,
 				CurrentPage:  1,
@@ -58,10 +68,12 @@ func TestProductService_GetProductsByVendor(t *testing.T) {
 			},
 		}
 
-		mockProductAccessor.EXPECT().GetProductsByVendor(ctx, vendorID, spec).
-			Return(expect, nil)
+		mockProductAccessor.EXPECT().getProductByID(ctx, gomock.Any()).
+			Return(&Product{}, nil)
+		mockProductAccessor.EXPECT().GetProductVendorsByVendor(ctx, vendorID, spec).
+			Return(accessorResponse, nil)
 
-		res, err := svc.GetProductsByVendor(ctx, vendorID, spec)
+		res, err := svc.GetProductVendorsByVendor(ctx, vendorID, spec)
 		g.Expect(res).Should(gomega.BeComparableTo(expect))
 		g.Expect(err).To(gomega.BeNil())
 	})
@@ -72,8 +84,8 @@ func TestProductService_GetProductsByVendor(t *testing.T) {
 			ctx                 = context.Background()
 			mockCtrl            = gomock.NewController(t)
 			mockProductAccessor = NewMockproductDBAccessor(mockCtrl)
-			spec                = GetProductsByVendorSpec{
-				Name:           "Rice Cooker",
+			spec                = GetProductVendorByVendorSpec{
+				Name:           "Mixer",
 				PaginationSpec: database.PaginationSpec{OrderBy: "name"},
 			}
 		)
@@ -82,8 +94,15 @@ func TestProductService_GetProductsByVendor(t *testing.T) {
 			mockProductAccessor,
 		}
 
-		expect := &AccessorGetProductsByVendorPaginationData{
-			Products: products[1:],
+		expect := &GetProductVendorsByVendorResponse{
+			ProductVendors: []ProductVendorResponse{
+				{
+					ID:           productVendors[0].ID,
+					Product:      ProductResponse{},
+					Name:         productVendors[0].Name,
+					ModifiedDate: productVendors[0].ModifiedDate,
+				},
+			},
 			Metadata: database.PaginationMetadata{
 				TotalPage:    1,
 				CurrentPage:  1,
@@ -91,10 +110,12 @@ func TestProductService_GetProductsByVendor(t *testing.T) {
 			},
 		}
 
-		mockProductAccessor.EXPECT().GetProductsByVendor(ctx, vendorID, spec).
-			Return(expect, nil)
+		mockProductAccessor.EXPECT().getProductByID(ctx, gomock.Any()).
+			Return(&Product{}, nil)
+		mockProductAccessor.EXPECT().GetProductVendorsByVendor(ctx, vendorID, spec).
+			Return(accessorResponse, nil)
 
-		res, err := svc.GetProductsByVendor(ctx, vendorID, spec)
+		res, err := svc.GetProductVendorsByVendor(ctx, vendorID, spec)
 		g.Expect(res).Should(gomega.BeComparableTo(expect))
 		g.Expect(err).To(gomega.BeNil())
 	})
@@ -105,17 +126,40 @@ func TestProductService_GetProductsByVendor(t *testing.T) {
 			ctx                 = context.Background()
 			mockCtrl            = gomock.NewController(t)
 			mockProductAccessor = NewMockproductDBAccessor(mockCtrl)
-			spec                = GetProductsByVendorSpec{}
+			spec                = GetProductVendorByVendorSpec{}
 		)
 
 		svc := &ProductService{
 			mockProductAccessor,
 		}
 
-		mockProductAccessor.EXPECT().GetProductsByVendor(ctx, vendorID, spec).
+		mockProductAccessor.EXPECT().GetProductVendorsByVendor(ctx, vendorID, spec).
 			Return(nil, errors.New("error"))
 
-		res, err := svc.GetProductsByVendor(ctx, vendorID, spec)
+		res, err := svc.GetProductVendorsByVendor(ctx, vendorID, spec)
+		g.Expect(res).To(gomega.BeNil())
+		g.Expect(err).ShouldNot(gomega.BeNil())
+	})
+
+	t.Run("returns err on product accessor error", func(t *testing.T) {
+		var (
+			g                   = gomega.NewWithT(t)
+			ctx                 = context.Background()
+			mockCtrl            = gomock.NewController(t)
+			mockProductAccessor = NewMockproductDBAccessor(mockCtrl)
+			spec                = GetProductVendorByVendorSpec{}
+		)
+
+		svc := &ProductService{
+			mockProductAccessor,
+		}
+
+		mockProductAccessor.EXPECT().getProductByID(ctx, gomock.Any()).
+			Return(nil, errors.New("error"))
+		mockProductAccessor.EXPECT().GetProductVendorsByVendor(ctx, vendorID, spec).
+			Return(accessorResponse, nil)
+
+		res, err := svc.GetProductVendorsByVendor(ctx, vendorID, spec)
 		g.Expect(res).To(gomega.BeNil())
 		g.Expect(err).ShouldNot(gomega.BeNil())
 	})
