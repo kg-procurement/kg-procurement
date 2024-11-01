@@ -29,10 +29,12 @@ const (
 			v.id
 		FROM
 			vendor v
-		JOIN
-			product_vendor pv ON pv.vendor_id = v.id
 		JOIN 
-			product p ON pv.product_id = p.id
+			price pp ON pp.vendor_id = v.id
+		JOIN
+			product_vendor pv ON pv.id = pp.product_vendor_id
+		JOIN 
+			product p ON p.id = pv.product_id
 		WHERE
 			p.name = :product_name
 	`
