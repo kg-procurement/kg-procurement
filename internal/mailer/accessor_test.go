@@ -86,7 +86,7 @@ func Test_Close(t *testing.T) {
 	})
 }
 
-type productAccessorTestComponent struct {
+type emailStatusAccessorTestComponent struct {
 	g        *gomega.WithT
 	mock     sqlmock.Sqlmock
 	db       *sql.DB
@@ -106,7 +106,7 @@ func WithQueryMatcher(matcher sqlmock.QueryMatcher) Option {
 
 type Option func(*setupOptions)
 
-func setupEmailStatusAccessorTestComponent(t *testing.T, opts ...Option) productAccessorTestComponent {
+func setupEmailStatusAccessorTestComponent(t *testing.T, opts ...Option) emailStatusAccessorTestComponent {
 	options := setupOptions{
 		queryMatcher: sqlmock.QueryMatcherEqual,
 	}
@@ -121,7 +121,7 @@ func setupEmailStatusAccessorTestComponent(t *testing.T, opts ...Option) product
 
 	clockMock := clock.NewMock()
 
-	return productAccessorTestComponent{
+	return emailStatusAccessorTestComponent{
 		g:        g,
 		mock:     sqlMock,
 		db:       db,
