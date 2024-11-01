@@ -19,7 +19,7 @@ func NewAccountEngine(
 
 		payload := account.RegisterContract{}
 		if err := ctx.ShouldBindJSON(&payload); err != nil {
-			u.ErrorLogger.Println("An error occured: ", err.Error())
+			u.ErrorLogger.Println(err.Error())
 			ctx.JSON(http.StatusBadRequest, gin.H{
 				"error": "Invalid request payload",
 			})
@@ -28,7 +28,7 @@ func NewAccountEngine(
 
 		err := accountSvc.RegisterAccount(ctx, payload)
 		if err != nil {
-			u.ErrorLogger.Println("An error occured: ", err.Error())
+			u.ErrorLogger.Println(err.Error())
 
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
@@ -46,7 +46,7 @@ func NewAccountEngine(
 
 		payload := account.LoginContract{}
 		if err := ctx.ShouldBindJSON(&payload); err != nil {
-			u.ErrorLogger.Println("An error occured: ", err.Error())
+			u.ErrorLogger.Println(err.Error())
 
 			ctx.JSON(http.StatusBadRequest, gin.H{
 				"error": "Invalid request payload",
@@ -56,7 +56,7 @@ func NewAccountEngine(
 
 		token, err := accountSvc.Login(ctx, payload)
 		if err != nil {
-			u.ErrorLogger.Println("An error occured: ", err.Error())
+			u.ErrorLogger.Println(err.Error())
 
 			ctx.JSON(http.StatusUnauthorized, gin.H{
 				"error": err.Error(),
