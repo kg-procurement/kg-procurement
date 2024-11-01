@@ -77,44 +77,6 @@ func (c *MockseederDataWriterCloseCall) DoAndReturn(f func() error) *MockseederD
 	return c
 }
 
-// writePrice mocks base method.
-func (m *MockseederDataWriter) writePrice(ctx context.Context, price Price) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "writePrice", ctx, price)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// writePrice indicates an expected call of writePrice.
-func (mr *MockseederDataWriterMockRecorder) writePrice(ctx, price any) *MockseederDataWriterwritePriceCall {
-	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "writePrice", reflect.TypeOf((*MockseederDataWriter)(nil).writePrice), ctx, price)
-	return &MockseederDataWriterwritePriceCall{Call: call}
-}
-
-// MockseederDataWriterwritePriceCall wrap *gomock.Call
-type MockseederDataWriterwritePriceCall struct {
-	*gomock.Call
-}
-
-// Return rewrite *gomock.Call.Return
-func (c *MockseederDataWriterwritePriceCall) Return(arg0 error) *MockseederDataWriterwritePriceCall {
-	c.Call = c.Call.Return(arg0)
-	return c
-}
-
-// Do rewrite *gomock.Call.Do
-func (c *MockseederDataWriterwritePriceCall) Do(f func(context.Context, Price) error) *MockseederDataWriterwritePriceCall {
-	c.Call = c.Call.Do(f)
-	return c
-}
-
-// DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockseederDataWriterwritePriceCall) DoAndReturn(f func(context.Context, Price) error) *MockseederDataWriterwritePriceCall {
-	c.Call = c.Call.DoAndReturn(f)
-	return c
-}
-
 // writeProduct mocks base method.
 func (m *MockseederDataWriter) writeProduct(ctx context.Context, product Product) error {
 	m.ctrl.T.Helper()
