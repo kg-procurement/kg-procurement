@@ -56,6 +56,7 @@ type VendorRoutes struct {
 
 type ProductRoutes struct {
 	GetProductsByVendor string `mapstructure:"get-products-by-vendor" validate:"required"`
+	GetProductVendors   string `mapstructure:"get-product-vendors" validate:"required"`
 	UpdateProduct       string `mapstructure:"update-product" validate:"required"`
 	UpdatePrice         string `mapstructure:"update-price" validate:"required"`
 }
