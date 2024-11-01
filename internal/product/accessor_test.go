@@ -709,6 +709,75 @@ func Test_GetProductVendorsByVendor(t *testing.T) {
 	})
 }
 
+func Test_getProductByID(t *testing.T) {
+	t.Parallel()
+
+	var (
+		accessor *postgresProductAccessor
+		mock     sqlmock.Sqlmock
+	)
+
+	setup := func(t *testing.T) (*gomega.GomegaWithT, *sql.DB) {
+		g := gomega.NewWithT(t)
+		realClock := clock.New()
+
+		db, sqlMock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+		if err != nil {
+			log.Fatal("error initializing mock:", err)
+		}
+		sqlxDB := sqlx.NewDb(db, "sqlmock")
+
+		accessor = newPostgresProductAccessor(sqlxDB, realClock)
+		mock = sqlMock
+
+		return g, db
+	}
+
+	productFields := []string{"id", "product_category_id", "uom_id", "income_tax_id", "product_type_id", "name", "description", "modified_date", "modified_by"}
+
+	product := &Product{
+		ID:           "1",
+		Name:         "Kismis",
+		ModifiedDate: time.Now(),
+	}
+
+	t.Run("success", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		rows := sqlmock.NewRows(productFields).
+			AddRow("1", "", "", "", "", product.Name, "", product.ModifiedDate, "")
+
+		mock.ExpectQuery(getProductByID).
+			WithArgs("1").
+			WillReturnRows(rows)
+
+		ctx := context.Background()
+		res, err := accessor.getProductByID(ctx, "1")
+
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(res).To(gomega.Equal(product))
+	})
+
+	t.Run("error on row scan", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		rows := sqlmock.NewRows(productFields).
+			RowError(1, fmt.Errorf("error"))
+
+		mock.ExpectQuery(getProductByID).
+			WithArgs("1").
+			WillReturnRows(rows)
+
+		ctx := context.Background()
+		res, err := accessor.getProductByID(ctx, "1")
+
+		g.Expect(err).ToNot(gomega.BeNil())
+		g.Expect(res).To(gomega.BeNil())
+	})
+}
+
 func Test_writeProduct(t *testing.T) {
 	t.Parallel()
 
