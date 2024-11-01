@@ -28,3 +28,17 @@ Info:	2024/11/01 18:25:31 test.go:14: Starting...
 Debug:	2024/11/01 18:25:31 test.go:18: Printing stuff
 Error:	2024/11/01 18:25:31 test.go:22: Error occured
 Fatal:	2024/11/01 18:25:31 test.go:30: Fatal occured
+Info:	2024/11/01 21:20:35 test.go:14: Starting...
+Debug:	2024/11/01 21:20:35 test.go:18: Printing stuff
+Error:	2024/11/01 21:20:35 test.go:22: Error occured
+Fatal:	2024/11/01 21:20:35 test.go:30: Fatal occured
+Info:	2024/11/01 21:21:19 test.go:14: Starting...
+Debug:	2024/11/01 21:21:19 test.go:18: Printing stuff
+Error:	2024/11/01 21:21:19 test.go:22: Error occured
+General Logger:	2024/11/01 21:21:19 main.go:33: Loading configurations
+General Logger:	2024/11/01 21:21:19 main.go:36: Creating database connection
+General Logger:	2024/11/01 21:21:20 main.go:46: Loading AWS Configurations
+General Logger:	2024/11/01 21:21:20 main.go:52: Creating SMTP provider
+General Logger:	2024/11/01 21:21:20 main.go:55: Preparing application services
+General Logger:	2024/11/01 21:21:20 main.go:61: Initiating application routing engine
+General Logger:	2024/11/01 21:21:20 main.go:68: Application starts listening

@@ -27,7 +27,7 @@ func main() {
 	logger.Debug("Printing stuff")
 	logger.Error("Error occured")
 	// logger.Panic("Panic occured")
-	logger.Fatal("Fatal occured")
+	// logger.Fatal("Fatal occured")
 	// u.GeneralLogger.Println("Starting...")
 
 	u.GeneralLogger.Println("Loading configurations")
