@@ -27,7 +27,7 @@ func NewVendorEngine(
 
 		res, err := vendorSvc.GetAll(ctx, spec)
 		if err != nil {
-			u.ErrorLogger.Println("An error occured: ", err.Error())
+			u.ErrorLogger.Println(err.Error())
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
 			})
@@ -46,7 +46,7 @@ func NewVendorEngine(
 
 		spec := &vendors.PutVendorSpec{}
 		if err := ctx.ShouldBindJSON(&spec); err != nil {
-			u.ErrorLogger.Println("An error occured: ", err.Error())
+			u.ErrorLogger.Println(err.Error())
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
 			})
@@ -67,7 +67,7 @@ func NewVendorEngine(
 
 		res, err := vendorSvc.UpdateDetail(ctx, newVendor)
 		if err != nil {
-			u.ErrorLogger.Println("An error occured: ", err.Error())
+			u.ErrorLogger.Println(err.Error())
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
 			})
@@ -86,7 +86,7 @@ func NewVendorEngine(
 
 		res, err := vendorSvc.GetById(ctx, id)
 		if err != nil {
-			u.ErrorLogger.Println("An error occured: ", err.Error())
+			u.ErrorLogger.Println(err.Error())
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
 			})
@@ -103,7 +103,7 @@ func NewVendorEngine(
 
 		res, err := vendorSvc.GetLocations(ctx)
 		if err != nil {
-			u.ErrorLogger.Println("An error occured: ", err.Error())
+			u.ErrorLogger.Println(err.Error())
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
 			})
@@ -122,7 +122,7 @@ func NewVendorEngine(
 
 		payload := vendors.EmailBlastContract{}
 		if err := ctx.ShouldBindJSON(&payload); err != nil {
-			u.ErrorLogger.Println("An error occured: ", err.Error())
+			u.ErrorLogger.Println(err.Error())
 			ctx.JSON(http.StatusBadRequest, gin.H{
 				"error": "Invalid request payload",
 			})
@@ -132,13 +132,13 @@ func NewVendorEngine(
 		errList, err := vendorSvc.BlastEmail(ctx, payload.VendorIDs, payload.EmailTemplate)
 		if err != nil {
 			if len(errList) > 0 {
-				u.ErrorLogger.Println("An error occured: ", err.Error())
+				u.ErrorLogger.Println(err.Error())
 				ctx.JSON(http.StatusMultiStatus, gin.H{
 					"error": errList,
 				})
 				return
 			}
-			u.ErrorLogger.Println("An error occured: ", err.Error())
+			u.ErrorLogger.Println(err.Error())
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
 			})

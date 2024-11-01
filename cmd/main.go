@@ -26,14 +26,11 @@ func main() {
 	logger.Info("Starting...")
 	logger.Debug("Printing stuff")
 	logger.Error("Error occured")
-	// logger.Panic("Panic occured")
-	// logger.Fatal("Fatal occured")
-	// u.GeneralLogger.Println("Starting...")
 
-	u.GeneralLogger.Println("Loading configurations")
+	logger.Info("Loading configurations")
 	cfg := config.Load()
 
-	u.GeneralLogger.Println("Creating database connection")
+	logger.Info("Creating database connection")
 	conn := dependency.NewPostgreSQL(cfg.Common.Postgres)
 	defer func() {
 		err := conn.Close()
@@ -43,29 +40,29 @@ func main() {
 		_ = os.Stdout.Sync()
 	}()
 
-	u.GeneralLogger.Println("Loading AWS Configurations")
+	logger.Info("Loading AWS Configurations")
 	awsCfg := dependency.NewAWSConfig(cfg.AWS)
 	_ = mailer.NewSESProvider(*awsCfg)
 
 	clock := clock.New()
 
-	u.GeneralLogger.Println("Creating SMTP provider")
+	logger.Info("Creating SMTP provider")
 	netSMTP := mailer.NewNativeSMTP(cfg.SMTP)
 
-	u.GeneralLogger.Println("Preparing application services")
+	logger.Info("Preparing application services")
 	vendorSvc := vendors.NewVendorService(cfg, conn, clock, netSMTP)
 	productSvc := product.NewProductService(conn, clock)
 	tokenSvc := token.NewTokenService(cfg.Token, clock)
 	accountSvc := account.NewAccountService(conn, clock, tokenSvc)
 
-	u.GeneralLogger.Println("Initiating application routing engine")
+	logger.Info("Initiating application routing engine")
 	r := gin.Default()
 	r.Use(cors.Default())
 	router.NewVendorEngine(r, cfg.Routes.Vendor, vendorSvc)
 	router.NewProductEngine(r, cfg.Routes.Product, productSvc)
 	router.NewAccountEngine(r, cfg.Routes.Account, accountSvc)
 
-	u.GeneralLogger.Println("Application starts listening")
+	logger.Info("Application starts listening")
 	if err := r.Run(":8080"); err != nil {
 		log.Fatalf("failed to run server, err: %v", err)
 	}

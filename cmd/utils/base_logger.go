@@ -14,8 +14,6 @@ var InfoLogger *log.Logger
 var PanicLogger *log.Logger
 var FatalLogger *log.Logger
 
-// TODO
-// Use builder pattern to create a more descriptive logging functions
 func init() {
 	projectRoot, err := filepath.Abs("./")
 	if err != nil {

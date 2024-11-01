@@ -21,7 +21,7 @@ func NewProductEngine(
 		vendorID := ctx.Param("vendor_id")
 
 		if vendorID == "" {
-			u.ErrorLogger.Println("An error occured: vendor_id is required")
+			u.ErrorLogger.Println("vendor_id is required")
 			ctx.JSON(http.StatusBadRequest, gin.H{
 				"error": "vendor_id is required",
 			})
@@ -37,7 +37,7 @@ func NewProductEngine(
 
 		res, err := productSvc.GetProductsByVendor(ctx, vendorID, spec)
 		if err != nil {
-			u.ErrorLogger.Println("An error occured: ", err.Error())
+			u.ErrorLogger.Println(err.Error())
 
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
@@ -57,7 +57,7 @@ func NewProductEngine(
 
 		spec := product.PutProductSpec{}
 		if err := ctx.ShouldBindJSON(&spec); err != nil {
-			u.ErrorLogger.Println("An error occured: ", err.Error())
+			u.ErrorLogger.Println(err.Error())
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
 			})
@@ -74,7 +74,7 @@ func NewProductEngine(
 		}
 		res, err := productSvc.UpdateProduct(ctx, newProduct)
 		if err != nil {
-			u.ErrorLogger.Println("An error occured: ", err.Error())
+			u.ErrorLogger.Println(err.Error())
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
 			})
@@ -92,7 +92,7 @@ func NewProductEngine(
 		id := ctx.Param("id")
 		spec := product.PutPriceSpec{}
 		if err := ctx.ShouldBindJSON(&spec); err != nil {
-			u.ErrorLogger.Println("An error occured: ", err.Error())
+			u.ErrorLogger.Println(err.Error())
 
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
@@ -127,7 +127,7 @@ func NewProductEngine(
 
 		res, err := productSvc.UpdatePrice(ctx, newPrice)
 		if err != nil {
-			u.ErrorLogger.Println("An error occured: ", err.Error())
+			u.ErrorLogger.Println(err.Error())
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
 			})

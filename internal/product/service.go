@@ -28,7 +28,7 @@ func (p *ProductService) GetProductsByVendor(
 
 	result, err := p.productDBAccessor.GetProductsByVendor(ctx, vendorID, spec)
 	if err != nil {
-		u.ErrorLogger.Println("Errors occured: ", err.Error())
+		u.ErrorLogger.Println(err.Error())
 	}
 
 	u.GeneralLogger.Println("ProductsByVendor successfully fetched from service layer")
@@ -42,7 +42,7 @@ func (p *ProductService) UpdateProduct(ctx context.Context, payload Product) (Pr
 	result, err := p.productDBAccessor.UpdateProduct(ctx, payload)
 
 	if err != nil {
-		u.ErrorLogger.Println("Errors occured: ", err.Error())
+		u.ErrorLogger.Println(err.Error())
 	}
 
 	u.ErrorLogger.Println("Product successfully udpated from service layer")
@@ -56,7 +56,7 @@ func (p *ProductService) UpdatePrice(ctx context.Context, price Price) (Price, e
 	result, err := p.productDBAccessor.UpdatePrice(ctx, price)
 
 	if err != nil {
-		u.ErrorLogger.Println("Errors occured: ", err.Error())
+		u.ErrorLogger.Println(err.Error())
 	}
 
 	return result, err
