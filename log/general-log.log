@@ -42,3 +42,13 @@ General Logger:	2024/11/01 21:21:20 main.go:52: Creating SMTP provider
 General Logger:	2024/11/01 21:21:20 main.go:55: Preparing application services
 General Logger:	2024/11/01 21:21:20 main.go:61: Initiating application routing engine
 General Logger:	2024/11/01 21:21:20 main.go:68: Application starts listening
+Info:	2024/11/01 21:29:49 logger.go:14: Starting...
+Debug:	2024/11/01 21:29:49 logger.go:18: Printing stuff
+Error:	2024/11/01 21:29:49 logger.go:22: Error occured
+General Logger:	2024/11/01 21:29:49 main.go:33: Loading configurations
+General Logger:	2024/11/01 21:29:49 main.go:36: Creating database connection
+General Logger:	2024/11/01 21:29:49 main.go:46: Loading AWS Configurations
+General Logger:	2024/11/01 21:29:49 main.go:52: Creating SMTP provider
+General Logger:	2024/11/01 21:29:49 main.go:55: Preparing application services
+General Logger:	2024/11/01 21:29:49 main.go:61: Initiating application routing engine
+General Logger:	2024/11/01 21:29:49 main.go:68: Application starts listening
