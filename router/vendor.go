@@ -1,7 +1,6 @@
 package router
 
 import (
-	"fmt"
 	"kg/procurement/cmd/config"
 	"kg/procurement/internal/vendors"
 	"net/http"
@@ -133,7 +132,6 @@ func NewVendorEngine(
 		}
 		vendorIDs := []string{}
 		vendorIDs, err := vendorSvc.AutomatedEmailBlast(ctx, productName)
-		fmt.Println("vendorIds: ", vendorIDs)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
