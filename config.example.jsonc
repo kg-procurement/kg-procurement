@@ -18,6 +18,7 @@
     },
     "product": {
       "get-products-by-vendor": "/product/vendor/:vendor_id",
+      "get-product-vendors": "/product/vendor",
       "update-product": "/product/:id",
       "update-price": "/product/price/:id"
     },

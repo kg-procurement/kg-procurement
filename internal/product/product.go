@@ -109,6 +109,34 @@ type GetProductsByVendorSpec struct {
 	database.PaginationSpec
 }
 
+type GetProductVendorsSpec struct {
+	database.PaginationSpec
+}
+
+type GetProductVendorsDBResponse struct {
+	ID                  string    `db:"id" json:"id"`
+	ProductID           string    `db:"product_id" json:"product_id"`
+	Code                string    `db:"code" json:"code"`
+	Name                string    `db:"name" json:"name"`
+	QuantityMin         int       `db:"quantity_min" json:"quantity_min"`
+	QuantityMax         int       `db:"quantity_max" json:"quantity_max"`
+	CurrencyName        string    `db:"currency_name" json:"currency_name"`
+	CurrencyCode        string    `db:"currency_code" json:"currency_code"`
+	Price               float64   `db:"price" json:"price"`
+	PriceQuantity       int       `db:"price_quantity" json:"price_quantity"`
+	VendorID            string    `db:"vendor_id" json:"vendor_id"`
+	VendorName          string    `db:"vendor_name" json:"vendor_name"`
+	VendorRating        int       `db:"vendor_rating" json:"vendor_rating"`
+	IncomeTaxID         string    `db:"income_tax_id" json:"income_tax_id"`
+	IncomeTaxName       string    `db:"income_tax_name" json:"income_tax_name"`
+	IncomeTaxPercentage string    `db:"income_tax_percentage" json:"income_tax_percentage"`
+	Description         string    `db:"description" json:"description"`
+	UOMID               string    `db:"uom_id" json:"uom_id"`
+	SAPCode             string    `db:"sap_code" json:"sap_code"`
+	ModifiedDate        time.Time `db:"modified_date" json:"modified_date"`
+	ModifiedBy          string    `db:"modified_by" json:"modified_by"`
+}
+
 type PutProductSpec struct {
 	ProductCategoryID string `json:"product_category_id"`
 	UOMID             string `json:"uom_id"`
