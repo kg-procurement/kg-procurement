@@ -21,7 +21,14 @@ import (
 
 // main is the entrypoint for the entire service
 func main() {
-	u.GeneralLogger.Println("Starting...")
+	logger := u.NewConsoleLogger()
+
+	logger.Info("Starting...")
+	logger.Debug("Printing stuff")
+	logger.Error("Error occured")
+	// logger.Panic("Panic occured")
+	logger.Fatal("Fatal occured")
+	// u.GeneralLogger.Println("Starting...")
 
 	u.GeneralLogger.Println("Loading configurations")
 	cfg := config.Load()

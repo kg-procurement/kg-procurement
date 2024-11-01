@@ -6,3 +6,25 @@ General Logger:	2024/11/01 13:56:31 main.go:45: Creating SMTP provider
 General Logger:	2024/11/01 13:56:31 main.go:48: Preparing application services
 General Logger:	2024/11/01 13:56:31 main.go:54: Initiating application routing engine
 General Logger:	2024/11/01 13:56:31 main.go:61: Application starts listening
+General Logger:	2024/11/01 18:04:17 test.go:12: Starting...
+Debug Logger:	2024/11/01 18:04:17 test.go:16: Printing stuff
+Error Logger:	2024/11/01 18:04:17 test.go:20: Error occured
+General Logger:	2024/11/01 18:04:17 main.go:31: Loading configurations
+General Logger:	2024/11/01 18:04:17 main.go:34: Creating database connection
+General Logger:	2024/11/01 18:04:17 main.go:44: Loading AWS Configurations
+General Logger:	2024/11/01 18:04:17 main.go:50: Creating SMTP provider
+General Logger:	2024/11/01 18:04:17 main.go:53: Preparing application services
+General Logger:	2024/11/01 18:04:17 main.go:59: Initiating application routing engine
+General Logger:	2024/11/01 18:04:17 main.go:66: Application starts listening
+Info Logger:	2024/11/01 18:21:55 test.go:13: Starting...
+Debug Logger:	2024/11/01 18:21:55 test.go:17: Printing stuff
+Error Logger:	2024/11/01 18:21:55 test.go:21: Error occured
+Panic Logger:	2024/11/01 18:21:55 test.go:25: Panic occured
+Info:	2024/11/01 18:25:23 test.go:14: Starting...
+Debug:	2024/11/01 18:25:23 test.go:18: Printing stuff
+Error:	2024/11/01 18:25:23 test.go:22: Error occured
+Panic:	2024/11/01 18:25:23 test.go:26: Panic occured
+Info:	2024/11/01 18:25:31 test.go:14: Starting...
+Debug:	2024/11/01 18:25:31 test.go:18: Printing stuff
+Error:	2024/11/01 18:25:31 test.go:22: Error occured
+Fatal:	2024/11/01 18:25:31 test.go:30: Fatal occured
