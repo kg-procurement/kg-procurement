@@ -122,4 +122,24 @@ func NewVendorEngine(
 			"message": "Emails successfully sent",
 		})
 	})
+	r.POST(cfg.AutomatedEmailBlast, func(ctx *gin.Context) {
+		productName := ctx.Param("product_name")
+		if productName == "" {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"error": "Product name is required",
+			})
+			return
+		}
+		vendorIDs := []string{}
+		vendorIDs, err := vendorSvc.AutomatedEmailBlast(ctx, productName)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{
+			"vendor_ids": vendorIDs,
+		})
+	})
 }
