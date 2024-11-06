@@ -169,7 +169,7 @@ func (p *postgresProductAccessor) GetProductsByVendor(
 	row := p.db.QueryRow(countQuery, vendorID)
 	if err = row.Scan(&totalEntries); err != nil {
 		utils.Logger.Errorf(err.Error())
-		return nil, fmt.Errorf("failed to execute count query: %v", err)
+		return nil, fmt.Errorf("failed to execute count query: %w", err)
 	}
 
 	return &AccessorGetProductsByVendorPaginationData{
