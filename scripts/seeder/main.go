@@ -9,7 +9,6 @@ import (
 	"kg/procurement/cmd/utils"
 	"kg/procurement/internal/product"
 	"kg/procurement/internal/vendors"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -238,7 +237,7 @@ func seedPrice(ctx context.Context) {
 	}
 	byteValue := readBytesFromFixture(priceFixtureFile)
 	if err := json.Unmarshal(byteValue, &temp); err != nil {
-		log.Println("Error unmarshalling")
+		utils.Logger.Fatal("Error unmarshalling")
 		panic(err)
 	}
 

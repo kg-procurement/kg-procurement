@@ -3,7 +3,7 @@ package mailer
 
 import (
 	"context"
-	"log"
+	"kg/procurement/cmd/utils"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -33,11 +33,11 @@ func (s sesProvider) sendEmail(ctx context.Context, client SESSendEmailAPI, emai
 
 	result, err := client.SendEmail(ctx, inputPayload)
 	if err != nil {
-		log.Printf("failed executing SendEmail : %v", err)
+		utils.Logger.Errorf("failed executing SendEmail : %v", err)
 		return err
 	}
 
-	log.Printf("email sent: %v", result)
+	utils.Logger.Errorf("email sent: %v", result)
 	return nil
 }
 

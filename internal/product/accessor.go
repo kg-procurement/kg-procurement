@@ -289,6 +289,7 @@ func (p *postgresProductAccessor) GetAllProductVendors(
 	var totalEntries int
 	row := p.db.QueryRow(countProductVendorsQuery)
 	if err = row.Scan(&totalEntries); err != nil {
+		utils.Logger.Errorf(err.Error())
 		return nil, fmt.Errorf("failed to execute count query: %w", err)
 	}
 
