@@ -79,14 +79,12 @@ func NewConn(host, user, password, name, port string) *Conn {
 	connStr := fmt.Sprintf("user=%s port=%s password=%s dbname=%s host=%s sslmode=disable",
 		user, port, password, name, host)
 
-	utils.Logger.Debug("Starts connecting db with sqlx")
 	db := sqlx.MustConnect("postgres", connStr)
 
 	if err := db.Ping(); err != nil {
 		utils.Logger.Fatal(err.Error())
 	}
 
-	utils.Logger.Info("Successfully connected to database")
-	log.Println("Successfully connected to database")
+	log.Println("\nSuccessfully connected to database")
 	return &Conn{db: db}
 }
