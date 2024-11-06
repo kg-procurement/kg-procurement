@@ -496,7 +496,7 @@ func (p *postgresProductAccessor) writeProductVendor(_ context.Context, pv Produ
 
 func (p *postgresProductAccessor) writePrice(_ context.Context, price Price) error {
 	if _, err := p.db.NamedExec(insertPrice, price); err != nil {
-		log.Printf("failed inserting price: %s", price.ID)
+		utils.Logger.Errorf("failed inserting price: %s", price.ID)
 		return err
 	}
 	return nil
