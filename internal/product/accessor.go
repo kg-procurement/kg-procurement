@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"kg/procurement/cmd/utils"
 	"kg/procurement/internal/common/database"
-	"log"
 	"strings"
 
 	"github.com/benbjohnson/clock"
@@ -169,8 +168,9 @@ func (p *postgresProductAccessor) GetProductsByVendor(
 	var totalEntries int
 	row := p.db.QueryRow(countQuery, vendorID)
 	if err = row.Scan(&totalEntries); err != nil {
-		utils.Logger.Errorf("failed to execute count query: %w", err)
-		return nil, fmt.Errorf("failed to execute count query: %w", err)
+		errorMessage := "failed to execute count query: %w"
+		utils.Logger.Errorf(errorMessage, err)
+		return nil, fmt.Errorf(errorMessage, err)
 	}
 
 	return &AccessorGetProductsByVendorPaginationData{
@@ -205,8 +205,9 @@ func (p *postgresProductAccessor) UpdateProduct(_ context.Context, payload Produ
 		&updatedProduct.ModifiedDate,
 		&updatedProduct.ModifiedBy,
 	); err != nil {
-		utils.Logger.Errorf("failed to scan updated product: %w", err)
-		return Product{}, fmt.Errorf("failed to scan updated product: %w", err)
+		errorMessage := "failed to scan updated product: %w"
+		utils.Logger.Errorf(errorMessage, err)
+		return Product{}, fmt.Errorf(errorMessage, err)
 	}
 
 	return updatedProduct, nil
@@ -338,7 +339,6 @@ func (p *postgresProductAccessor) UpdatePrice(ctx context.Context, price Price) 
 func (p *postgresProductAccessor) writeProduct(_ context.Context, product Product) error {
 	if _, err := p.db.NamedExec(insertProduct, product); err != nil {
 		utils.Logger.Errorf("failed inserting product: %s", product.ID)
-		log.Printf("failed inserting product: %s", product.ID)
 		return err
 	}
 	return nil
@@ -347,7 +347,6 @@ func (p *postgresProductAccessor) writeProduct(_ context.Context, product Produc
 func (p *postgresProductAccessor) writeProductCategory(_ context.Context, category ProductCategory) error {
 	if _, err := p.db.NamedExec(insertProductCategory, category); err != nil {
 		utils.Logger.Errorf("failed inserting product category: %s", category.ID)
-		log.Printf("failed inserting product category: %s", category.ID)
 		return err
 	}
 	return nil
@@ -356,7 +355,6 @@ func (p *postgresProductAccessor) writeProductCategory(_ context.Context, catego
 func (p *postgresProductAccessor) writeProductType(_ context.Context, pType ProductType) error {
 	if _, err := p.db.NamedExec(insertProductType, pType); err != nil {
 		utils.Logger.Errorf("failed inserting product type: %s", pType.ID)
-		log.Printf("failed inserting product type: %s", pType.ID)
 		return err
 	}
 	return nil
@@ -365,7 +363,6 @@ func (p *postgresProductAccessor) writeProductType(_ context.Context, pType Prod
 func (p *postgresProductAccessor) writeUOM(_ context.Context, uom UOM) error {
 	if _, err := p.db.NamedExec(insertUOM, uom); err != nil {
 		utils.Logger.Errorf("failed inserting uom: %s", uom.ID)
-		log.Printf("failed inserting uom: %s", uom.ID)
 		return err
 	}
 	return nil
@@ -374,7 +371,6 @@ func (p *postgresProductAccessor) writeUOM(_ context.Context, uom UOM) error {
 func (p *postgresProductAccessor) writeProductVendor(_ context.Context, pv ProductVendor) error {
 	if _, err := p.db.NamedExec(insertProductVendor, pv); err != nil {
 		utils.Logger.Errorf("failed inserting product_vendor: %s, product_id: %s", pv.ID, pv.ProductID)
-		log.Printf("failed inserting product_vendor: %s, product_id: %s", pv.ID, pv.ProductID)
 		return err
 	}
 	return nil
