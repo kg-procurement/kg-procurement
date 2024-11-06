@@ -33,21 +33,21 @@ type AccountService struct {
 func (a *AccountService) RegisterAccount(ctx context.Context, spec RegisterContract) error {
 	// Validate email
 	if _, err := mail.ParseAddress(spec.Email); err != nil {
-		utils.Logger.Errorf("invalid email: %w", err)
+		utils.Logger.Errorf("invalid email: %v", err)
 		return fmt.Errorf("invalid email: %w", err)
 	}
 
 	// Hash the password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(spec.Password), bcrypt.DefaultCost)
 	if err != nil {
-		utils.Logger.Errorf("failed to hash password: %w", err)
+		utils.Logger.Errorf("failed to hash password: %v", err)
 		return fmt.Errorf("failed to hash password: %w", err)
 	}
 
 	// Generate ID
 	id, err := generateRandomID()
 	if err != nil {
-		utils.Logger.Errorf("failed to generate random ID: %w", err)
+		utils.Logger.Errorf("failed to generate random ID: %v", err)
 		return fmt.Errorf("failed to generate random ID: %w", err)
 	}
 
