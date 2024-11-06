@@ -2,10 +2,9 @@ package router
 
 import (
 	"kg/procurement/cmd/config"
+	"kg/procurement/cmd/utils"
 	"kg/procurement/internal/vendors"
 	"net/http"
-
-	u "kg/procurement/cmd/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,7 +15,7 @@ func NewVendorEngine(
 	vendorSvc *vendors.VendorService,
 ) {
 	r.GET(cfg.GetAll, func(ctx *gin.Context) {
-		u.GeneralLogger.Println("Received getAllVendor request")
+		utils.Logger.Info("Received getAllVendor request")
 
 		paginationSpec := GetPaginationSpec(ctx.Request)
 		spec := vendors.GetAllVendorSpec{
@@ -27,26 +26,25 @@ func NewVendorEngine(
 
 		res, err := vendorSvc.GetAll(ctx, spec)
 		if err != nil {
-			u.ErrorLogger.Println(err.Error())
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
 			})
 			return
 		}
 
-		u.GeneralLogger.Println("Completed getAllVendor request process")
+		utils.Logger.Info("Completed getAllVendor request process")
 
 		ctx.JSON(http.StatusOK, res)
 	})
 
 	r.PUT(cfg.UpdateDetail, func(ctx *gin.Context) {
-		u.GeneralLogger.Println("Received updateVendorDetail request")
+		utils.Logger.Info("Received updateVendorDetail request")
 
 		id := ctx.Param("id")
 
 		spec := &vendors.PutVendorSpec{}
 		if err := ctx.ShouldBindJSON(&spec); err != nil {
-			u.ErrorLogger.Println(err.Error())
+			utils.Logger.Error(err.Error())
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
 			})
@@ -67,50 +65,47 @@ func NewVendorEngine(
 
 		res, err := vendorSvc.UpdateDetail(ctx, newVendor)
 		if err != nil {
-			u.ErrorLogger.Println(err.Error())
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
 			})
 			return
 		}
 
-		u.GeneralLogger.Println("Completed updateDetailVendor request process")
+		utils.Logger.Info("Completed updateDetailVendor request process")
 
 		ctx.JSON(http.StatusOK, res)
 	})
 
 	r.GET(cfg.GetById, func(ctx *gin.Context) {
-		u.GeneralLogger.Println("Received getVendorById request")
+		utils.Logger.Info("Received getVendorById request")
 
 		id := ctx.Param("id")
 
 		res, err := vendorSvc.GetById(ctx, id)
 		if err != nil {
-			u.ErrorLogger.Println(err.Error())
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
 			})
 			return
 		}
 
-		u.GeneralLogger.Println("Completed getVendorById request process")
+		utils.Logger.Info("Completed getVendorById request process")
 
 		ctx.JSON(http.StatusOK, res)
 	})
 
 	r.GET(cfg.GetLocations, func(ctx *gin.Context) {
-		u.GeneralLogger.Println("Received getVendorByLocations request")
+		utils.Logger.Info("Received getVendorByLocations request")
 
 		res, err := vendorSvc.GetLocations(ctx)
 		if err != nil {
-			u.ErrorLogger.Println(err.Error())
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
 			})
 			return
 		}
 
-		u.GeneralLogger.Println("Completed getVendorByLocations request process")
+		utils.Logger.Info("Completed getVendorByLocations request process")
 
 		ctx.JSON(http.StatusOK, gin.H{
 			"locations": res,
@@ -118,11 +113,11 @@ func NewVendorEngine(
 	})
 
 	r.POST(cfg.EmailBlast, func(ctx *gin.Context) {
-		u.GeneralLogger.Println("Received emailBlast request")
+		utils.Logger.Info("Received emailBlast request")
 
 		payload := vendors.EmailBlastContract{}
 		if err := ctx.ShouldBindJSON(&payload); err != nil {
-			u.ErrorLogger.Println(err.Error())
+			utils.Logger.Error(err.Error())
 			ctx.JSON(http.StatusBadRequest, gin.H{
 				"error": "Invalid request payload",
 			})
@@ -132,20 +127,18 @@ func NewVendorEngine(
 		errList, err := vendorSvc.BlastEmail(ctx, payload.VendorIDs, payload.EmailTemplate)
 		if err != nil {
 			if len(errList) > 0 {
-				u.ErrorLogger.Println(err.Error())
 				ctx.JSON(http.StatusMultiStatus, gin.H{
 					"error": errList,
 				})
 				return
 			}
-			u.ErrorLogger.Println(err.Error())
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
 			})
 			return
 		}
 
-		u.GeneralLogger.Println("Completed emailBlast request process")
+		utils.Logger.Info("Completed emailBlast request process")
 
 		ctx.JSON(http.StatusOK, gin.H{
 			"message": "Emails successfully sent",

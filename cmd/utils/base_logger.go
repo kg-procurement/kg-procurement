@@ -7,12 +7,10 @@ import (
 	"path/filepath"
 )
 
-var GeneralLogger *log.Logger
-var ErrorLogger *log.Logger
-var DebugLogger *log.Logger
-var InfoLogger *log.Logger
-var PanicLogger *log.Logger
-var FatalLogger *log.Logger
+var errorLogger *log.Logger
+var debugLogger *log.Logger
+var infoLogger *log.Logger
+var fatalLogger *log.Logger
 
 func init() {
 	projectRoot, err := filepath.Abs("./")
@@ -34,10 +32,8 @@ func init() {
 		fmt.Println("error opening file: ", err)
 		return
 	}
-	GeneralLogger = log.New(generalLog, "General Logger:\t", log.Ldate|log.Ltime|log.Lshortfile)
-	ErrorLogger = log.New(generalLog, "Error:\t", log.Ldate|log.Ltime|log.Lshortfile)
-	DebugLogger = log.New(generalLog, "Debug:\t", log.Ldate|log.Ltime|log.Lshortfile)
-	InfoLogger = log.New(generalLog, "Info:\t", log.Ldate|log.Ltime|log.Lshortfile)
-	PanicLogger = log.New(generalLog, "Panic:\t", log.Ldate|log.Ltime|log.Lshortfile)
-	FatalLogger = log.New(generalLog, "Fatal:\t", log.Ldate|log.Ltime|log.Lshortfile)
+	errorLogger = log.New(generalLog, "Error:\t", log.Ldate|log.Ltime|log.Lshortfile)
+	debugLogger = log.New(generalLog, "Debug:\t", log.Ldate|log.Ltime|log.Lshortfile)
+	infoLogger = log.New(generalLog, "Info:\t", log.Ldate|log.Ltime|log.Lshortfile)
+	fatalLogger = log.New(generalLog, "Fatal:\t", log.Ldate|log.Ltime|log.Lshortfile)
 }
