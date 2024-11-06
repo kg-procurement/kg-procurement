@@ -168,9 +168,8 @@ func (p *postgresProductAccessor) GetProductsByVendor(
 	var totalEntries int
 	row := p.db.QueryRow(countQuery, vendorID)
 	if err = row.Scan(&totalEntries); err != nil {
-		errorMessage := "failed to execute count query: %v"
-		utils.Logger.Errorf(errorMessage, err)
-		return nil, fmt.Errorf(errorMessage, err)
+		utils.Logger.Errorf(err.Error())
+		return nil, fmt.Errorf("failed to execute count query: %v", err)
 	}
 
 	return &AccessorGetProductsByVendorPaginationData{
@@ -205,9 +204,8 @@ func (p *postgresProductAccessor) UpdateProduct(_ context.Context, payload Produ
 		&updatedProduct.ModifiedDate,
 		&updatedProduct.ModifiedBy,
 	); err != nil {
-		errorMessage := "failed to scan updated product: %v"
-		utils.Logger.Errorf(errorMessage, err)
-		return Product{}, fmt.Errorf(errorMessage, err)
+		utils.Logger.Error(err.Error())
+		return Product{}, fmt.Errorf("failed to scan updated product: %w", err)
 	}
 
 	return updatedProduct, nil
