@@ -10,6 +10,7 @@ import (
 
 type productDBAccessor interface {
 	GetProductsByVendor(ctx context.Context, vendorID string, spec GetProductsByVendorSpec) (*AccessorGetProductsByVendorPaginationData, error)
+	GetAllProductVendors(ctx context.Context, spec GetProductVendorsSpec) (*AccessorGetProductVendorsPaginationData, error)
 	UpdatePrice(ctx context.Context, price Price) (Price, error)
 	UpdateProduct(ctx context.Context, payload Product) (Product, error)
 }
@@ -24,6 +25,13 @@ func (p *ProductService) GetProductsByVendor(
 	spec GetProductsByVendorSpec,
 ) (*AccessorGetProductsByVendorPaginationData, error) {
 	return p.productDBAccessor.GetProductsByVendor(ctx, vendorID, spec)
+}
+
+func (p *ProductService) GetProductVendors(
+	ctx context.Context,
+	spec GetProductVendorsSpec,
+) (*AccessorGetProductVendorsPaginationData, error) {
+	return p.productDBAccessor.GetAllProductVendors(ctx, spec)
 }
 
 func (p *ProductService) UpdateProduct(ctx context.Context, payload Product) (Product, error) {

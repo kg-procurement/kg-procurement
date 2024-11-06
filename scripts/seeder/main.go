@@ -9,6 +9,7 @@ import (
 	"kg/procurement/cmd/utils"
 	"kg/procurement/internal/product"
 	"kg/procurement/internal/vendors"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -25,6 +26,7 @@ const (
 	uomFixtureFile             = "./fixtures/product/uom.jsonc"
 	vendorFixtureFile          = "./fixtures/vendors/vendor.jsonc"
 	productVendorFixtureFile   = "./fixtures/product/product_vendor.jsonc"
+	priceFixtureFile           = "./fixtures/product/price.jsonc"
 )
 
 var (
@@ -56,6 +58,8 @@ func main() {
 		seedVendor(ctx)
 	case "product_vendor":
 		seedProductVendor(ctx)
+	case "price":
+		seedPrice(ctx)
 	default:
 		utils.Logger.Info("Usage: go run scripts/seeder/main.go [product|product_category|product_type|uom|vendor|product_vendor].")
 	}
@@ -218,6 +222,37 @@ func seedProductVendor(ctx context.Context) {
 
 	if err := productSeeder.SetupProductVendor(ctx, listOfProductVendor); err != nil {
 		utils.Logger.Fatal(err.Error())
+	}
+}
+
+func seedPrice(ctx context.Context) {
+	var listOfPrice []product.Price
+
+	// parsing issue from data given not conforming to RFC3339 format
+	var temp []struct {
+		product.Price
+		ValidFrom     string `json:"valid_from"`
+		ValidTo       string `json:"valid_to"`
+		ReferenceDate string `json:"reference_date"`
+		ModifiedDate  string `json:"modified_date"`
+	}
+	byteValue := readBytesFromFixture(priceFixtureFile)
+	if err := json.Unmarshal(byteValue, &temp); err != nil {
+		log.Println("Error unmarshalling")
+		panic(err)
+	}
+
+	for _, tPrice := range temp {
+		p := tPrice.Price
+		p.ValidFrom, _ = time.Parse(time.DateTime, tPrice.ValidFrom)
+		p.ValidTo, _ = time.Parse(time.DateTime, tPrice.ValidTo)
+		p.ReferenceDate, _ = time.Parse(time.DateOnly, tPrice.ReferenceDate)
+		p.ModifiedDate, _ = time.Parse(time.DateTime, tPrice.ModifiedDate)
+		listOfPrice = append(listOfPrice, p)
+	}
+
+	if err := productSeeder.SetupPrice(ctx, listOfPrice); err != nil {
+		panic(err)
 	}
 }
 

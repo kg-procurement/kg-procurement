@@ -59,6 +59,12 @@ const (
 		VALUES 
 			(:id, :product_id, :code, :name, :income_tax_id, :income_tax_name, :income_tax_percentage, :description, :uom_id, :sap_code, :modified_date, :modified_by)
 	`
+	insertPrice = `
+		INSERT INTO price
+			(id, purchasing_org_id, purchasing_org_name, vendor_id, product_vendor_id, quantity_min, quantity_max, quantity_uom_id, lead_time_min, lead_time_max, currency_id, currency_name, currency_code, price, price_quantity, price_uom_id, valid_from, valid_to, valid_pattern_id, valid_pattern_name, area_group_id, area_group_name, reference_number, reference_date, document_type_id, document_type_name, document_id, item_id, term_of_payment_id, term_of_payment_days, term_of_payment_text, invocation_order, modified_date, modified_by)
+		VALUES 
+			(:id, :purchasing_org_id, :purchasing_org_name, :vendor_id, :product_vendor_id, :quantity_min, :quantity_max, :quantity_uom_id, :lead_time_min, :lead_time_max, :currency_id, :currency_name, :currency_code, :price, :price_quantity, :price_uom_id, :valid_from, :valid_to, :valid_pattern_id, :valid_pattern_name, :area_group_id, :area_group_name, :reference_number, :reference_date, :document_type_id, :document_type_name, :document_id, :item_id, :term_of_payment_id, :term_of_payment_days, :term_of_payment_text, :invocation_order, :modified_date, :modified_by)
+	`
 	updateProduct = `UPDATE product SET
         product_category_id = $2,
         uom_id = $3,
@@ -79,6 +85,47 @@ const (
         modified_date,
         modified_by
     `
+
+	getProductVendorsQuery = `
+		SELECT 
+			pv.id, 
+			pv.product_id, 
+			pv.code, 
+			pv.name, 
+			pr.quantity_min, 
+			pr.quantity_max, 
+			pr.currency_name, 
+			pr.currency_code, 
+			pr.price, 
+			pr.price_quantity,
+			v.id AS vendor_id,
+			v.name AS vendor_name, 
+			v.rating AS vendor_rating,
+			pv.income_tax_id, 
+			pv.income_tax_name, 
+			pv.income_tax_percentage, 
+			pv.description, 
+			pv.uom_id, 
+			pv.sap_code, 
+			pv.modified_date, 
+			pv.modified_by
+		FROM 
+			product_vendor pv
+		JOIN 
+			price pr ON pr.product_vendor_id = pv.id
+		JOIN 
+			vendor v ON pr.vendor_id = v.id
+	`
+	countProductVendorsQuery = `
+		SELECT 
+			COUNT(*)
+		FROM 
+			product_vendor pv
+		JOIN 
+			price pr ON pr.product_vendor_id = pv.id
+		JOIN 
+			vendor v ON pr.vendor_id = v.id
+	`
 )
 
 type postgresProductAccessor struct {
@@ -89,6 +136,11 @@ type postgresProductAccessor struct {
 type AccessorGetProductsByVendorPaginationData struct {
 	Products []Product                   `json:"products"`
 	Metadata database.PaginationMetadata `json:"metadata"`
+}
+
+type AccessorGetProductVendorsPaginationData struct {
+	ProductVendors []GetProductVendorsDBResponse `json:"product_vendors"`
+	Metadata       database.PaginationMetadata   `json:"metadata"`
 }
 
 func (p *postgresProductAccessor) GetProductsByVendor(
@@ -175,6 +227,74 @@ func (p *postgresProductAccessor) GetProductsByVendor(
 	return &AccessorGetProductsByVendorPaginationData{
 		Products: res,
 		Metadata: database.GeneratePaginationMetadata(spec.PaginationSpec, totalEntries),
+	}, nil
+}
+
+func (p *postgresProductAccessor) GetAllProductVendors(
+	_ context.Context,
+	spec GetProductVendorsSpec,
+) (*AccessorGetProductVendorsPaginationData, error) {
+	paginationArgs := database.BuildPaginationArgs(spec.PaginationSpec)
+
+	// Initialize clauses and arguments
+	var (
+		extraClauses    []string
+		args            map[string]interface{}
+		extraClausesRaw = []string{
+			"LIMIT :limit",
+			"OFFSET :offset",
+		}
+	)
+
+	// Build extra clauses
+	if paginationArgs.OrderBy != "" {
+		extraClauses = append(extraClauses, fmt.Sprintf("ORDER BY %s %s",
+			paginationArgs.OrderBy, paginationArgs.Order))
+	}
+
+	// Pagination clause
+	extraClauses = append(extraClauses, extraClausesRaw...)
+
+	args = map[string]interface{}{
+		"limit":  paginationArgs.Limit,
+		"offset": paginationArgs.Offset,
+	}
+
+	// Build the query
+	query := getProductVendorsQuery
+	if len(extraClauses) > 0 {
+		query += " " + strings.Join(extraClauses, " ")
+	}
+	fmt.Println(query)
+
+	rows, err := p.db.NamedQuery(query, args)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	res := []GetProductVendorsDBResponse{}
+
+	for rows.Next() {
+		var product GetProductVendorsDBResponse
+		if err := rows.StructScan(&product); err != nil {
+			return nil, err
+		}
+		res = append(res, product)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	var totalEntries int
+	row := p.db.QueryRow(countProductVendorsQuery)
+	if err = row.Scan(&totalEntries); err != nil {
+		return nil, fmt.Errorf("failed to execute count query: %w", err)
+	}
+
+	return &AccessorGetProductVendorsPaginationData{
+		ProductVendors: res,
+		Metadata:       database.GeneratePaginationMetadata(spec.PaginationSpec, totalEntries),
 	}, nil
 }
 
@@ -369,6 +489,14 @@ func (p *postgresProductAccessor) writeUOM(_ context.Context, uom UOM) error {
 func (p *postgresProductAccessor) writeProductVendor(_ context.Context, pv ProductVendor) error {
 	if _, err := p.db.NamedExec(insertProductVendor, pv); err != nil {
 		utils.Logger.Errorf("failed inserting product_vendor: %s, product_id: %s", pv.ID, pv.ProductID)
+		return err
+	}
+	return nil
+}
+
+func (p *postgresProductAccessor) writePrice(_ context.Context, price Price) error {
+	if _, err := p.db.NamedExec(insertPrice, price); err != nil {
+		log.Printf("failed inserting price: %s", price.ID)
 		return err
 	}
 	return nil

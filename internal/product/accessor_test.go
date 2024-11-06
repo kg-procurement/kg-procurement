@@ -685,6 +685,438 @@ func Test_GetProductsByVendor(t *testing.T) {
 	})
 }
 
+func Test_GetAllProductVendors(t *testing.T) {
+	t.Parallel()
+
+	var (
+		spec = GetProductVendorsSpec{
+			PaginationSpec: database.PaginationSpec{
+				Limit: 10,
+				Page:  1,
+			},
+		}
+		args           = database.BuildPaginationArgs(spec.PaginationSpec)
+		productColumns = []string{
+			"id", "product_id", "code", "name",
+			"quantity_min", "quantity_max", "currency_name",
+			"currency_code", "price", "price_quantity",
+			"vendor_id", "vendor_name", "vendor_rating", 
+			"income_tax_id", "income_tax_name", "income_tax_percentage",
+			"description", "uom_id", "sap_code",
+			"modified_date", "modified_by",
+		}
+		productVendors = []GetProductVendorsDBResponse{
+			{
+				ID:                  "1",
+				ProductID:           "1",
+				Code:                "",
+				Name:                "Buku",
+				QuantityMin:         1,
+				QuantityMax:         300,
+				CurrencyName:        "Rupiah",
+				CurrencyCode:        "IDR",
+				Price:               23000,
+				PriceQuantity:       1,
+				VendorID:            "1",
+				VendorName:          "Multi Kharisma Solusindo, PT",
+				VendorRating:        -100,
+				IncomeTaxID:         "0",
+				IncomeTaxName:       "",
+				IncomeTaxPercentage: "0",
+				Description:         "Buku",
+				UOMID:               "26",
+				SAPCode:             "",
+				ModifiedDate:        time.Date(2020, 11, 11, 13, 22, 16, 0, time.UTC),
+				ModifiedBy:          "151",
+			},
+			{
+				ID:                  "2",
+				ProductID:           "2",
+				Code:                "",
+				Name:                "Koran",
+				QuantityMin:         1,
+				QuantityMax:         4,
+				CurrencyName:        "Rupiah",
+				CurrencyCode:        "IDR",
+				Price:               290000,
+				PriceQuantity:       1,
+				VendorID:            "2",
+				VendorName:          "Toko Amazon",
+				VendorRating:        0,
+				IncomeTaxID:         "0",
+				IncomeTaxName:       "",
+				IncomeTaxPercentage: "0",
+				Description:         "Koran",
+				UOMID:               "26",
+				SAPCode:             "",
+				ModifiedDate:        time.Date(2020, 11, 2, 14, 49, 6, 0, time.UTC),
+				ModifiedBy:          "0",
+			},
+		}
+	)
+
+	t.Run("success", func(t *testing.T) {
+		var (
+			ctx            = context.Background()
+			c              = setupProductAccessorTestComponent(t)
+			expectedResult = sqlmock.NewRows(productColumns)
+		)
+		defer c.db.Close()
+
+		for _, p := range productVendors {
+			expectedResult.AddRow(
+				p.ID,
+				p.ProductID,
+				p.Code,
+				p.Name,
+				p.QuantityMin,
+				p.QuantityMax,
+				p.CurrencyName,
+				p.CurrencyCode,
+				p.Price,
+				p.PriceQuantity,
+				p.VendorID,
+				p.VendorName,
+				p.VendorRating,
+				p.IncomeTaxID,
+				p.IncomeTaxName,
+				p.IncomeTaxPercentage,
+				p.Description,
+				p.UOMID,
+				p.SAPCode,
+				p.ModifiedDate,
+				p.ModifiedBy,
+			)
+		}
+
+		query := getProductVendorsQuery + " LIMIT :limit OFFSET :offset"
+		transformedQuery, args, _ := sqlx.Named(query, map[string]interface{}{
+			"limit":  args.Limit,
+			"offset": args.Offset,
+		})
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectQuery(transformedQuery).
+			WithArgs(
+				driverArgs...,
+			).WillReturnRows(expectedResult)
+
+		totalRows := sqlmock.NewRows([]string{"count"}).AddRow(2)
+		c.mock.ExpectQuery(countProductVendorsQuery).
+			WillReturnRows(totalRows)
+
+		expect := &AccessorGetProductVendorsPaginationData{
+			ProductVendors: productVendors,
+			Metadata: database.PaginationMetadata{
+				TotalPage:    1,
+				CurrentPage:  1,
+				TotalEntries: 2,
+			},
+		}
+
+		res, err := c.accessor.GetAllProductVendors(ctx, spec)
+		c.g.Expect(err).To(gomega.BeNil())
+		c.g.Expect(res).To(gomega.BeComparableTo(expect))
+	})
+
+	t.Run("success with order by", func(t *testing.T) {
+		var (
+			ctx            = context.Background()
+			c              = setupProductAccessorTestComponent(t)
+			expectedResult = sqlmock.NewRows(productColumns)
+			customSpec     = GetProductVendorsSpec{
+				PaginationSpec: database.PaginationSpec{
+					OrderBy: "name",
+					Limit:   10,
+					Page:    1,
+				},
+			}
+		)
+		defer c.db.Close()
+
+		for _, p := range productVendors {
+			expectedResult.AddRow(
+				p.ID,
+				p.ProductID,
+				p.Code,
+				p.Name,
+				p.QuantityMin,
+				p.QuantityMax,
+				p.CurrencyName,
+				p.CurrencyCode,
+				p.Price,
+				p.PriceQuantity,
+				p.VendorID,
+				p.VendorName,
+				p.VendorRating,
+				p.IncomeTaxID,
+				p.IncomeTaxName,
+				p.IncomeTaxPercentage,
+				p.Description,
+				p.UOMID,
+				p.SAPCode,
+				p.ModifiedDate,
+				p.ModifiedBy,
+			)
+		}
+
+		query := getProductVendorsQuery + " ORDER BY name ASC LIMIT :limit OFFSET :offset"
+		transformedQuery, args, _ := sqlx.Named(query, map[string]interface{}{
+			"limit":  args.Limit,
+			"offset": args.Offset,
+		})
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectQuery(transformedQuery).
+			WithArgs(
+				driverArgs...,
+			).WillReturnRows(expectedResult)
+
+		totalRows := sqlmock.NewRows([]string{"count"}).AddRow(2)
+		c.mock.ExpectQuery(countProductVendorsQuery).
+			WillReturnRows(totalRows)
+
+		expect := &AccessorGetProductVendorsPaginationData{
+			ProductVendors: productVendors,
+			Metadata: database.PaginationMetadata{
+				TotalPage:    1,
+				CurrentPage:  1,
+				TotalEntries: 2,
+			},
+		}
+
+		res, err := c.accessor.GetAllProductVendors(ctx, customSpec)
+		c.g.Expect(err).To(gomega.BeNil())
+		c.g.Expect(res).To(gomega.BeComparableTo(expect))
+	})
+
+	t.Run("error on query execution", func(t *testing.T) {
+		var (
+			ctx = context.Background()
+			c   = setupProductAccessorTestComponent(t)
+		)
+		defer c.db.Close()
+
+		query := getProductVendorsQuery + " LIMIT :limit OFFSET :offset"
+		transformedQuery, args, _ := sqlx.Named(query, map[string]interface{}{
+			"limit":  args.Limit,
+			"offset": args.Offset,
+		})
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectQuery(transformedQuery).
+			WithArgs(
+				driverArgs...,
+			).WillReturnError(errors.New("error"))
+
+		res, err := c.accessor.GetAllProductVendors(ctx, spec)
+
+		c.g.Expect(err).ShouldNot(gomega.BeNil())
+		c.g.Expect(res).To(gomega.BeNil())
+	})
+
+	t.Run("error on scanning data row", func(t *testing.T) {
+		var (
+			ctx            = context.Background()
+			c              = setupProductAccessorTestComponent(t)
+			expectedResult = sqlmock.NewRows(productColumns)
+		)
+		defer c.db.Close()
+
+		for _, p := range productVendors {
+			expectedResult.AddRow(
+				p.ID,
+				p.ProductID,
+				p.Code,
+				p.Name,
+				p.QuantityMin,
+				p.QuantityMax,
+				p.CurrencyName,
+				p.CurrencyCode,
+				p.Price,
+				p.PriceQuantity,
+				p.VendorID,
+				p.VendorName,
+				p.VendorRating,
+				p.IncomeTaxID,
+				p.IncomeTaxName,
+				p.IncomeTaxPercentage,
+				p.Description,
+				p.UOMID,
+				p.SAPCode,
+				p.ModifiedDate,
+				p.ModifiedBy,
+			)
+		}
+		expectedResult.AddRow(
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+		)
+
+		query := getProductVendorsQuery + " LIMIT :limit OFFSET :offset"
+		transformedQuery, args, _ := sqlx.Named(query, map[string]interface{}{
+			"limit":  args.Limit,
+			"offset": args.Offset,
+		})
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectQuery(transformedQuery).
+			WithArgs(
+				driverArgs...,
+			).WillReturnRows(expectedResult)
+
+		res, err := c.accessor.GetAllProductVendors(ctx, spec)
+
+		c.g.Expect(err).ShouldNot(gomega.BeNil())
+		c.g.Expect(res).To(gomega.BeNil())
+	})
+
+	t.Run("error while iterating rows", func(t *testing.T) {
+		var (
+			ctx            = context.Background()
+			c              = setupProductAccessorTestComponent(t)
+			expectedResult = sqlmock.NewRows(productColumns)
+		)
+		defer c.db.Close()
+
+		for _, p := range productVendors {
+			expectedResult.AddRow(
+				p.ID,
+				p.ProductID,
+				p.Code,
+				p.Name,
+				p.QuantityMin,
+				p.QuantityMax,
+				p.CurrencyName,
+				p.CurrencyCode,
+				p.Price,
+				p.PriceQuantity,
+				p.VendorID,
+				p.VendorName,
+				p.VendorRating,
+				p.IncomeTaxID,
+				p.IncomeTaxName,
+				p.IncomeTaxPercentage,
+				p.Description,
+				p.UOMID,
+				p.SAPCode,
+				p.ModifiedDate,
+				p.ModifiedBy,
+			)
+		}
+		expectedResult.RowError(0, fmt.Errorf("some error"))
+
+		query := getProductVendorsQuery + " LIMIT :limit OFFSET :offset"
+		transformedQuery, args, _ := sqlx.Named(query, map[string]interface{}{
+			"limit":  args.Limit,
+			"offset": args.Offset,
+		})
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectQuery(transformedQuery).
+			WithArgs(
+				driverArgs...,
+			).WillReturnRows(expectedResult)
+
+		res, err := c.accessor.GetAllProductVendors(ctx, spec)
+
+		c.g.Expect(err).ToNot(gomega.BeNil())
+		c.g.Expect(res).To(gomega.BeNil())
+	})
+
+	t.Run("error while querying count", func(t *testing.T) {
+		var (
+			ctx            = context.Background()
+			c              = setupProductAccessorTestComponent(t)
+			expectedResult = sqlmock.NewRows(productColumns)
+		)
+		defer c.db.Close()
+
+		for _, p := range productVendors {
+			expectedResult.AddRow(
+				p.ID,
+				p.ProductID,
+				p.Code,
+				p.Name,
+				p.QuantityMin,
+				p.QuantityMax,
+				p.CurrencyName,
+				p.CurrencyCode,
+				p.Price,
+				p.PriceQuantity,
+				p.VendorID,
+				p.VendorName,
+				p.VendorRating,
+				p.IncomeTaxID,
+				p.IncomeTaxName,
+				p.IncomeTaxPercentage,
+				p.Description,
+				p.UOMID,
+				p.SAPCode,
+				p.ModifiedDate,
+				p.ModifiedBy,
+			)
+		}
+
+		query := getProductVendorsQuery + " LIMIT :limit OFFSET :offset"
+		transformedQuery, args, _ := sqlx.Named(query, map[string]interface{}{
+			"limit":  args.Limit,
+			"offset": args.Offset,
+		})
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectQuery(transformedQuery).
+			WithArgs(
+				driverArgs...,
+			).WillReturnError(errors.New("error"))
+
+		totalRows := sqlmock.NewRows([]string{"count"}).RowError(1, fmt.Errorf("row error"))
+		c.mock.ExpectQuery(countProductVendorsQuery).
+			WillReturnRows(totalRows)
+
+		res, err := c.accessor.GetAllProductVendors(ctx, spec)
+		c.g.Expect(err).ToNot(gomega.BeNil())
+		c.g.Expect(res).To(gomega.BeNil())
+	})
+}
+
 func Test_writeProduct(t *testing.T) {
 	t.Parallel()
 
@@ -919,6 +1351,52 @@ func Test_writeProductVendor(t *testing.T) {
 		).WillReturnError(errors.New("error"))
 
 		err := c.accessor.writeProductVendor(ctx, pv)
+		c.g.Expect(err).ShouldNot(gomega.BeNil())
+	})
+}
+
+func Test_writePrice(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		var (
+			ctx   = context.Background()
+			c     = setupProductAccessorTestComponent(t, WithQueryMatcher(sqlmock.QueryMatcherRegexp))
+			price = Price{ID: "321"}
+		)
+
+		transformedQuery, args, _ := sqlx.Named(insertPrice, price)
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectExec(regexp.QuoteMeta(transformedQuery)).WithArgs(
+			driverArgs...,
+		).WillReturnResult(sqlmock.NewResult(1, 1))
+
+		err := c.accessor.writePrice(ctx, price)
+		c.g.Expect(err).Should(gomega.BeNil())
+	})
+
+	t.Run("error", func(t *testing.T) {
+		var (
+			ctx   = context.Background()
+			c     = setupProductAccessorTestComponent(t)
+			price = Price{ID: "321"}
+		)
+
+		transformedQuery, args, _ := sqlx.Named(insertPrice, price)
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectExec(regexp.QuoteMeta(transformedQuery)).WithArgs(
+			driverArgs...,
+		).WillReturnError(errors.New("error"))
+
+		err := c.accessor.writePrice(ctx, price)
 		c.g.Expect(err).ShouldNot(gomega.BeNil())
 	})
 }

@@ -47,6 +47,24 @@ func NewProductEngine(
 		ctx.JSON(http.StatusOK, res)
 	})
 
+	r.GET(cfg.GetProductVendors, func(ctx *gin.Context) {
+		paginationSpec := GetPaginationSpec(ctx.Request)
+
+		spec := product.GetProductVendorsSpec{
+			PaginationSpec: paginationSpec,
+		}
+
+		res, err := productSvc.GetProductVendors(ctx, spec)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, res)
+	})
+
 	r.PUT(cfg.UpdateProduct, func(ctx *gin.Context) {
 		utils.Logger.Info("Received updateProductDetail request")
 
