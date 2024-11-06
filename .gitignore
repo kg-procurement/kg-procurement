@@ -13,4 +13,4 @@ tmp/*
 /vendor
 
 # Log folder
-# /log
+/log

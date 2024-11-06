@@ -3,7 +3,7 @@ package helper
 import (
 	"context"
 	"errors"
-	"log"
+	"kg/procurement/cmd/utils"
 	"time"
 )
 
@@ -41,13 +41,13 @@ func Retry[T any](
 		}
 
 		lastError = err
-		log.Printf("Retry #%d for error: %v. Retrying after %v...\n", attempt, err, currentDelay)
+		utils.Logger.Infof("Retry #%d for error: %v. Retrying after %v...\n", attempt, err, currentDelay)
 
 		sleep(currentDelay)
 
 		currentDelay *= time.Duration(backoff)
 	}
-	log.Printf("Failed after %d attempts with error: %v\n", tries, lastError)
+	utils.Logger.Infof("Failed after %d attempts with error: %v\n", tries, lastError)
 
 	return zeroValue, lastError
 }

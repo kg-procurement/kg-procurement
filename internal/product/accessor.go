@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"kg/procurement/cmd/utils"
 	"kg/procurement/internal/common/database"
-	"log"
 	"strings"
 
 	"github.com/benbjohnson/clock"
@@ -338,7 +337,6 @@ func (p *postgresProductAccessor) UpdatePrice(ctx context.Context, price Price) 
 func (p *postgresProductAccessor) writeProduct(_ context.Context, product Product) error {
 	if _, err := p.db.NamedExec(insertProduct, product); err != nil {
 		utils.Logger.Errorf("failed inserting product: %s", product.ID)
-		log.Printf("failed inserting product: %s", product.ID)
 		return err
 	}
 	return nil

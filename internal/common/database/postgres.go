@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"kg/procurement/cmd/utils"
-	"log"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -85,6 +84,6 @@ func NewConn(host, user, password, name, port string) *Conn {
 		utils.Logger.Fatal(err.Error())
 	}
 
-	log.Println("\nSuccessfully connected to database")
+	utils.Logger.Info("\nSuccessfully connected to database")
 	return &Conn{db: db}
 }
