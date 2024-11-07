@@ -708,6 +708,81 @@ func Test_GetProductVendorsByVendor(t *testing.T) {
 	})
 }
 
+func Test_getPriceByPVID(t *testing.T) {
+	t.Parallel()
+
+	var (
+		accessor *postgresProductAccessor
+		mock     sqlmock.Sqlmock
+	)
+
+	setup := func(t *testing.T) (*gomega.GomegaWithT, *sql.DB) {
+		g := gomega.NewWithT(t)
+		realClock := clock.New()
+
+		db, sqlMock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+		if err != nil {
+			log.Fatal("error initializing mock:", err)
+		}
+		sqlxDB := sqlx.NewDb(db, "sqlmock")
+
+		accessor = newPostgresProductAccessor(sqlxDB, realClock)
+		mock = sqlMock
+
+		return g, db
+	}
+
+	priceFields := []string{"id", "purchasing_org_id", "purchasing_org_name", "vendor_id", "product_vendor_id", "quantity_min", "quantity_max", "lead_time_min", "lead_time_max", "currency_id", "currency_name", "currency_code", "price", "price_quantity", "price_uom_id", "valid_from", "valid_to", "valid_pattern_id", "valid_pattern_name", "area_group_id", "area_group_name", "reference_number", "reference_date", "document_type_id", "document_type_name", "document_id", "item_id", "term_of_payment_id", "term_of_payment_days", "term_of_payment_text", "invocation_order", "modified_date", "modified_by"}
+
+	now := time.Now()
+	price := &Price{
+		ID:            "1",
+		Price:         100.0,
+		ValidFrom:     now,
+		ValidTo:       now,
+		ModifiedDate:  now,
+		ReferenceDate: now,
+	}
+
+	t.Run("success", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		rows := sqlmock.NewRows(priceFields).
+			AddRow(
+				price.ID, "", "", "", "", 0, 0, 0, 0, "", "", "", 100.0, 0, "", price.ValidFrom, price.ValidTo,
+				"", "", "", "", "", price.ReferenceDate, "", "", "", "", "", 0, "", 0, price.ModifiedDate, "")
+
+		mock.ExpectQuery(getPriceByPVID).
+			WithArgs("1").
+			WillReturnRows(rows)
+
+		ctx := context.Background()
+		res, err := accessor.getPriceByPVID(ctx, "1")
+
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(res).To(gomega.Equal(price))
+	})
+
+	t.Run("error on row scan", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		rows := sqlmock.NewRows(priceFields).
+			RowError(1, fmt.Errorf("error"))
+
+		mock.ExpectQuery(getPriceByPVID).
+			WithArgs("1").
+			WillReturnRows(rows)
+
+		ctx := context.Background()
+		res, err := accessor.getPriceByPVID(ctx, "1")
+
+		g.Expect(err).ToNot(gomega.BeNil())
+		g.Expect(res).To(gomega.BeNil())
+	})
+}
+
 func Test_getProductByID(t *testing.T) {
 	t.Parallel()
 
