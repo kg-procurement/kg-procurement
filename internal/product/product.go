@@ -104,7 +104,7 @@ type Price struct {
 	ModifiedBy        string    `db:"modified_by" json:"modified_by"`
 }
 
-type GetProductsByVendorSpec struct {
+type GetProductVendorByVendorSpec struct {
 	Name string `json:"name"`
 	database.PaginationSpec
 }

@@ -11,25 +11,14 @@ import (
 )
 
 const (
-	getProductsByVendorQuery = `
-		SELECT 
-			p.id, 
-			p.product_category_id, 
-			p.uom_id, 
-			p.income_tax_id, 
-			p.product_type_id, 
-			p.name, 
-			p.description, 
-			p.modified_date, 
-			p.modified_by 
-		FROM 
-			product p
-		JOIN 
-			product_vendor pv ON pv.product_id = p.id
-		WHERE 
-			pv.vendor_id = $1
+	getProductVendorsByVendorQuery = `
+		SELECT pv.id, pv.product_id, pv.code, pv.name, pv.income_tax_id, pv.income_tax_name, pv.income_tax_percentage, pv.description, pv.uom_id, pv.sap_code, pv.modified_date, pv.modified_by
+		FROM product_vendor pv
+		JOIN price pr ON pr.product_vendor_id = pv.id
+		WHERE pr.vendor_id = $1
 	`
-	insertProduct = `
+	getProductByID = `SELECT * FROM product WHERE id = $1`
+	insertProduct  = `
 		INSERT INTO product
 			(id, product_category_id, uom_id, income_tax_id, product_type_id, name, description, modified_date, modified_by)
 		VALUES 
@@ -133,21 +122,21 @@ type postgresProductAccessor struct {
 	clock clock.Clock
 }
 
-type AccessorGetProductsByVendorPaginationData struct {
-	Products []Product                   `json:"products"`
-	Metadata database.PaginationMetadata `json:"metadata"`
-}
-
 type AccessorGetProductVendorsPaginationData struct {
 	ProductVendors []GetProductVendorsDBResponse `json:"product_vendors"`
 	Metadata       database.PaginationMetadata   `json:"metadata"`
 }
 
-func (p *postgresProductAccessor) GetProductsByVendor(
+type AccessorGetProductVendorsByVendorPaginationData struct {
+	ProductVendors []ProductVendor             `json:"product_vendors"`
+	Metadata       database.PaginationMetadata `json:"metadata"`
+}
+
+func (p *postgresProductAccessor) GetProductVendorsByVendor(
 	_ context.Context,
 	vendorID string,
-	spec GetProductsByVendorSpec,
-) (*AccessorGetProductsByVendorPaginationData, error) {
+	spec GetProductVendorByVendorSpec,
+) (*AccessorGetProductVendorsByVendorPaginationData, error) {
 	paginationArgs := database.BuildPaginationArgs(spec.PaginationSpec)
 
 	// Initialize clauses and arguments
@@ -166,7 +155,7 @@ func (p *postgresProductAccessor) GetProductsByVendor(
 	if spec.Name != "" {
 		productNameList := strings.Fields(spec.Name)
 		for _, word := range productNameList {
-			whereClauses = append(whereClauses, fmt.Sprintf("p.name iLIKE $%d", argsIndex))
+			whereClauses = append(whereClauses, fmt.Sprintf("pv.name iLIKE $%d", argsIndex))
 			args = append(args, "%"+word+"%")
 			argsIndex++
 		}
@@ -186,7 +175,7 @@ func (p *postgresProductAccessor) GetProductsByVendor(
 	args = append(args, paginationArgs.Limit, paginationArgs.Offset)
 
 	// Build the query
-	query := getProductsByVendorQuery
+	query := getProductVendorsByVendorQuery
 	if len(whereClauses) > 0 {
 		query += " AND " + strings.Join(whereClauses, " AND ")
 	}
@@ -200,29 +189,47 @@ func (p *postgresProductAccessor) GetProductsByVendor(
 	}
 	defer rows.Close()
 
-	res := []Product{}
+	res := []ProductVendor{}
 
 	for rows.Next() {
-		var product Product
-		if err := rows.StructScan(&product); err != nil {
+		var productVendor ProductVendor
+		if err := rows.StructScan(&productVendor); err != nil {
 			return nil, err
 		}
-		res = append(res, product)
+		res = append(res, productVendor)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 
-	countQuery := `SELECT COUNT(*) FROM product_vendor WHERE vendor_id=$1`
+	countQuery := `SELECT COUNT(*)
+		FROM product_vendor pv
+		JOIN price pr ON pr.product_vendor_id = pv.id
+		WHERE pr.vendor_id = $1`
+
+	args = []interface{}{vendorID}
+	argsIndex = 2
+	var countWhereClauses []string
+
+	if spec.Name != "" {
+		productNameList := strings.Fields(spec.Name)
+		for _, word := range productNameList {
+			countWhereClauses = append(countWhereClauses, fmt.Sprintf("pv.name iLIKE $%d", argsIndex))
+			args = append(args, "%"+word+"%")
+			argsIndex++
+		}
+		countQuery += " AND " + strings.Join(countWhereClauses, " AND ")
+	}
+
 	var totalEntries int
-	row := p.db.QueryRow(countQuery, vendorID)
+	row := p.db.QueryRow(countQuery, args...)
 	if err = row.Scan(&totalEntries); err != nil {
 		return nil, fmt.Errorf("failed to execute count query: %w", err)
 	}
 
-	return &AccessorGetProductsByVendorPaginationData{
-		Products: res,
-		Metadata: database.GeneratePaginationMetadata(spec.PaginationSpec, totalEntries),
+	return &AccessorGetProductVendorsByVendorPaginationData{
+		ProductVendors: res,
+		Metadata:       database.GeneratePaginationMetadata(spec.PaginationSpec, totalEntries),
 	}, nil
 }
 
@@ -292,6 +299,15 @@ func (p *postgresProductAccessor) GetAllProductVendors(
 		ProductVendors: res,
 		Metadata:       database.GeneratePaginationMetadata(spec.PaginationSpec, totalEntries),
 	}, nil
+}
+
+func (p *postgresProductAccessor) getProductByID(_ context.Context, productID string) (*Product, error) {
+	rows := p.db.QueryRowx(getProductByID, productID)
+	res := Product{}
+	if err := rows.StructScan(&res); err != nil {
+		return nil, err
+	}
+	return &res, nil
 }
 
 func (p *postgresProductAccessor) UpdateProduct(_ context.Context, payload Product) (Product, error) {
