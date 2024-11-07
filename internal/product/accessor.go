@@ -155,7 +155,7 @@ func (p *postgresProductAccessor) GetProductVendorsByVendor(
 	if spec.Name != "" {
 		productNameList := strings.Fields(spec.Name)
 		for _, word := range productNameList {
-			whereClauses = append(whereClauses, fmt.Sprintf("p.name iLIKE $%d", argsIndex))
+			whereClauses = append(whereClauses, fmt.Sprintf("pv.name iLIKE $%d", argsIndex))
 			args = append(args, "%"+word+"%")
 			argsIndex++
 		}
@@ -207,8 +207,23 @@ func (p *postgresProductAccessor) GetProductVendorsByVendor(
 		JOIN price pr ON pr.product_vendor_id = pv.id
 		WHERE pr.vendor_id = $1`
 
+	args = []interface{}{vendorID}
+	argsIndex = 2
+
+	if spec.Name != "" {
+		productNameList := strings.Fields(spec.Name)
+		for _, word := range productNameList {
+			whereClauses = append(whereClauses, fmt.Sprintf("pv.name iLIKE $%d", argsIndex))
+			args = append(args, "%"+word+"%")
+			argsIndex++
+		}
+		countQuery += " AND " + strings.Join(whereClauses, " AND ")
+	}
+
+	fmt.Println(countQuery)
+
 	var totalEntries int
-	row := p.db.QueryRow(countQuery, vendorID)
+	row := p.db.QueryRow(countQuery, args...)
 	if err = row.Scan(&totalEntries); err != nil {
 		return nil, fmt.Errorf("failed to execute count query: %w", err)
 	}
