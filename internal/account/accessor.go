@@ -24,7 +24,7 @@ const (
 	findAccountByEmailQuery = `
 		SELECT id, email, password, modified_date, created_at
 		FROM account
-		WHERE email = :email
+		WHERE email = $1
 	`
 )
 

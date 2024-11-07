@@ -11,6 +11,7 @@ import (
 type productDBAccessor interface {
 	GetProductVendorsByVendor(ctx context.Context, vendorID string, spec GetProductVendorByVendorSpec) (*AccessorGetProductVendorsByVendorPaginationData, error)
 	getProductByID(ctx context.Context, productID string) (*Product, error)
+	GetAllProductVendors(ctx context.Context, spec GetProductVendorsSpec) (*AccessorGetProductVendorsPaginationData, error)
 	UpdatePrice(ctx context.Context, price Price) (Price, error)
 	UpdateProduct(ctx context.Context, payload Product) (Product, error)
 }
@@ -41,6 +42,13 @@ func (p *ProductService) GetProductVendorsByVendor(
 
 	res.Metadata = productVendors.Metadata
 	return &res, nil
+}
+
+func (p *ProductService) GetProductVendors(
+	ctx context.Context,
+	spec GetProductVendorsSpec,
+) (*AccessorGetProductVendorsPaginationData, error) {
+	return p.productDBAccessor.GetAllProductVendors(ctx, spec)
 }
 
 func (p *ProductService) UpdateProduct(ctx context.Context, payload Product) (Product, error) {

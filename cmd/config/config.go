@@ -47,15 +47,17 @@ type Routes struct {
 }
 
 type VendorRoutes struct {
-	GetAll       string `mapstructure:"get-all" validate:"required"`
-	UpdateDetail string `mapstructure:"update-detail" validate:"required"`
-	GetById      string `mapstructure:"get-by-id" validate:"required"`
-	GetLocations string `mapstructure:"get-locations" validate:"required"`
-	EmailBlast   string `mapstructure:"email-blast" validate:"required"`
+	GetAll              string `mapstructure:"get-all" validate:"required"`
+	UpdateDetail        string `mapstructure:"update-detail" validate:"required"`
+	GetById             string `mapstructure:"get-by-id" validate:"required"`
+	GetLocations        string `mapstructure:"get-locations" validate:"required"`
+	EmailBlast          string `mapstructure:"email-blast" validate:"required"`
+	AutomatedEmailBlast string `mapstructure:"automated-email-blast" validate:"required"`
 }
 
 type ProductRoutes struct {
 	GetProductsByVendor string `mapstructure:"get-products-by-vendor" validate:"required"`
+	GetProductVendors   string `mapstructure:"get-product-vendors" validate:"required"`
 	UpdateProduct       string `mapstructure:"update-product" validate:"required"`
 	UpdatePrice         string `mapstructure:"update-price" validate:"required"`
 }

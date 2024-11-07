@@ -39,6 +39,45 @@ func (m *MockproductDBAccessor) EXPECT() *MockproductDBAccessorMockRecorder {
 	return m.recorder
 }
 
+// GetAllProductVendors mocks base method.
+func (m *MockproductDBAccessor) GetAllProductVendors(ctx context.Context, spec GetProductVendorsSpec) (*AccessorGetProductVendorsPaginationData, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllProductVendors", ctx, spec)
+	ret0, _ := ret[0].(*AccessorGetProductVendorsPaginationData)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllProductVendors indicates an expected call of GetAllProductVendors.
+func (mr *MockproductDBAccessorMockRecorder) GetAllProductVendors(ctx, spec any) *MockproductDBAccessorGetAllProductVendorsCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllProductVendors", reflect.TypeOf((*MockproductDBAccessor)(nil).GetAllProductVendors), ctx, spec)
+	return &MockproductDBAccessorGetAllProductVendorsCall{Call: call}
+}
+
+// MockproductDBAccessorGetAllProductVendorsCall wrap *gomock.Call
+type MockproductDBAccessorGetAllProductVendorsCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockproductDBAccessorGetAllProductVendorsCall) Return(arg0 *AccessorGetProductVendorsPaginationData, arg1 error) *MockproductDBAccessorGetAllProductVendorsCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockproductDBAccessorGetAllProductVendorsCall) Do(f func(context.Context, GetProductVendorsSpec) (*AccessorGetProductVendorsPaginationData, error)) *MockproductDBAccessorGetAllProductVendorsCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockproductDBAccessorGetAllProductVendorsCall) DoAndReturn(f func(context.Context, GetProductVendorsSpec) (*AccessorGetProductVendorsPaginationData, error)) *MockproductDBAccessorGetAllProductVendorsCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // GetProductVendorsByVendor mocks base method.
 func (m *MockproductDBAccessor) GetProductVendorsByVendor(ctx context.Context, vendorID string, spec GetProductVendorByVendorSpec) (*AccessorGetProductVendorsByVendorPaginationData, error) {
 	m.ctrl.T.Helper()

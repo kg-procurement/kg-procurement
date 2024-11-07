@@ -74,11 +74,57 @@ const (
         modified_date,
         modified_by
     `
+
+	getProductVendorsQuery = `
+		SELECT 
+			pv.id, 
+			pv.product_id, 
+			pv.code, 
+			pv.name, 
+			pr.quantity_min, 
+			pr.quantity_max, 
+			pr.currency_name, 
+			pr.currency_code, 
+			pr.price, 
+			pr.price_quantity,
+			v.id AS vendor_id,
+			v.name AS vendor_name, 
+			v.rating AS vendor_rating,
+			pv.income_tax_id, 
+			pv.income_tax_name, 
+			pv.income_tax_percentage, 
+			pv.description, 
+			pv.uom_id, 
+			pv.sap_code, 
+			pv.modified_date, 
+			pv.modified_by
+		FROM 
+			product_vendor pv
+		JOIN 
+			price pr ON pr.product_vendor_id = pv.id
+		JOIN 
+			vendor v ON pr.vendor_id = v.id
+	`
+	countProductVendorsQuery = `
+		SELECT 
+			COUNT(*)
+		FROM 
+			product_vendor pv
+		JOIN 
+			price pr ON pr.product_vendor_id = pv.id
+		JOIN 
+			vendor v ON pr.vendor_id = v.id
+	`
 )
 
 type postgresProductAccessor struct {
 	db    database.DBConnector
 	clock clock.Clock
+}
+
+type AccessorGetProductVendorsPaginationData struct {
+	ProductVendors []GetProductVendorsDBResponse `json:"product_vendors"`
+	Metadata       database.PaginationMetadata   `json:"metadata"`
 }
 
 type AccessorGetProductVendorsByVendorPaginationData struct {
@@ -168,6 +214,74 @@ func (p *postgresProductAccessor) GetProductVendorsByVendor(
 	}
 
 	return &AccessorGetProductVendorsByVendorPaginationData{
+		ProductVendors: res,
+		Metadata:       database.GeneratePaginationMetadata(spec.PaginationSpec, totalEntries),
+	}, nil
+}
+
+func (p *postgresProductAccessor) GetAllProductVendors(
+	_ context.Context,
+	spec GetProductVendorsSpec,
+) (*AccessorGetProductVendorsPaginationData, error) {
+	paginationArgs := database.BuildPaginationArgs(spec.PaginationSpec)
+
+	// Initialize clauses and arguments
+	var (
+		extraClauses    []string
+		args            map[string]interface{}
+		extraClausesRaw = []string{
+			"LIMIT :limit",
+			"OFFSET :offset",
+		}
+	)
+
+	// Build extra clauses
+	if paginationArgs.OrderBy != "" {
+		extraClauses = append(extraClauses, fmt.Sprintf("ORDER BY %s %s",
+			paginationArgs.OrderBy, paginationArgs.Order))
+	}
+
+	// Pagination clause
+	extraClauses = append(extraClauses, extraClausesRaw...)
+
+	args = map[string]interface{}{
+		"limit":  paginationArgs.Limit,
+		"offset": paginationArgs.Offset,
+	}
+
+	// Build the query
+	query := getProductVendorsQuery
+	if len(extraClauses) > 0 {
+		query += " " + strings.Join(extraClauses, " ")
+	}
+	fmt.Println(query)
+
+	rows, err := p.db.NamedQuery(query, args)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	res := []GetProductVendorsDBResponse{}
+
+	for rows.Next() {
+		var product GetProductVendorsDBResponse
+		if err := rows.StructScan(&product); err != nil {
+			return nil, err
+		}
+		res = append(res, product)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	var totalEntries int
+	row := p.db.QueryRow(countProductVendorsQuery)
+	if err = row.Scan(&totalEntries); err != nil {
+		return nil, fmt.Errorf("failed to execute count query: %w", err)
+	}
+
+	return &AccessorGetProductVendorsPaginationData{
 		ProductVendors: res,
 		Metadata:       database.GeneratePaginationMetadata(spec.PaginationSpec, totalEntries),
 	}, nil
