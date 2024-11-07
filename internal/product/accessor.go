@@ -209,18 +209,17 @@ func (p *postgresProductAccessor) GetProductVendorsByVendor(
 
 	args = []interface{}{vendorID}
 	argsIndex = 2
+	var countWhereClauses []string
 
 	if spec.Name != "" {
 		productNameList := strings.Fields(spec.Name)
 		for _, word := range productNameList {
-			whereClauses = append(whereClauses, fmt.Sprintf("pv.name iLIKE $%d", argsIndex))
+			countWhereClauses = append(countWhereClauses, fmt.Sprintf("pv.name iLIKE $%d", argsIndex))
 			args = append(args, "%"+word+"%")
 			argsIndex++
 		}
-		countQuery += " AND " + strings.Join(whereClauses, " AND ")
+		countQuery += " AND " + strings.Join(countWhereClauses, " AND ")
 	}
-
-	fmt.Println(countQuery)
 
 	var totalEntries int
 	row := p.db.QueryRow(countQuery, args...)

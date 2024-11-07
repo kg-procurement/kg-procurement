@@ -495,7 +495,7 @@ func Test_GetProductVendorsByVendor(t *testing.T) {
 		defer c.db.Close()
 
 		productNameList := strings.Fields(customSpec.Name)
-		c.mock.ExpectQuery(getProductVendorsByVendorQuery+" AND p.name iLIKE $2 AND p.name iLIKE $3"+" LIMIT $4 OFFSET $5").
+		c.mock.ExpectQuery(getProductVendorsByVendorQuery+" AND pv.name iLIKE $2 AND pv.name iLIKE $3"+" LIMIT $4 OFFSET $5").
 			WithArgs(vendorID, "%"+productNameList[0]+"%", "%"+productNameList[1]+"%", args.Limit, args.Offset).
 			WillReturnRows(expectedResult)
 
@@ -503,11 +503,10 @@ func Test_GetProductVendorsByVendor(t *testing.T) {
 		countQuery := `SELECT COUNT(*)
 			FROM product_vendor pv
 			JOIN price pr ON pr.product_vendor_id = pv.id
-			WHERE pr.vendor_id = $1
-		`
+			WHERE pr.vendor_id = $1`
 
-		c.mock.ExpectQuery(countQuery).
-			WithArgs(vendorID).
+		c.mock.ExpectQuery(countQuery+" AND pv.name iLIKE $2 AND pv.name iLIKE $3").
+			WithArgs(vendorID, "%"+productNameList[0]+"%", "%"+productNameList[1]+"%").
 			WillReturnRows(totalRows)
 
 		expect := &AccessorGetProductVendorsByVendorPaginationData{
@@ -589,7 +588,7 @@ func Test_GetProductVendorsByVendor(t *testing.T) {
 
 		productNameList := strings.Fields(customSpec.Name)
 		c.mock.ExpectQuery(getProductVendorsByVendorQuery+
-			" AND p.name iLIKE $2 AND p.name iLIKE $3 ORDER BY name ASC LIMIT $4 OFFSET $5").
+			" AND pv.name iLIKE $2 AND pv.name iLIKE $3 ORDER BY name ASC LIMIT $4 OFFSET $5").
 			WithArgs(vendorID, "%"+productNameList[0]+"%", "%"+productNameList[1]+"%", args.Limit, args.Offset).
 			WillReturnRows(expectedResult)
 
@@ -600,8 +599,8 @@ func Test_GetProductVendorsByVendor(t *testing.T) {
 			WHERE pr.vendor_id = $1
 		`
 
-		c.mock.ExpectQuery(countQuery).
-			WithArgs(vendorID).
+		c.mock.ExpectQuery(countQuery+" AND pv.name iLIKE $2 AND pv.name iLIKE $3").
+			WithArgs(vendorID, "%"+productNameList[0]+"%", "%"+productNameList[1]+"%").
 			WillReturnRows(totalRows)
 
 		expect := &AccessorGetProductVendorsByVendorPaginationData{
