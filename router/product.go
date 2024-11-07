@@ -51,6 +51,7 @@ func NewProductEngine(
 		paginationSpec := GetPaginationSpec(ctx.Request)
 
 		spec := product.GetProductVendorsSpec{
+			Name:           ctx.Query("name"),
 			PaginationSpec: paginationSpec,
 		}
 

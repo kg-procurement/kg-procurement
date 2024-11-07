@@ -110,6 +110,7 @@ type GetProductVendorByVendorSpec struct {
 }
 
 type GetProductVendorsSpec struct {
+	Name string `json:"name"`
 	database.PaginationSpec
 }
 
