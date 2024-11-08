@@ -39,7 +39,6 @@ func (p *postgresEmailStatusAccessor) GetAll(ctx context.Context, spec GetAllEma
 	// Initialize clauses and arguments
 	var (
 		joinClauses     []string
-		whereClauses    []string
 		extraClauses    []string
 		args            []interface{}
 		argsIndex       = 1
@@ -71,10 +70,6 @@ func (p *postgresEmailStatusAccessor) GetAll(ctx context.Context, spec GetAllEma
 
 	// Construct the final query
 	joinClause := strings.Join(joinClauses, "\n")
-	whereClause := ""
-	if len(whereClauses) > 0 {
-		whereClause = "WHERE " + strings.Join(whereClauses, " AND ")
-	}
 	extraClause := strings.Join(extraClauses, "\n")
 
 	dataQuery := fmt.Sprintf(`
@@ -87,7 +82,7 @@ func (p *postgresEmailStatusAccessor) GetAll(ctx context.Context, spec GetAllEma
 		%s
 		%s
 		%s
-	`, joinClause, whereClause, extraClause)
+	`, joinClause, extraClause)
 
 	// Execute the query
 	rows, err := p.db.Queryx(dataQuery, args...)
