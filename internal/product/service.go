@@ -9,6 +9,7 @@ import (
 )
 
 type productDBAccessor interface {
+	getProductCategoryByID(ctx context.Context, pvID string) (*ProductCategory, error)
 	GetProductVendorsByVendor(ctx context.Context, vendorID string, spec GetProductVendorByVendorSpec) (*AccessorGetProductVendorsByVendorPaginationData, error)
 	getProductByID(ctx context.Context, productID string) (*Product, error)
 	GetAllProductVendors(ctx context.Context, spec GetProductVendorsSpec) (*AccessorGetProductVendorsPaginationData, error)
@@ -36,7 +37,13 @@ func (p *ProductService) GetProductVendorsByVendor(
 		if err != nil {
 			return nil, err
 		}
-		pvr := ToProductVendorResponse(&pv, product)
+
+		category, err := p.getProductCategoryByID(ctx, product.ProductCategoryID)
+		if err != nil {
+			return nil, err
+		}
+
+		pvr := ToProductVendorResponse(&pv, product, category)
 		res.ProductVendors = append(res.ProductVendors, *pvr)
 	}
 

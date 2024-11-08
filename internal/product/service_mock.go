@@ -233,3 +233,42 @@ func (c *MockproductDBAccessorgetProductByIDCall) DoAndReturn(f func(context.Con
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
+
+// getProductCategoryByID mocks base method.
+func (m *MockproductDBAccessor) getProductCategoryByID(ctx context.Context, pvID string) (*ProductCategory, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "getProductCategoryByID", ctx, pvID)
+	ret0, _ := ret[0].(*ProductCategory)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// getProductCategoryByID indicates an expected call of getProductCategoryByID.
+func (mr *MockproductDBAccessorMockRecorder) getProductCategoryByID(ctx, pvID any) *MockproductDBAccessorgetProductCategoryByIDCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "getProductCategoryByID", reflect.TypeOf((*MockproductDBAccessor)(nil).getProductCategoryByID), ctx, pvID)
+	return &MockproductDBAccessorgetProductCategoryByIDCall{Call: call}
+}
+
+// MockproductDBAccessorgetProductCategoryByIDCall wrap *gomock.Call
+type MockproductDBAccessorgetProductCategoryByIDCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockproductDBAccessorgetProductCategoryByIDCall) Return(arg0 *ProductCategory, arg1 error) *MockproductDBAccessorgetProductCategoryByIDCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockproductDBAccessorgetProductCategoryByIDCall) Do(f func(context.Context, string) (*ProductCategory, error)) *MockproductDBAccessorgetProductCategoryByIDCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockproductDBAccessorgetProductCategoryByIDCall) DoAndReturn(f func(context.Context, string) (*ProductCategory, error)) *MockproductDBAccessorgetProductCategoryByIDCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}

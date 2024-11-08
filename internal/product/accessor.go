@@ -18,6 +18,13 @@ const (
 		WHERE pr.vendor_id = $1
 	`
 	getProductByID = `SELECT * FROM product WHERE id = $1`
+	
+	getProductCategoryByIDQuery = `
+		SELECT *
+		FROM product_category
+		WHERE id = $1
+	`
+
 	insertProduct  = `
 		INSERT INTO product
 			(id, product_category_id, uom_id, income_tax_id, product_type_id, name, description, modified_date, modified_by)
@@ -309,6 +316,15 @@ func (p *postgresProductAccessor) GetAllProductVendors(
 func (p *postgresProductAccessor) getProductByID(_ context.Context, productID string) (*Product, error) {
 	rows := p.db.QueryRowx(getProductByID, productID)
 	res := Product{}
+	if err := rows.StructScan(&res); err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
+
+func (p *postgresProductAccessor) getProductCategoryByID(_ context.Context, productCategoryID string) (*ProductCategory, error) {
+	rows := p.db.QueryRowx(getProductCategoryByIDQuery, productCategoryID)
+	res := ProductCategory{}
 	if err := rows.StructScan(&res); err != nil {
 		return nil, err
 	}
