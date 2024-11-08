@@ -753,7 +753,7 @@ func Test_getPriceByPVID(t *testing.T) {
 				price.ID, "", "", "", "", 0, 0, 0, 0, "", "", "", 100.0, 0, "", price.ValidFrom, price.ValidTo,
 				"", "", "", "", "", price.ReferenceDate, "", "", "", "", "", 0, "", 0, price.ModifiedDate, "")
 
-		mock.ExpectQuery(getPriceByPVID).
+		mock.ExpectQuery(getPriceByPVIDQuery).
 			WithArgs("1").
 			WillReturnRows(rows)
 
@@ -771,7 +771,7 @@ func Test_getPriceByPVID(t *testing.T) {
 		rows := sqlmock.NewRows(priceFields).
 			RowError(1, fmt.Errorf("error"))
 
-		mock.ExpectQuery(getPriceByPVID).
+		mock.ExpectQuery(getPriceByPVIDQuery).
 			WithArgs("1").
 			WillReturnRows(rows)
 
@@ -822,7 +822,7 @@ func Test_getProductByID(t *testing.T) {
 		rows := sqlmock.NewRows(productFields).
 			AddRow("1", "", "", "", "", product.Name, "", product.ModifiedDate, "")
 
-		mock.ExpectQuery(getProductByID).
+		mock.ExpectQuery(getProductByIDQuery).
 			WithArgs("1").
 			WillReturnRows(rows)
 
@@ -840,7 +840,7 @@ func Test_getProductByID(t *testing.T) {
 		rows := sqlmock.NewRows(productFields).
 			RowError(1, fmt.Errorf("error"))
 
-		mock.ExpectQuery(getProductByID).
+		mock.ExpectQuery(getProductByIDQuery).
 			WithArgs("1").
 			WillReturnRows(rows)
 
