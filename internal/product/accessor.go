@@ -288,7 +288,6 @@ func (p *postgresProductAccessor) GetAllProductVendors(
 	if len(extraClauses) > 0 {
 		query += " " + strings.Join(extraClauses, " ")
 	}
-	fmt.Println(query)
 
 	rows, err := p.db.NamedQuery(query, args)
 	if err != nil {
@@ -302,11 +301,13 @@ func (p *postgresProductAccessor) GetAllProductVendors(
 	for rows.Next() {
 		var product GetProductVendorsDBResponse
 		if err := rows.StructScan(&product); err != nil {
+			utils.Logger.Error(err.Error())
 			return nil, err
 		}
 		res = append(res, product)
 	}
 	if err := rows.Err(); err != nil {
+		utils.Logger.Error(err.Error())
 		return nil, err
 	}
 
@@ -323,6 +324,10 @@ func (p *postgresProductAccessor) GetAllProductVendors(
 			utils.Logger.Error(err.Error())
 			return nil, err
 		}
+	}
+	if err := rows.Err(); err != nil {
+		utils.Logger.Error(err.Error())
+		return nil, err
 	}
 
 	return &AccessorGetProductVendorsPaginationData{
