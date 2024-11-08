@@ -2,6 +2,7 @@ package router
 
 import (
 	"kg/procurement/cmd/config"
+	"kg/procurement/cmd/utils"
 	"kg/procurement/internal/account"
 	"net/http"
 
@@ -14,8 +15,11 @@ func NewAccountEngine(
 	accountSvc *account.AccountService,
 ) {
 	r.POST(cfg.Register, func(ctx *gin.Context) {
+		utils.Logger.Info("Received accountRegister request")
+
 		payload := account.RegisterContract{}
 		if err := ctx.ShouldBindJSON(&payload); err != nil {
+			utils.Logger.Error(err.Error())
 			ctx.JSON(http.StatusBadRequest, gin.H{
 				"error": "Invalid request payload",
 			})
@@ -36,8 +40,12 @@ func NewAccountEngine(
 	})
 
 	r.POST(cfg.Login, func(ctx *gin.Context) {
+		utils.Logger.Info("Received accountLogin request")
+
 		payload := account.LoginContract{}
 		if err := ctx.ShouldBindJSON(&payload); err != nil {
+			utils.Logger.Error(err.Error())
+
 			ctx.JSON(http.StatusBadRequest, gin.H{
 				"error": "Invalid request payload",
 			})
@@ -51,6 +59,8 @@ func NewAccountEngine(
 			})
 			return
 		}
+
+		utils.Logger.Info("Completed accountLogin request process")
 
 		ctx.JSON(http.StatusOK, gin.H{
 			"token": token,

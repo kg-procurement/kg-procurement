@@ -3,13 +3,13 @@ package main
 import (
 	"kg/procurement/cmd/config"
 	"kg/procurement/cmd/dependency"
+	"kg/procurement/cmd/utils"
 	"kg/procurement/internal/account"
 	"kg/procurement/internal/mailer"
 	"kg/procurement/internal/product"
 	"kg/procurement/internal/token"
 	"kg/procurement/internal/vendors"
 	"kg/procurement/router"
-	"log"
 	"os"
 
 	"github.com/benbjohnson/clock"
@@ -18,14 +18,16 @@ import (
 )
 
 // main is the entrypoint for the entire service
+
 func main() {
+
 	cfg := config.Load()
 
 	conn := dependency.NewPostgreSQL(cfg.Common.Postgres)
 	defer func() {
 		err := conn.Close()
 		if err != nil {
-			log.Printf("failed to close db, err: %v", err)
+			utils.Logger.Fatalf("failed to close db, err: %v", err)
 		}
 		_ = os.Stdout.Sync()
 	}()
@@ -49,6 +51,7 @@ func main() {
 	router.NewAccountEngine(r, cfg.Routes.Account, accountSvc)
 
 	if err := r.Run(":8080"); err != nil {
-		log.Fatalf("failed to run server, err: %v", err)
+		utils.Logger.Fatalf("failed to run server, err: %v", err)
 	}
+	utils.Logger.Info("Application starts listening")
 }

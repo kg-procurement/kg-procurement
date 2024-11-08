@@ -5,9 +5,9 @@ import (
 	"context"
 	"fmt"
 	"kg/procurement/cmd/config"
+	"kg/procurement/cmd/utils"
 	"kg/procurement/internal/common/database"
 	"kg/procurement/internal/mailer"
-	"log"
 	"strings"
 	"sync"
 
@@ -91,12 +91,13 @@ func (v *VendorService) BlastEmail(ctx context.Context, vendorIDs []string, temp
 	var errList []string
 	for i := 0; i < len(vendors); i++ {
 		if err := <-errCh; err != nil {
-			log.Printf("ERROR: fail sending email %v", err)
+			utils.Logger.Errorf("fail sending email %v", err)
 			errList = append(errList, err.Error())
 		}
 	}
 
 	if len(errList) > 0 {
+		utils.Logger.Error("fail sending emails")
 		return errList, fmt.Errorf("fail sending emails")
 	}
 

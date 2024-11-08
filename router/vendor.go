@@ -2,6 +2,7 @@ package router
 
 import (
 	"kg/procurement/cmd/config"
+	"kg/procurement/cmd/utils"
 	"kg/procurement/internal/vendors"
 	"net/http"
 
@@ -14,6 +15,7 @@ func NewVendorEngine(
 	vendorSvc *vendors.VendorService,
 ) {
 	r.GET(cfg.GetAll, func(ctx *gin.Context) {
+		utils.Logger.Info("Received getAllVendor request")
 
 		paginationSpec := GetPaginationSpec(ctx.Request)
 		spec := vendors.GetAllVendorSpec{
@@ -30,14 +32,19 @@ func NewVendorEngine(
 			return
 		}
 
+		utils.Logger.Info("Completed getAllVendor request process")
+
 		ctx.JSON(http.StatusOK, res)
 	})
 
 	r.PUT(cfg.UpdateDetail, func(ctx *gin.Context) {
+		utils.Logger.Info("Received updateVendorDetail request")
+
 		id := ctx.Param("id")
 
 		spec := &vendors.PutVendorSpec{}
 		if err := ctx.ShouldBindJSON(&spec); err != nil {
+			utils.Logger.Error(err.Error())
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
 			})
@@ -64,10 +71,14 @@ func NewVendorEngine(
 			return
 		}
 
+		utils.Logger.Info("Completed updateDetailVendor request process")
+
 		ctx.JSON(http.StatusOK, res)
 	})
 
 	r.GET(cfg.GetById, func(ctx *gin.Context) {
+		utils.Logger.Info("Received getVendorById request")
+
 		id := ctx.Param("id")
 
 		res, err := vendorSvc.GetById(ctx, id)
@@ -78,10 +89,14 @@ func NewVendorEngine(
 			return
 		}
 
+		utils.Logger.Info("Completed getVendorById request process")
+
 		ctx.JSON(http.StatusOK, res)
 	})
 
 	r.GET(cfg.GetLocations, func(ctx *gin.Context) {
+		utils.Logger.Info("Received getVendorByLocations request")
+
 		res, err := vendorSvc.GetLocations(ctx)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{
@@ -90,14 +105,19 @@ func NewVendorEngine(
 			return
 		}
 
+		utils.Logger.Info("Completed getVendorByLocations request process")
+
 		ctx.JSON(http.StatusOK, gin.H{
 			"locations": res,
 		})
 	})
 
 	r.POST(cfg.EmailBlast, func(ctx *gin.Context) {
+		utils.Logger.Info("Received emailBlast request")
+
 		payload := vendors.EmailBlastContract{}
 		if err := ctx.ShouldBindJSON(&payload); err != nil {
+			utils.Logger.Error(err.Error())
 			ctx.JSON(http.StatusBadRequest, gin.H{
 				"error": "Invalid request payload",
 			})
@@ -117,6 +137,8 @@ func NewVendorEngine(
 			})
 			return
 		}
+
+		utils.Logger.Info("Completed emailBlast request process")
 
 		ctx.JSON(http.StatusOK, gin.H{
 			"message": "Emails successfully sent",
