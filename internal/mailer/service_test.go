@@ -167,7 +167,7 @@ func TestEmailService_GetAll(t *testing.T) {
 				Return(tt.want, tt.err)
 
 			// Call the method under test
-			res, err := e.GetAll(tt.args.ctx, tt.args.spec)
+			res, err := e.GetAllEmailStatus(tt.args.ctx, tt.args.spec)
 
 			// Assert the results
 			if tt.err == nil {
