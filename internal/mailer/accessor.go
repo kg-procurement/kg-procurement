@@ -81,7 +81,6 @@ func (p *postgresEmailStatusAccessor) GetAll(ctx context.Context, spec GetAllEma
 		FROM email_status es
 		%s
 		%s
-		%s
 	`, joinClause, extraClause)
 
 	// Execute the query
