@@ -171,6 +171,68 @@ func Test_GetAll(t *testing.T) {
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(res).To(gomega.Equal(expectation))
 	})
+
+	t.Run("success with ordering", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		rows := sqlmock.NewRows(emailStatusFields).
+			AddRow(
+				"1",
+				"test@example.com",
+				"sent",
+				fixedTime,
+			)
+
+		customQuery := `
+			SELECT DISTINCT
+				es.id,
+				es.email_to,
+				es.status,
+				es.modified_date
+			FROM email_status es
+			ORDER BY es.status DESC
+			LIMIT $1
+			OFFSET $2
+		`
+
+		customSpec := GetAllEmailStatusSpec{
+			PaginationSpec: database.PaginationSpec{
+				Order:   "DESC",
+				Limit:   10,
+				Page:    1,
+				OrderBy: "status",
+			},
+		}
+
+		args := database.BuildPaginationArgs(customSpec.PaginationSpec)
+
+		mock.ExpectQuery(customQuery).
+			WithArgs(args.Limit, args.Offset).
+			WillReturnRows(rows)
+
+		totalRows := sqlmock.NewRows([]string{"count"}).AddRow(1)
+
+		mock.ExpectQuery(countQuery).WillReturnRows(totalRows)
+
+		ctx := context.Background()
+		res, err := accessor.GetAll(ctx, customSpec)
+
+		emailStatusExpectation := []EmailStatus{{
+			ID:           "1",
+			EmailTo:      "test@example.com",
+			Status:       "sent",
+			ModifiedDate: fixedTime,
+		}}
+
+		expectation := &AccessorGetAllPaginationData{
+			EmailStatus: emailStatusExpectation,
+			Metadata:    res.Metadata,
+		}
+
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(res).To(gomega.Equal(expectation))
+	})
 }
 
 func Test_Close(t *testing.T) {
