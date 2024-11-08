@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"database/sql/driver"
+	"fmt"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/benbjohnson/clock"
 	"github.com/jmoiron/sqlx"
@@ -261,6 +262,127 @@ func Test_GetAll(t *testing.T) {
 
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(res).To(gomega.Equal(expectation))
+	})
+
+	t.Run("error on scanning email status data rows", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		rows := sqlmock.NewRows(emailStatusFields).AddRow(
+			nil,
+			nil,
+			nil,
+			nil,
+		)
+
+		args := database.BuildPaginationArgs(spec.PaginationSpec)
+
+		mock.ExpectQuery(dataQuery).
+			WithArgs(args.Limit, args.Offset).
+			WillReturnRows(rows)
+
+		totalRows := sqlmock.NewRows([]string{"count"}).AddRow(1)
+
+		mock.ExpectQuery(countQuery).WillReturnRows(totalRows)
+
+		ctx := context.Background()
+		res, err := accessor.GetAll(ctx, spec)
+
+		g.Expect(err).ToNot(gomega.BeNil())
+		g.Expect(res).To(gomega.BeNil())
+	})
+
+	t.Run("error on executing email status data query", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		wrongQuery := `
+			SELECT
+				"email_to",
+				"status",
+				"modified_date"
+			FROM email_status
+			ORDER BY es.status DESC
+			LIMIT $1
+			OFFSET $2
+		`
+
+		args := database.BuildPaginationArgs(spec.PaginationSpec)
+
+		mock.ExpectQuery(wrongQuery).
+			WithArgs(args.Limit, args.Offset).
+			WillReturnError(fmt.Errorf("query error"))
+
+		totalRows := sqlmock.NewRows([]string{"count"}).AddRow(1)
+
+		mock.ExpectQuery(countQuery).WillReturnRows(totalRows)
+
+		ctx := context.Background()
+		res, err := accessor.GetAll(ctx, spec)
+
+		g.Expect(err).ToNot(gomega.BeNil())
+		g.Expect(res).To(gomega.BeNil())
+	})
+
+	t.Run("error while iterating rows", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		rows := sqlmock.NewRows(emailStatusFields).
+			AddRow(
+				"1",
+				"test@example.com",
+				"sent",
+				fixedTime,
+			).AddRow(
+			"2",
+			"test2@example.com",
+			"failed",
+			fixedTime,
+		).RowError(1, fmt.Errorf("row error"))
+
+		args := database.BuildPaginationArgs(spec.PaginationSpec)
+
+		mock.ExpectQuery(dataQuery).
+			WithArgs(args.Limit, args.Offset).
+			WillReturnRows(rows)
+
+		totalRows := sqlmock.NewRows([]string{"count"}).AddRow(2)
+
+		mock.ExpectQuery(countQuery).WillReturnRows(totalRows)
+
+		ctx := context.Background()
+		res, err := accessor.GetAll(ctx, spec)
+
+		g.Expect(err).ToNot(gomega.BeNil())
+		g.Expect(res).To(gomega.BeNil())
+	})
+
+	t.Run("error on scanning total entry row", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		rows := sqlmock.NewRows(emailStatusFields).
+			AddRow(
+				"1",
+				"test@example.com",
+				"sent",
+				fixedTime,
+			)
+
+		args := database.BuildPaginationArgs(spec.PaginationSpec)
+
+		mock.ExpectQuery(dataQuery).
+			WithArgs(args.Limit, args.Offset).
+			WillReturnRows(rows)
+
+		mock.ExpectQuery(countQuery).WillReturnError(fmt.Errorf("count query error"))
+
+		ctx := context.Background()
+		res, err := accessor.GetAll(ctx, spec)
+
+		g.Expect(err).ToNot(gomega.BeNil())
+		g.Expect(res).To(gomega.BeNil())
 	})
 }
 
