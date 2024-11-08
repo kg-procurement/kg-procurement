@@ -17,8 +17,14 @@ const (
 		JOIN price pr ON pr.product_vendor_id = pv.id
 		WHERE pr.vendor_id = $1
 	`
-	getProductByID = `SELECT * FROM product WHERE id = $1`
-	insertProduct  = `
+	getProductByIDQuery = `SELECT * FROM product WHERE id = $1`
+	getPriceByPVIDQuery = `
+		SELECT pr.*
+		FROM price pr 
+		JOIN product_vendor pv ON pv.id = pr.product_vendor_id
+		WHERE pv.id = $1
+	`
+	insertProduct = `
 		INSERT INTO product
 			(id, product_category_id, uom_id, income_tax_id, product_type_id, name, description, modified_date, modified_by)
 		VALUES 
@@ -306,8 +312,20 @@ func (p *postgresProductAccessor) GetAllProductVendors(
 	}, nil
 }
 
+func (p *postgresProductAccessor) getPriceByPVID(
+	_ context.Context,
+	pvID string,
+) (*Price, error) {
+	rows := p.db.QueryRowx(getPriceByPVIDQuery, pvID)
+	res := Price{}
+	if err := rows.StructScan(&res); err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
+
 func (p *postgresProductAccessor) getProductByID(_ context.Context, productID string) (*Product, error) {
-	rows := p.db.QueryRowx(getProductByID, productID)
+	rows := p.db.QueryRowx(getProductByIDQuery, productID)
 	res := Product{}
 	if err := rows.StructScan(&res); err != nil {
 		return nil, err
