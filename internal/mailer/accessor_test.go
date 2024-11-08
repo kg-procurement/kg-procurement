@@ -8,8 +8,11 @@ import (
 	"github.com/benbjohnson/clock"
 	"github.com/jmoiron/sqlx"
 	"github.com/onsi/gomega"
+	"kg/procurement/internal/common/database"
+	"log"
 	"regexp"
 	"testing"
+	"time"
 )
 
 func Test_newPostgresEmailStatusAccessor(t *testing.T) {
@@ -21,9 +24,9 @@ func Test_WriteEmailStatus(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		var (
-			ctx     = context.Background()
-			c       = setupEmailStatusAccessorTestComponent(t, WithQueryMatcher(sqlmock.QueryMatcherRegexp))
-			now     = c.cmock.Now()
+			ctx         = context.Background()
+			c           = setupEmailStatusAccessorTestComponent(t, WithQueryMatcher(sqlmock.QueryMatcherRegexp))
+			now         = c.cmock.Now()
 			emailStatus = EmailStatus{
 				ID:           "123",
 				EmailTo:      "email@email.com",
@@ -48,9 +51,9 @@ func Test_WriteEmailStatus(t *testing.T) {
 
 	t.Run("returns error on db failure", func(t *testing.T) {
 		var (
-			ctx     = context.Background()
-			c       = setupEmailStatusAccessorTestComponent(t)
-			now     = c.cmock.Now()
+			ctx         = context.Background()
+			c           = setupEmailStatusAccessorTestComponent(t)
+			now         = c.cmock.Now()
 			emailStatus = EmailStatus{
 				ID:           "123",
 				EmailTo:      "email@email.com",
@@ -71,6 +74,102 @@ func Test_WriteEmailStatus(t *testing.T) {
 
 		err := c.accessor.WriteEmailStatus(ctx, emailStatus)
 		c.g.Expect(err).Should(gomega.HaveOccurred())
+	})
+}
+
+func Test_GetAll(t *testing.T) {
+	t.Parallel()
+
+	var (
+		accessor *postgresEmailStatusAccessor
+		mock     sqlmock.Sqlmock
+	)
+
+	setup := func(t *testing.T) (*gomega.WithT, *sql.DB) {
+		g := gomega.NewWithT(t)
+		realClock := clock.New()
+		db, sqlMock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+		if err != nil {
+			log.Fatal("error initializing mock:", err)
+		}
+		sqlxDB := sqlx.NewDb(db, "sqlmock")
+
+		accessor = newPostgresEmailStatusAccessor(sqlxDB, realClock)
+		mock = sqlMock
+
+		return g, db
+	}
+
+	emailStatusFields := []string{
+		"id",
+		"email_to",
+		"status",
+		"modified_date",
+	}
+
+	dataQuery := `
+		SELECT DISTINCT
+			es.id,
+			es.email_to,
+			es.status,
+			es.modified_date
+		FROM email_status es
+		ORDER BY es.modified_date DESC
+		LIMIT $1
+		OFFSET $2
+	`
+
+	countQuery := "SELECT COUNT(*) from email_status"
+
+	fixedTime := time.Date(2024, time.September, 23, 12, 30, 0, 0, time.UTC)
+
+	spec := GetAllEmailStatusSpec{
+		PaginationSpec: database.PaginationSpec{
+			Order: "DESC",
+			Limit: 10,
+			Page:  1,
+		},
+	}
+
+	t.Run("success", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		rows := sqlmock.NewRows(emailStatusFields).
+			AddRow(
+				"1",
+				"test@example.com",
+				"sent",
+				fixedTime,
+			)
+
+		args := database.BuildPaginationArgs(spec.PaginationSpec)
+
+		mock.ExpectQuery(dataQuery).
+			WithArgs(args.Limit, args.Offset).
+			WillReturnRows(rows)
+
+		totalRows := sqlmock.NewRows([]string{"count"}).AddRow(1)
+
+		mock.ExpectQuery(countQuery).WillReturnRows(totalRows)
+
+		ctx := context.Background()
+		res, err := accessor.GetAll(ctx, spec)
+
+		emailStatusExpectation := []EmailStatus{{
+			ID:           "1",
+			EmailTo:      "test@example.com",
+			Status:       "sent",
+			ModifiedDate: fixedTime,
+		}}
+
+		expectation := &AccessorGetAllPaginationData{
+			EmailStatus: emailStatusExpectation,
+			Metadata:    res.Metadata,
+		}
+
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(res).To(gomega.Equal(expectation))
 	})
 }
 
