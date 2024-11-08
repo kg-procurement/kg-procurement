@@ -13,13 +13,13 @@ type ProductCategoryResponse struct {
 	ModifiedBy   string    `json:"modified_by"`
 }
 
-func newFromProductCategory(product_category *ProductCategory) *ProductCategoryResponse {
+func newFromProductCategory(productCategory *ProductCategory) *ProductCategoryResponse {
 	return &ProductCategoryResponse{
-		ID:                product_category.ID,
-		CategoryName:      product_category.Name,
-		Description:       product_category.Description,
-		ModifiedDate:      product_category.ModifiedDate,
-		ModifiedBy:        product_category.ModifiedBy,
+		ID:                productCategory.ID,
+		CategoryName:      productCategory.Name,
+		Description:       productCategory.Description,
+		ModifiedDate:      productCategory.ModifiedDate,
+		ModifiedBy:        productCategory.ModifiedBy,
 	}
 }
 type ProductResponse struct {
@@ -34,8 +34,8 @@ type ProductResponse struct {
 	ModifiedBy        string                   `json:"modified_by"`
 }
 
-func newFromProduct(product *Product, product_category *ProductCategory) *ProductResponse {
-	productCategoryResponse := newFromProductCategory(product_category)
+func newFromProduct(product *Product, productCategory *ProductCategory) *ProductResponse {
+	productCategoryResponse := newFromProductCategory(productCategory)
 	return &ProductResponse{
 		ID:                product.ID,
 		ProductCategory:   *productCategoryResponse,
