@@ -317,6 +317,7 @@ func (p *postgresProductAccessor) getProductByID(_ context.Context, productID st
 	rows := p.db.QueryRowx(getProductByID, productID)
 	res := Product{}
 	if err := rows.StructScan(&res); err != nil {
+		utils.Logger.Errorf(err.Error())
 		return nil, err
 	}
 	return &res, nil
@@ -326,6 +327,7 @@ func (p *postgresProductAccessor) getProductCategoryByID(_ context.Context, prod
 	rows := p.db.QueryRowx(getProductCategoryByIDQuery, productCategoryID)
 	res := ProductCategory{}
 	if err := rows.StructScan(&res); err != nil {
+		utils.Logger.Errorf(err.Error())
 		return nil, err
 	}
 	return &res, nil

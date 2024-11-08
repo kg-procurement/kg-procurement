@@ -4,6 +4,7 @@ package product
 import (
 	"context"
 	"kg/procurement/internal/common/database"
+	"kg/procurement/cmd/utils"
 
 	"github.com/benbjohnson/clock"
 )
@@ -29,17 +30,20 @@ func (p *ProductService) GetProductVendorsByVendor(
 	res := GetProductVendorsByVendorResponse{}
 	productVendors, err := p.productDBAccessor.GetProductVendorsByVendor(ctx, vendorID, spec)
 	if err != nil {
+		utils.Logger.Errorf(err.Error())
 		return nil, err
 	}
 
 	for _, pv := range productVendors.ProductVendors {
 		product, err := p.getProductByID(ctx, pv.ProductID)
 		if err != nil {
+			utils.Logger.Errorf(err.Error())
 			return nil, err
 		}
 
 		category, err := p.getProductCategoryByID(ctx, product.ProductCategoryID)
 		if err != nil {
+			utils.Logger.Errorf(err.Error())
 			return nil, err
 		}
 
@@ -69,6 +73,7 @@ func (p *ProductService) UpdatePrice(ctx context.Context, price Price) (Price, e
 func (p *ProductService) getProductByID(ctx context.Context, productID string) (*Product, error) {
 	product, err := p.productDBAccessor.getProductByID(ctx, productID)
 	if err != nil {
+		utils.Logger.Errorf(err.Error())
 		return nil, err
 	}
 	return product, nil
