@@ -43,12 +43,14 @@ func main() {
 	productSvc := product.NewProductService(conn, clock)
 	tokenSvc := token.NewTokenService(cfg.Token, clock)
 	accountSvc := account.NewAccountService(conn, clock, tokenSvc)
+	mailerSvc := mailer.NewEmailStatusService(conn, clock)
 
 	r := gin.Default()
 	r.Use(cors.Default())
 	router.NewVendorEngine(r, cfg.Routes.Vendor, vendorSvc)
 	router.NewProductEngine(r, cfg.Routes.Product, productSvc)
 	router.NewAccountEngine(r, cfg.Routes.Account, accountSvc)
+	router.NewEmailStatusEngine(r, cfg.Routes.EmailStatus, mailerSvc)
 
 	if err := r.Run(":8080"); err != nil {
 		utils.Logger.Fatalf("failed to run server, err: %v", err)

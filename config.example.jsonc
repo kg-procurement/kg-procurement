@@ -26,6 +26,9 @@
     "account": {
       "register": "/account/register",
       "login": "/account/login"
+    },
+    "email-status": {
+      "get-all": "/email-status"
     }
   },
   "token": {
