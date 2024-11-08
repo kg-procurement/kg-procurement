@@ -122,6 +122,25 @@ func TestEmailService_GetAll(t *testing.T) {
 			want: data,
 			err:  nil,
 		},
+		{
+			name: "success with order by status",
+			fields: fields{
+				mockEmailStatusDBAccessor: NewMockemailStatusDBAccessor(ctrl),
+			},
+			args: args{
+				ctx: context.Background(),
+				spec: GetAllEmailStatusSpec{
+					PaginationSpec: database.PaginationSpec{
+						Limit:   10,
+						Order:   "DESC",
+						OrderBy: "status",
+						Page:    1,
+					},
+				},
+			},
+			want: data,
+			err:  nil,
+		},
 	}
 
 	for _, tt := range tests {
