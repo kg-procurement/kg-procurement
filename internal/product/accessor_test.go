@@ -708,6 +708,83 @@ func Test_GetProductVendorsByVendor(t *testing.T) {
 	})
 }
 
+func Test_getProductCategoryByID(t *testing.T) {
+	t.Parallel()
+
+	var (
+		accessor *postgresProductAccessor
+		mock     sqlmock.Sqlmock
+	)
+
+	setup := func(t *testing.T) (*gomega.GomegaWithT, *sql.DB) {
+		g := gomega.NewWithT(t)
+		realClock := clock.New()
+
+		db, sqlMock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+		if err != nil {
+			log.Fatal("error initializing mock:", err)
+		}
+		sqlxDB := sqlx.NewDb(db, "sqlmock")
+
+		accessor = newPostgresProductAccessor(sqlxDB, realClock)
+		mock = sqlMock
+
+		return g, db
+	}
+
+	categoryFields := []string{"id", "name", "code", "description", "parent_id", "specialist_bpid", "modified_date", "modified_by"}
+
+	category := &ProductCategory{
+		ID:             "1",
+		Name:           "Category 1",
+		Code:           "CAT001",
+		Description:    "This is a test category",
+		ParentID:       "0",
+		SpecialistBPID: "123",
+		ModifiedDate:   time.Now(),
+		ModifiedBy:     "admin",
+	}
+
+	t.Run("success", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		rows := sqlmock.NewRows(categoryFields).
+			AddRow(
+				category.ID, category.Name, category.Code, category.Description,
+				category.ParentID, category.SpecialistBPID, category.ModifiedDate, category.ModifiedBy,
+			)
+
+		mock.ExpectQuery(getProductCategoryByIDQuery).
+			WithArgs("1").
+			WillReturnRows(rows)
+
+		ctx := context.Background()
+		res, err := accessor.getProductCategoryByID(ctx, "1")
+
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(res).To(gomega.Equal(category))
+	})
+
+	t.Run("error on row scan", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		rows := sqlmock.NewRows(categoryFields).
+			RowError(0, fmt.Errorf("error scanning row"))
+
+		mock.ExpectQuery(getProductCategoryByIDQuery).
+			WithArgs("1").
+			WillReturnRows(rows)
+
+		ctx := context.Background()
+		res, err := accessor.getProductCategoryByID(ctx, "1")
+
+		g.Expect(err).ToNot(gomega.BeNil())
+		g.Expect(res).To(gomega.BeNil())
+	})
+}
+
 func Test_getProductByID(t *testing.T) {
 	t.Parallel()
 

@@ -70,6 +70,8 @@ func TestProductService_GetProductsByVendor(t *testing.T) {
 
 		mockProductAccessor.EXPECT().getProductByID(ctx, gomock.Any()).
 			Return(&Product{}, nil)
+		mockProductAccessor.EXPECT().getProductCategoryByID(ctx, gomock.Any()).
+			Return(&ProductCategory{}, nil)
 		mockProductAccessor.EXPECT().GetProductVendorsByVendor(ctx, vendorID, spec).
 			Return(accessorResponse, nil)
 
@@ -112,6 +114,8 @@ func TestProductService_GetProductsByVendor(t *testing.T) {
 
 		mockProductAccessor.EXPECT().getProductByID(ctx, gomock.Any()).
 			Return(&Product{}, nil)
+		mockProductAccessor.EXPECT().getProductCategoryByID(ctx, gomock.Any()).
+			Return(&ProductCategory{}, nil)
 		mockProductAccessor.EXPECT().GetProductVendorsByVendor(ctx, vendorID, spec).
 			Return(accessorResponse, nil)
 
@@ -155,6 +159,31 @@ func TestProductService_GetProductsByVendor(t *testing.T) {
 		}
 
 		mockProductAccessor.EXPECT().getProductByID(ctx, gomock.Any()).
+			Return(nil, errors.New("error"))
+		mockProductAccessor.EXPECT().GetProductVendorsByVendor(ctx, vendorID, spec).
+			Return(accessorResponse, nil)
+
+		res, err := svc.GetProductVendorsByVendor(ctx, vendorID, spec)
+		g.Expect(res).To(gomega.BeNil())
+		g.Expect(err).ShouldNot(gomega.BeNil())
+	})
+
+	t.Run("returns err on product category accessor error", func(t *testing.T) {
+		var (
+			g                   = gomega.NewWithT(t)
+			ctx                 = context.Background()
+			mockCtrl            = gomock.NewController(t)
+			mockProductAccessor = NewMockproductDBAccessor(mockCtrl)
+			spec                = GetProductVendorByVendorSpec{}
+		)
+
+		svc := &ProductService{
+			mockProductAccessor,
+		}
+
+		mockProductAccessor.EXPECT().getProductByID(ctx, gomock.Any()).
+			Return(&Product{}, nil)
+		mockProductAccessor.EXPECT().getProductCategoryByID(ctx, gomock.Any()).
 			Return(nil, errors.New("error"))
 		mockProductAccessor.EXPECT().GetProductVendorsByVendor(ctx, vendorID, spec).
 			Return(accessorResponse, nil)
