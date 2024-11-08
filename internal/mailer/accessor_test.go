@@ -233,6 +233,35 @@ func Test_GetAll(t *testing.T) {
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(res).To(gomega.Equal(expectation))
 	})
+
+	t.Run("success on empty result", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		rows := sqlmock.NewRows(emailStatusFields)
+
+		args := database.BuildPaginationArgs(spec.PaginationSpec)
+
+		mock.ExpectQuery(dataQuery).
+			WithArgs(args.Limit, args.Offset).
+			WillReturnRows(rows)
+
+		totalRows := sqlmock.NewRows([]string{"count"}).AddRow(0)
+
+		mock.ExpectQuery(countQuery).
+			WillReturnRows(totalRows)
+
+		ctx := context.Background()
+		res, err := accessor.GetAll(ctx, spec)
+
+		expectation := &AccessorGetAllPaginationData{
+			EmailStatus: []EmailStatus{},
+			Metadata:    res.Metadata,
+		}
+
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(res).To(gomega.Equal(expectation))
+	})
 }
 
 func Test_Close(t *testing.T) {
