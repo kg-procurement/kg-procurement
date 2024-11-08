@@ -3,6 +3,7 @@ package vendors
 import (
 	"context"
 	"fmt"
+	"kg/procurement/cmd/utils"
 	"kg/procurement/internal/common/database"
 	"strings"
 
@@ -151,6 +152,7 @@ func (p *postgresVendorAccessor) GetAll(ctx context.Context, spec GetAllVendorSp
 	// Execute the query
 	rows, err := p.db.Queryx(dataQuery, args...)
 	if err != nil {
+		utils.Logger.Error(err.Error())
 		return nil, err
 	}
 	defer rows.Close()
@@ -165,6 +167,7 @@ func (p *postgresVendorAccessor) GetAll(ctx context.Context, spec GetAllVendorSp
 		vendors = append(vendors, vendor)
 	}
 	if err := rows.Err(); err != nil {
+		utils.Logger.Error(err.Error())
 		return nil, err
 	}
 
@@ -173,6 +176,7 @@ func (p *postgresVendorAccessor) GetAll(ctx context.Context, spec GetAllVendorSp
 	totalEntries := new(int)
 	row := p.db.QueryRow(countQuery)
 	if err = row.Scan(&totalEntries); err != nil {
+		utils.Logger.Error(err.Error())
 		return nil, err
 	}
 
@@ -202,6 +206,7 @@ func (p *postgresVendorAccessor) GetById(ctx context.Context, id string) (*Vendo
 	vendor := Vendor{}
 	row := p.db.QueryRowx(query, id)
 	if err := row.StructScan(&vendor); err != nil {
+		utils.Logger.Error(err.Error())
 		return nil, err
 	}
 
@@ -254,6 +259,7 @@ func (p *postgresVendorAccessor) UpdateDetail(ctx context.Context, vendor Vendor
 		now)
 
 	if err := row.StructScan(updatedVendor); err != nil {
+		utils.Logger.Error(err.Error())
 		return nil, err
 	}
 
@@ -263,6 +269,7 @@ func (p *postgresVendorAccessor) UpdateDetail(ctx context.Context, vendor Vendor
 func (p *postgresVendorAccessor) GetAllLocations(ctx context.Context) ([]string, error) {
 	rows, err := p.db.Query(getAllLocationsQuery)
 	if err != nil {
+		utils.Logger.Error(err.Error())
 		return nil, err
 	}
 	defer rows.Close()
@@ -271,12 +278,14 @@ func (p *postgresVendorAccessor) GetAllLocations(ctx context.Context) ([]string,
 	for rows.Next() {
 		var name string
 		if err := rows.Scan(&name); err != nil {
+			utils.Logger.Error(err.Error())
 			return nil, err
 		}
 		results = append(results, name)
 	}
 
 	if err := rows.Err(); err != nil {
+		utils.Logger.Error(err.Error())
 		return nil, err
 	}
 
@@ -286,12 +295,14 @@ func (p *postgresVendorAccessor) GetAllLocations(ctx context.Context) ([]string,
 func (p *postgresVendorAccessor) BulkGetByIDs(_ context.Context, ids []string) ([]Vendor, error) {
 	query, args, err := sqlx.In(getBulkByID, ids)
 	if err != nil {
+		utils.Logger.Error(err.Error())
 		return nil, err
 	}
 
 	query = p.db.Rebind(query)
 	rows, err := p.db.Queryx(query, args...)
 	if err != nil {
+		utils.Logger.Error(err.Error())
 		return nil, err
 	}
 	defer rows.Close()
@@ -300,6 +311,7 @@ func (p *postgresVendorAccessor) BulkGetByIDs(_ context.Context, ids []string) (
 	for rows.Next() {
 		var vendor Vendor
 		if err := rows.StructScan(&vendor); err != nil {
+			utils.Logger.Error(err.Error())
 			return nil, err
 		}
 		res = append(res, vendor)
@@ -313,7 +325,7 @@ func (p *postgresVendorAccessor) BulkGetByIDs(_ context.Context, ids []string) (
 
 func (p *postgresVendorAccessor) writeVendor(ctx context.Context, vendor Vendor) error {
 	if _, err := p.db.NamedExec(insertVendor, vendor); err != nil {
-		fmt.Println("log error: ", err)
+		utils.Logger.Error(err.Error())
 		return err
 	}
 	return nil

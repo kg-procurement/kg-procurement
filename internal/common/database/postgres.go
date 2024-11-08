@@ -4,7 +4,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"log"
+	"kg/procurement/cmd/utils"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -81,9 +81,9 @@ func NewConn(host, user, password, name, port string) *Conn {
 	db := sqlx.MustConnect("postgres", connStr)
 
 	if err := db.Ping(); err != nil {
-		panic(err)
+		utils.Logger.Fatal(err.Error())
 	}
 
-	log.Println("Successfully connected to database")
+	utils.Logger.Info("\nSuccessfully connected to database")
 	return &Conn{db: db}
 }
