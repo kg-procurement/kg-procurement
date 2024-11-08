@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"kg/procurement/cmd/utils"
 	"kg/procurement/internal/common/database"
-	"log"
 	"strconv"
 	"strings"
 
@@ -293,6 +292,7 @@ func (p *postgresProductAccessor) GetAllProductVendors(
 
 	rows, err := p.db.NamedQuery(query, args)
 	if err != nil {
+		utils.Logger.Error(err.Error())
 		return nil, err
 	}
 	defer rows.Close()
@@ -313,13 +313,15 @@ func (p *postgresProductAccessor) GetAllProductVendors(
 	var totalEntries int
 	rows, err = p.db.NamedQuery(countQuery, countArgs)
 	if err != nil {
-		return nil, fmt.Errorf("failed to execute count query: %w", err)
+		utils.Logger.Error(err.Error())
+		return nil, err
 	}
 	defer rows.Close()
 
 	for rows.Next() {
 		if err := rows.Scan(&totalEntries); err != nil {
-			return nil, fmt.Errorf("failed to execute count query: %w", err)
+			utils.Logger.Error(err.Error())
+			return nil, err
 		}
 	}
 
