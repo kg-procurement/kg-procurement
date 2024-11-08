@@ -79,6 +79,45 @@ func (c *MockaccountDBAccessorFindAccountByEmailCall) DoAndReturn(f func(context
 	return c
 }
 
+// FindAccountByID mocks base method.
+func (m *MockaccountDBAccessor) FindAccountByID(ctx context.Context, id string) (*Account, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindAccountByID", ctx, id)
+	ret0, _ := ret[0].(*Account)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindAccountByID indicates an expected call of FindAccountByID.
+func (mr *MockaccountDBAccessorMockRecorder) FindAccountByID(ctx, id any) *MockaccountDBAccessorFindAccountByIDCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAccountByID", reflect.TypeOf((*MockaccountDBAccessor)(nil).FindAccountByID), ctx, id)
+	return &MockaccountDBAccessorFindAccountByIDCall{Call: call}
+}
+
+// MockaccountDBAccessorFindAccountByIDCall wrap *gomock.Call
+type MockaccountDBAccessorFindAccountByIDCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockaccountDBAccessorFindAccountByIDCall) Return(arg0 *Account, arg1 error) *MockaccountDBAccessorFindAccountByIDCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockaccountDBAccessorFindAccountByIDCall) Do(f func(context.Context, string) (*Account, error)) *MockaccountDBAccessorFindAccountByIDCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockaccountDBAccessorFindAccountByIDCall) DoAndReturn(f func(context.Context, string) (*Account, error)) *MockaccountDBAccessorFindAccountByIDCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // RegisterAccount mocks base method.
 func (m *MockaccountDBAccessor) RegisterAccount(ctx context.Context, account Account) error {
 	m.ctrl.T.Helper()
@@ -175,6 +214,45 @@ func (c *MocktokenServiceGenerateTokenCall) Do(f func(token.ClaimSpec) (string, 
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MocktokenServiceGenerateTokenCall) DoAndReturn(f func(token.ClaimSpec) (string, error)) *MocktokenServiceGenerateTokenCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// ValidateToken mocks base method.
+func (m *MocktokenService) ValidateToken(tokenString string) (*token.Claims, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ValidateToken", tokenString)
+	ret0, _ := ret[0].(*token.Claims)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ValidateToken indicates an expected call of ValidateToken.
+func (mr *MocktokenServiceMockRecorder) ValidateToken(tokenString any) *MocktokenServiceValidateTokenCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateToken", reflect.TypeOf((*MocktokenService)(nil).ValidateToken), tokenString)
+	return &MocktokenServiceValidateTokenCall{Call: call}
+}
+
+// MocktokenServiceValidateTokenCall wrap *gomock.Call
+type MocktokenServiceValidateTokenCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MocktokenServiceValidateTokenCall) Return(arg0 *token.Claims, arg1 error) *MocktokenServiceValidateTokenCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MocktokenServiceValidateTokenCall) Do(f func(string) (*token.Claims, error)) *MocktokenServiceValidateTokenCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MocktokenServiceValidateTokenCall) DoAndReturn(f func(string) (*token.Claims, error)) *MocktokenServiceValidateTokenCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
