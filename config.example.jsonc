@@ -25,7 +25,8 @@
     },
     "account": {
       "register": "/account/register",
-      "login": "/account/login"
+      "login": "/account/login",
+      "get-current-user": "/account/user"
     }
   },
   "token": {

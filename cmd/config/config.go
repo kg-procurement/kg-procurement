@@ -69,6 +69,7 @@ type Token struct {
 type AccountRoutes struct {
 	Register string `mapstructure:"register" validate:"required"`
 	Login    string `mapstructure:"login" validate:"required"`
+	GetCurrentUser string `mapstructure:"get-current-user" validate:"required"`
 }
 
 func Load() Application {

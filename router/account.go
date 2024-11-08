@@ -66,4 +66,37 @@ func NewAccountEngine(
 			"token": token,
 		})
 	})
+
+	r.GET(cfg.GetCurrentUser, func(ctx *gin.Context) {
+		utils.Logger.Info("Received getCurrentUser request")
+
+		tokenString := ctx.GetHeader("Authorization")
+		if tokenString == "" {
+			utils.Logger.Error("Authorization header is required")
+			ctx.JSON(http.StatusUnauthorized, gin.H{
+				"error": "Authorization header is required",
+			})
+			return
+		}
+	
+		if len(tokenString) > 7 && tokenString[:7] == "Bearer " {
+			tokenString = tokenString[7:]
+		}
+	
+		account, err := accountSvc.GetCurrentUser(ctx, tokenString)
+		if err != nil {
+			utils.Logger.Error(err.Error())
+			ctx.JSON(http.StatusUnauthorized, gin.H{
+				"error": "Invalid or expired token",
+			})
+			return
+		}
+	
+		ctx.JSON(http.StatusOK, gin.H{
+			"id":        account.ID,
+			"email":     account.Email,
+			"createdAt": account.CreatedAt,
+			"modifiedAt": account.ModifiedDate,
+		})
+	})
 }
