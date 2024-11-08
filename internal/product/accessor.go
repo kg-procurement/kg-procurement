@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"kg/procurement/cmd/utils"
 	"kg/procurement/internal/common/database"
+	"strconv"
 	"strings"
 
 	"github.com/benbjohnson/clock"
@@ -251,13 +252,28 @@ func (p *postgresProductAccessor) GetAllProductVendors(
 
 	// Initialize clauses and arguments
 	var (
-		extraClauses    []string
-		args            map[string]interface{}
+		whereClauses []string
+		extraClauses []string
+		args         = map[string]interface{}{
+			"limit":  paginationArgs.Limit,
+			"offset": paginationArgs.Offset,
+		}
+		countArgs       = map[string]interface{}{}
 		extraClausesRaw = []string{
 			"LIMIT :limit",
 			"OFFSET :offset",
 		}
 	)
+
+	// Build WHERE clauses for product
+	if spec.Name != "" {
+		productNameList := strings.Fields(spec.Name)
+		for i, word := range productNameList {
+			whereClauses = append(whereClauses, fmt.Sprintf("pv.name iLIKE :%s", "name"+strconv.Itoa(i)))
+			args["name"+strconv.Itoa(i)] = "%" + word + "%"
+			countArgs["name"+strconv.Itoa(i)] = "%" + word + "%"
+		}
+	}
 
 	// Build extra clauses
 	if paginationArgs.OrderBy != "" {
@@ -268,20 +284,20 @@ func (p *postgresProductAccessor) GetAllProductVendors(
 	// Pagination clause
 	extraClauses = append(extraClauses, extraClausesRaw...)
 
-	args = map[string]interface{}{
-		"limit":  paginationArgs.Limit,
-		"offset": paginationArgs.Offset,
-	}
-
 	// Build the query
 	query := getProductVendorsQuery
+	countQuery := countProductVendorsQuery
+	if len(whereClauses) > 0 {
+		query += "WHERE " + strings.Join(whereClauses, " AND ")
+		countQuery += " WHERE " + strings.Join(whereClauses, " AND ")
+	}
 	if len(extraClauses) > 0 {
 		query += " " + strings.Join(extraClauses, " ")
 	}
-	fmt.Println(query)
 
 	rows, err := p.db.NamedQuery(query, args)
 	if err != nil {
+		utils.Logger.Error(err.Error())
 		return nil, err
 	}
 	defer rows.Close()
@@ -291,19 +307,33 @@ func (p *postgresProductAccessor) GetAllProductVendors(
 	for rows.Next() {
 		var product GetProductVendorsDBResponse
 		if err := rows.StructScan(&product); err != nil {
+			utils.Logger.Error(err.Error())
 			return nil, err
 		}
 		res = append(res, product)
 	}
 	if err := rows.Err(); err != nil {
+		utils.Logger.Error(err.Error())
 		return nil, err
 	}
 
 	var totalEntries int
-	row := p.db.QueryRow(countProductVendorsQuery)
-	if err = row.Scan(&totalEntries); err != nil {
-		utils.Logger.Errorf(err.Error())
-		return nil, fmt.Errorf("failed to execute count query: %w", err)
+	rows, err = p.db.NamedQuery(countQuery, countArgs)
+	if err != nil {
+		utils.Logger.Error(err.Error())
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		if err := rows.Scan(&totalEntries); err != nil {
+			utils.Logger.Error(err.Error())
+			return nil, err
+		}
+	}
+	if err := rows.Err(); err != nil {
+		utils.Logger.Error(err.Error())
+		return nil, err
 	}
 
 	return &AccessorGetProductVendorsPaginationData{

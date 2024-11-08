@@ -989,6 +989,90 @@ func Test_GetAllProductVendors(t *testing.T) {
 		c.g.Expect(res).To(gomega.BeComparableTo(expect))
 	})
 
+	t.Run("success with filter by name", func(t *testing.T) {
+		var (
+			ctx            = context.Background()
+			c              = setupProductAccessorTestComponent(t)
+			expectedResult = sqlmock.NewRows(productColumns)
+			customSpec     = GetProductVendorsSpec{
+				Name:           "Buku",
+				PaginationSpec: spec.PaginationSpec,
+			}
+		)
+		defer c.db.Close()
+
+		for _, p := range productVendors[:1] {
+			expectedResult.AddRow(
+				p.ID,
+				p.ProductID,
+				p.Code,
+				p.Name,
+				p.QuantityMin,
+				p.QuantityMax,
+				p.CurrencyName,
+				p.CurrencyCode,
+				p.Price,
+				p.PriceQuantity,
+				p.VendorID,
+				p.VendorName,
+				p.VendorRating,
+				p.IncomeTaxID,
+				p.IncomeTaxName,
+				p.IncomeTaxPercentage,
+				p.Description,
+				p.UOMID,
+				p.SAPCode,
+				p.ModifiedDate,
+				p.ModifiedBy,
+			)
+		}
+
+		query := getProductVendorsQuery + " WHERE pv.name iLIKE :name0 LIMIT :limit OFFSET :offset"
+		transformedQuery, args, _ := sqlx.Named(query, map[string]interface{}{
+			"limit":  args.Limit,
+			"offset": args.Offset,
+			"name0":  "%" + customSpec.Name + "%",
+		})
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectQuery(transformedQuery).
+			WithArgs(
+				driverArgs...,
+			).WillReturnRows(expectedResult)
+
+		totalRows := sqlmock.NewRows([]string{"count"}).AddRow(1)
+		countQuery := countProductVendorsQuery + " WHERE pv.name iLIKE :name0"
+
+		transformedCountQuery, countArgs, _ := sqlx.Named(countQuery, map[string]interface{}{
+			"name0": "%" + customSpec.Name + "%",
+		})
+		driverCountArgs := make([]driver.Value, len(countArgs))
+		for i, arg := range countArgs {
+			driverCountArgs[i] = arg
+		}
+
+		c.mock.ExpectQuery(transformedCountQuery).
+			WithArgs(
+				driverCountArgs...,
+			).WillReturnRows(totalRows)
+
+		expect := &AccessorGetProductVendorsPaginationData{
+			ProductVendors: productVendors[:1],
+			Metadata: database.PaginationMetadata{
+				TotalPage:    1,
+				CurrentPage:  1,
+				TotalEntries: 1,
+			},
+		}
+
+		res, err := c.accessor.GetAllProductVendors(ctx, customSpec)
+		c.g.Expect(err).To(gomega.BeNil())
+		c.g.Expect(res).To(gomega.BeComparableTo(expect))
+	})
+
 	t.Run("success with order by", func(t *testing.T) {
 		var (
 			ctx            = context.Background()
@@ -1055,6 +1139,93 @@ func Test_GetAllProductVendors(t *testing.T) {
 				TotalPage:    1,
 				CurrentPage:  1,
 				TotalEntries: 2,
+			},
+		}
+
+		res, err := c.accessor.GetAllProductVendors(ctx, customSpec)
+		c.g.Expect(err).To(gomega.BeNil())
+		c.g.Expect(res).To(gomega.BeComparableTo(expect))
+	})
+	t.Run("success with order by and filter by name", func(t *testing.T) {
+		var (
+			ctx            = context.Background()
+			c              = setupProductAccessorTestComponent(t)
+			expectedResult = sqlmock.NewRows(productColumns)
+			customSpec     = GetProductVendorsSpec{
+				Name: "Buku",
+				PaginationSpec: database.PaginationSpec{
+					OrderBy: "name",
+					Limit:   10,
+					Page:    1,
+				},
+			}
+		)
+		defer c.db.Close()
+
+		for _, p := range productVendors[:1] {
+			expectedResult.AddRow(
+				p.ID,
+				p.ProductID,
+				p.Code,
+				p.Name,
+				p.QuantityMin,
+				p.QuantityMax,
+				p.CurrencyName,
+				p.CurrencyCode,
+				p.Price,
+				p.PriceQuantity,
+				p.VendorID,
+				p.VendorName,
+				p.VendorRating,
+				p.IncomeTaxID,
+				p.IncomeTaxName,
+				p.IncomeTaxPercentage,
+				p.Description,
+				p.UOMID,
+				p.SAPCode,
+				p.ModifiedDate,
+				p.ModifiedBy,
+			)
+		}
+
+		query := getProductVendorsQuery + " WHERE pv.name iLIKE :name0 ORDER BY name ASC LIMIT :limit OFFSET :offset"
+		transformedQuery, args, _ := sqlx.Named(query, map[string]interface{}{
+			"limit":  args.Limit,
+			"offset": args.Offset,
+			"name0":  "%" + customSpec.Name + "%",
+		})
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectQuery(transformedQuery).
+			WithArgs(
+				driverArgs...,
+			).WillReturnRows(expectedResult)
+
+		totalRows := sqlmock.NewRows([]string{"count"}).AddRow(1)
+		countQuery := countProductVendorsQuery + " WHERE pv.name iLIKE :name0"
+
+		transformedCountQuery, countArgs, _ := sqlx.Named(countQuery, map[string]interface{}{
+			"name0": "%" + customSpec.Name + "%",
+		})
+		driverCountArgs := make([]driver.Value, len(countArgs))
+		for i, arg := range countArgs {
+			driverCountArgs[i] = arg
+		}
+
+		c.mock.ExpectQuery(transformedCountQuery).
+			WithArgs(
+				driverCountArgs...,
+			).WillReturnRows(totalRows)
+
+		expect := &AccessorGetProductVendorsPaginationData{
+			ProductVendors: productVendors[:1],
+			Metadata: database.PaginationMetadata{
+				TotalPage:    1,
+				CurrentPage:  1,
+				TotalEntries: 1,
 			},
 		}
 
@@ -1225,7 +1396,7 @@ func Test_GetAllProductVendors(t *testing.T) {
 		c.g.Expect(res).To(gomega.BeNil())
 	})
 
-	t.Run("error while querying count", func(t *testing.T) {
+	t.Run("error on query execution", func(t *testing.T) {
 		var (
 			ctx            = context.Background()
 			c              = setupProductAccessorTestComponent(t)
@@ -1272,9 +1443,125 @@ func Test_GetAllProductVendors(t *testing.T) {
 		c.mock.ExpectQuery(transformedQuery).
 			WithArgs(
 				driverArgs...,
-			).WillReturnError(errors.New("error"))
+			).WillReturnRows(expectedResult)
 
-		totalRows := sqlmock.NewRows([]string{"count"}).RowError(1, fmt.Errorf("row error"))
+		c.mock.ExpectQuery(countProductVendorsQuery).
+			WillReturnError(errors.New("error"))
+
+		res, err := c.accessor.GetAllProductVendors(ctx, spec)
+		c.g.Expect(err).ToNot(gomega.BeNil())
+		c.g.Expect(res).To(gomega.BeNil())
+	})
+
+	t.Run("error on scanning data query count row", func(t *testing.T) {
+		var (
+			ctx            = context.Background()
+			c              = setupProductAccessorTestComponent(t)
+			expectedResult = sqlmock.NewRows(productColumns)
+		)
+		defer c.db.Close()
+
+		for _, p := range productVendors {
+			expectedResult.AddRow(
+				p.ID,
+				p.ProductID,
+				p.Code,
+				p.Name,
+				p.QuantityMin,
+				p.QuantityMax,
+				p.CurrencyName,
+				p.CurrencyCode,
+				p.Price,
+				p.PriceQuantity,
+				p.VendorID,
+				p.VendorName,
+				p.VendorRating,
+				p.IncomeTaxID,
+				p.IncomeTaxName,
+				p.IncomeTaxPercentage,
+				p.Description,
+				p.UOMID,
+				p.SAPCode,
+				p.ModifiedDate,
+				p.ModifiedBy,
+			)
+		}
+
+		query := getProductVendorsQuery + " LIMIT :limit OFFSET :offset"
+		transformedQuery, args, _ := sqlx.Named(query, map[string]interface{}{
+			"limit":  args.Limit,
+			"offset": args.Offset,
+		})
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectQuery(transformedQuery).
+			WithArgs(
+				driverArgs...,
+			).WillReturnRows(expectedResult)
+
+		totalRows := sqlmock.NewRows([]string{"count"}).AddRow(nil)
+		c.mock.ExpectQuery(countProductVendorsQuery).
+			WillReturnRows(totalRows)
+
+		res, err := c.accessor.GetAllProductVendors(ctx, spec)
+		c.g.Expect(err).ToNot(gomega.BeNil())
+		c.g.Expect(res).To(gomega.BeNil())
+	})
+
+	t.Run("error while iterating query count rows", func(t *testing.T) {
+		var (
+			ctx            = context.Background()
+			c              = setupProductAccessorTestComponent(t)
+			expectedResult = sqlmock.NewRows(productColumns)
+		)
+		defer c.db.Close()
+
+		for _, p := range productVendors {
+			expectedResult.AddRow(
+				p.ID,
+				p.ProductID,
+				p.Code,
+				p.Name,
+				p.QuantityMin,
+				p.QuantityMax,
+				p.CurrencyName,
+				p.CurrencyCode,
+				p.Price,
+				p.PriceQuantity,
+				p.VendorID,
+				p.VendorName,
+				p.VendorRating,
+				p.IncomeTaxID,
+				p.IncomeTaxName,
+				p.IncomeTaxPercentage,
+				p.Description,
+				p.UOMID,
+				p.SAPCode,
+				p.ModifiedDate,
+				p.ModifiedBy,
+			)
+		}
+
+		query := getProductVendorsQuery + " LIMIT :limit OFFSET :offset"
+		transformedQuery, args, _ := sqlx.Named(query, map[string]interface{}{
+			"limit":  args.Limit,
+			"offset": args.Offset,
+		})
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectQuery(transformedQuery).
+			WithArgs(
+				driverArgs...,
+			).WillReturnRows(expectedResult)
+
+		totalRows := sqlmock.NewRows([]string{"count"}).AddRow(2).
+			RowError(0, fmt.Errorf("row error"))
 		c.mock.ExpectQuery(countProductVendorsQuery).
 			WillReturnRows(totalRows)
 
