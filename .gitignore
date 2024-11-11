@@ -11,3 +11,6 @@ tmp/*
 
 # Dependency
 /vendor
+
+# Log folder
+**/log

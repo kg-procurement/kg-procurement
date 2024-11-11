@@ -19,19 +19,22 @@ docker-up:
 docker-down:
 	docker-compose -f docker-compose.yaml down
 
-seed-product:
-	@go run scripts/seeder/main.go product
 seed-product-category:
 	@go run scripts/seeder/main.go product_category
 seed-product-type:
 	@go run scripts/seeder/main.go product_type
 seed-uom:
 	@go run scripts/seeder/main.go uom
+seed-product:
+	@go run scripts/seeder/main.go product
 seed-vendor:
 	@go run scripts/seeder/main.go vendor
 seed-product-vendor:
 	@go run scripts/seeder/main.go product_vendor
+seed-price:
+	@go run scripts/seeder/main.go price
 
+seed-all: seed-product-category seed-product-type seed-uom seed-product seed-vendor seed-product-vendor seed-price
 
 migrate-up:
 	@goose -dir migrations postgres "password=postgres user=postgres port=5432 dbname=kg-procurement host=postgres-local sslmode=disable" up

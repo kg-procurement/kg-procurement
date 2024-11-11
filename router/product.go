@@ -2,6 +2,7 @@ package router
 
 import (
 	"kg/procurement/cmd/config"
+	"kg/procurement/cmd/utils"
 	"kg/procurement/internal/product"
 	"net/http"
 
@@ -14,9 +15,12 @@ func NewProductEngine(
 	productSvc *product.ProductService,
 ) {
 	r.GET(cfg.GetProductsByVendor, func(ctx *gin.Context) {
+		utils.Logger.Info("Received getProductsByVendor request")
+
 		vendorID := ctx.Param("vendor_id")
 
 		if vendorID == "" {
+			utils.Logger.Error("vendor_id is required")
 			ctx.JSON(http.StatusBadRequest, gin.H{
 				"error": "vendor_id is required",
 			})
@@ -25,12 +29,33 @@ func NewProductEngine(
 
 		paginationSpec := GetPaginationSpec(ctx.Request)
 
-		spec := product.GetProductsByVendorSpec{
+		spec := product.GetProductVendorByVendorSpec{
 			Name:           ctx.Query("name"),
 			PaginationSpec: paginationSpec,
 		}
 
-		res, err := productSvc.GetProductsByVendor(ctx, vendorID, spec)
+		res, err := productSvc.GetProductVendorsByVendor(ctx, vendorID, spec)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		utils.Logger.Info("Completed getproductsByVendor request process")
+
+		ctx.JSON(http.StatusOK, res)
+	})
+
+	r.GET(cfg.GetProductVendors, func(ctx *gin.Context) {
+		paginationSpec := GetPaginationSpec(ctx.Request)
+
+		spec := product.GetProductVendorsSpec{
+			Name:           ctx.Query("name"),
+			PaginationSpec: paginationSpec,
+		}
+
+		res, err := productSvc.GetProductVendors(ctx, spec)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
@@ -42,10 +67,13 @@ func NewProductEngine(
 	})
 
 	r.PUT(cfg.UpdateProduct, func(ctx *gin.Context) {
+		utils.Logger.Info("Received updateProductDetail request")
+
 		id := ctx.Param("id")
 
 		spec := product.PutProductSpec{}
 		if err := ctx.ShouldBindJSON(&spec); err != nil {
+			utils.Logger.Error(err.Error())
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
 			})
@@ -67,13 +95,19 @@ func NewProductEngine(
 			})
 			return
 		}
+
+		utils.Logger.Info("Completed updateProductDetail request process")
+
 		ctx.JSON(http.StatusOK, res)
 	})
 
 	r.PUT(cfg.UpdatePrice, func(ctx *gin.Context) {
+		utils.Logger.Info("Received updateProductPrice request")
+
 		id := ctx.Param("id")
 		spec := product.PutPriceSpec{}
 		if err := ctx.ShouldBindJSON(&spec); err != nil {
+			utils.Logger.Error(err.Error())
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
 			})
@@ -112,6 +146,9 @@ func NewProductEngine(
 			})
 			return
 		}
+
+		utils.Logger.Info("Completed updateProductPrice request process")
+
 		ctx.JSON(http.StatusOK, res)
 	})
 }

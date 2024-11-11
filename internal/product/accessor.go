@@ -3,31 +3,27 @@ package product
 import (
 	"context"
 	"fmt"
+	"kg/procurement/cmd/utils"
 	"kg/procurement/internal/common/database"
-	"log"
+	"strconv"
 	"strings"
 
 	"github.com/benbjohnson/clock"
 )
 
 const (
-	getProductsByVendorQuery = `
-		SELECT 
-			p.id, 
-			p.product_category_id, 
-			p.uom_id, 
-			p.income_tax_id, 
-			p.product_type_id, 
-			p.name, 
-			p.description, 
-			p.modified_date, 
-			p.modified_by 
-		FROM 
-			product p
-		JOIN 
-			product_vendor pv ON pv.product_id = p.id
-		WHERE 
-			pv.vendor_id = $1
+	getProductVendorsByVendorQuery = `
+		SELECT pv.id, pv.product_id, pv.code, pv.name, pv.income_tax_id, pv.income_tax_name, pv.income_tax_percentage, pv.description, pv.uom_id, pv.sap_code, pv.modified_date, pv.modified_by
+		FROM product_vendor pv
+		JOIN price pr ON pr.product_vendor_id = pv.id
+		WHERE pr.vendor_id = $1
+	`
+	getProductByIDQuery = `SELECT * FROM product WHERE id = $1`
+	getPriceByPVIDQuery = `
+		SELECT pr.*
+		FROM price pr 
+		JOIN product_vendor pv ON pv.id = pr.product_vendor_id
+		WHERE pv.id = $1
 	`
 	insertProduct = `
 		INSERT INTO product
@@ -55,9 +51,15 @@ const (
 	`
 	insertProductVendor = `
 		INSERT INTO product_vendor
-			(product_id, vendor_id)
+			(id, product_id, code, name, income_tax_id, income_tax_name, income_tax_percentage, description, uom_id, sap_code, modified_date, modified_by)
 		VALUES 
-			(:product_id, :vendor_id)
+			(:id, :product_id, :code, :name, :income_tax_id, :income_tax_name, :income_tax_percentage, :description, :uom_id, :sap_code, :modified_date, :modified_by)
+	`
+	insertPrice = `
+		INSERT INTO price
+			(id, purchasing_org_id, purchasing_org_name, vendor_id, product_vendor_id, quantity_min, quantity_max, quantity_uom_id, lead_time_min, lead_time_max, currency_id, currency_name, currency_code, price, price_quantity, price_uom_id, valid_from, valid_to, valid_pattern_id, valid_pattern_name, area_group_id, area_group_name, reference_number, reference_date, document_type_id, document_type_name, document_id, item_id, term_of_payment_id, term_of_payment_days, term_of_payment_text, invocation_order, modified_date, modified_by)
+		VALUES 
+			(:id, :purchasing_org_id, :purchasing_org_name, :vendor_id, :product_vendor_id, :quantity_min, :quantity_max, :quantity_uom_id, :lead_time_min, :lead_time_max, :currency_id, :currency_name, :currency_code, :price, :price_quantity, :price_uom_id, :valid_from, :valid_to, :valid_pattern_id, :valid_pattern_name, :area_group_id, :area_group_name, :reference_number, :reference_date, :document_type_id, :document_type_name, :document_id, :item_id, :term_of_payment_id, :term_of_payment_days, :term_of_payment_text, :invocation_order, :modified_date, :modified_by)
 	`
 	updateProduct = `UPDATE product SET
         product_category_id = $2,
@@ -79,6 +81,47 @@ const (
         modified_date,
         modified_by
     `
+
+	getProductVendorsQuery = `
+		SELECT 
+			pv.id, 
+			pv.product_id, 
+			pv.code, 
+			pv.name, 
+			pr.quantity_min, 
+			pr.quantity_max, 
+			pr.currency_name, 
+			pr.currency_code, 
+			pr.price, 
+			pr.price_quantity,
+			v.id AS vendor_id,
+			v.name AS vendor_name, 
+			v.rating AS vendor_rating,
+			pv.income_tax_id, 
+			pv.income_tax_name, 
+			pv.income_tax_percentage, 
+			pv.description, 
+			pv.uom_id, 
+			pv.sap_code, 
+			pv.modified_date, 
+			pv.modified_by
+		FROM 
+			product_vendor pv
+		JOIN 
+			price pr ON pr.product_vendor_id = pv.id
+		JOIN 
+			vendor v ON pr.vendor_id = v.id
+	`
+	countProductVendorsQuery = `
+		SELECT 
+			COUNT(*)
+		FROM 
+			product_vendor pv
+		JOIN 
+			price pr ON pr.product_vendor_id = pv.id
+		JOIN 
+			vendor v ON pr.vendor_id = v.id
+	`
 )
 
 type postgresProductAccessor struct {
@@ -86,16 +129,21 @@ type postgresProductAccessor struct {
 	clock clock.Clock
 }
 
-type AccessorGetProductsByVendorPaginationData struct {
-	Products []Product                   `json:"products"`
-	Metadata database.PaginationMetadata `json:"metadata"`
+type AccessorGetProductVendorsPaginationData struct {
+	ProductVendors []GetProductVendorsDBResponse `json:"product_vendors"`
+	Metadata       database.PaginationMetadata   `json:"metadata"`
 }
 
-func (p *postgresProductAccessor) GetProductsByVendor(
+type AccessorGetProductVendorsByVendorPaginationData struct {
+	ProductVendors []ProductVendor             `json:"product_vendors"`
+	Metadata       database.PaginationMetadata `json:"metadata"`
+}
+
+func (p *postgresProductAccessor) GetProductVendorsByVendor(
 	_ context.Context,
 	vendorID string,
-	spec GetProductsByVendorSpec,
-) (*AccessorGetProductsByVendorPaginationData, error) {
+	spec GetProductVendorByVendorSpec,
+) (*AccessorGetProductVendorsByVendorPaginationData, error) {
 	paginationArgs := database.BuildPaginationArgs(spec.PaginationSpec)
 
 	// Initialize clauses and arguments
@@ -114,7 +162,7 @@ func (p *postgresProductAccessor) GetProductsByVendor(
 	if spec.Name != "" {
 		productNameList := strings.Fields(spec.Name)
 		for _, word := range productNameList {
-			whereClauses = append(whereClauses, fmt.Sprintf("p.name iLIKE $%d", argsIndex))
+			whereClauses = append(whereClauses, fmt.Sprintf("pv.name iLIKE $%d", argsIndex))
 			args = append(args, "%"+word+"%")
 			argsIndex++
 		}
@@ -134,7 +182,7 @@ func (p *postgresProductAccessor) GetProductsByVendor(
 	args = append(args, paginationArgs.Limit, paginationArgs.Offset)
 
 	// Build the query
-	query := getProductsByVendorQuery
+	query := getProductVendorsByVendorQuery
 	if len(whereClauses) > 0 {
 		query += " AND " + strings.Join(whereClauses, " AND ")
 	}
@@ -144,34 +192,175 @@ func (p *postgresProductAccessor) GetProductsByVendor(
 
 	rows, err := p.db.Queryx(query, args...)
 	if err != nil {
+		utils.Logger.Error(err.Error())
 		return nil, err
 	}
 	defer rows.Close()
 
-	res := []Product{}
+	res := []ProductVendor{}
 
 	for rows.Next() {
-		var product Product
+		var productVendor ProductVendor
+		if err := rows.StructScan(&productVendor); err != nil {
+			utils.Logger.Error(err.Error())
+			return nil, err
+		}
+		res = append(res, productVendor)
+	}
+	if err := rows.Err(); err != nil {
+		utils.Logger.Error(err.Error())
+		return nil, err
+	}
+
+	countQuery := `SELECT COUNT(*)
+		FROM product_vendor pv
+		JOIN price pr ON pr.product_vendor_id = pv.id
+		WHERE pr.vendor_id = $1`
+
+	args = []interface{}{vendorID}
+	argsIndex = 2
+	var countWhereClauses []string
+
+	if spec.Name != "" {
+		productNameList := strings.Fields(spec.Name)
+		for _, word := range productNameList {
+			countWhereClauses = append(countWhereClauses, fmt.Sprintf("pv.name iLIKE $%d", argsIndex))
+			args = append(args, "%"+word+"%")
+			argsIndex++
+		}
+		countQuery += " AND " + strings.Join(countWhereClauses, " AND ")
+	}
+
+	var totalEntries int
+	row := p.db.QueryRow(countQuery, args...)
+	if err = row.Scan(&totalEntries); err != nil {
+		utils.Logger.Errorf(err.Error())
+		return nil, fmt.Errorf("failed to execute count query: %w", err)
+	}
+
+	return &AccessorGetProductVendorsByVendorPaginationData{
+		ProductVendors: res,
+		Metadata:       database.GeneratePaginationMetadata(spec.PaginationSpec, totalEntries),
+	}, nil
+}
+
+func (p *postgresProductAccessor) GetAllProductVendors(
+	_ context.Context,
+	spec GetProductVendorsSpec,
+) (*AccessorGetProductVendorsPaginationData, error) {
+	paginationArgs := database.BuildPaginationArgs(spec.PaginationSpec)
+
+	// Initialize clauses and arguments
+	var (
+		whereClauses []string
+		extraClauses []string
+		args         = map[string]interface{}{
+			"limit":  paginationArgs.Limit,
+			"offset": paginationArgs.Offset,
+		}
+		countArgs       = map[string]interface{}{}
+		extraClausesRaw = []string{
+			"LIMIT :limit",
+			"OFFSET :offset",
+		}
+	)
+
+	// Build WHERE clauses for product
+	if spec.Name != "" {
+		productNameList := strings.Fields(spec.Name)
+		for i, word := range productNameList {
+			whereClauses = append(whereClauses, fmt.Sprintf("pv.name iLIKE :%s", "name"+strconv.Itoa(i)))
+			args["name"+strconv.Itoa(i)] = "%" + word + "%"
+			countArgs["name"+strconv.Itoa(i)] = "%" + word + "%"
+		}
+	}
+
+	// Build extra clauses
+	if paginationArgs.OrderBy != "" {
+		extraClauses = append(extraClauses, fmt.Sprintf("ORDER BY %s %s",
+			paginationArgs.OrderBy, paginationArgs.Order))
+	}
+
+	// Pagination clause
+	extraClauses = append(extraClauses, extraClausesRaw...)
+
+	// Build the query
+	query := getProductVendorsQuery
+	countQuery := countProductVendorsQuery
+	if len(whereClauses) > 0 {
+		query += "WHERE " + strings.Join(whereClauses, " AND ")
+		countQuery += " WHERE " + strings.Join(whereClauses, " AND ")
+	}
+	if len(extraClauses) > 0 {
+		query += " " + strings.Join(extraClauses, " ")
+	}
+
+	rows, err := p.db.NamedQuery(query, args)
+	if err != nil {
+		utils.Logger.Error(err.Error())
+		return nil, err
+	}
+	defer rows.Close()
+
+	res := []GetProductVendorsDBResponse{}
+
+	for rows.Next() {
+		var product GetProductVendorsDBResponse
 		if err := rows.StructScan(&product); err != nil {
+			utils.Logger.Error(err.Error())
 			return nil, err
 		}
 		res = append(res, product)
 	}
 	if err := rows.Err(); err != nil {
+		utils.Logger.Error(err.Error())
 		return nil, err
 	}
 
-	countQuery := `SELECT COUNT(*) FROM product_vendor WHERE vendor_id=$1`
 	var totalEntries int
-	row := p.db.QueryRow(countQuery, vendorID)
-	if err = row.Scan(&totalEntries); err != nil {
-		return nil, fmt.Errorf("failed to execute count query: %w", err)
+	rows, err = p.db.NamedQuery(countQuery, countArgs)
+	if err != nil {
+		utils.Logger.Error(err.Error())
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		if err := rows.Scan(&totalEntries); err != nil {
+			utils.Logger.Error(err.Error())
+			return nil, err
+		}
+	}
+	if err := rows.Err(); err != nil {
+		utils.Logger.Error(err.Error())
+		return nil, err
 	}
 
-	return &AccessorGetProductsByVendorPaginationData{
-		Products: res,
-		Metadata: database.GeneratePaginationMetadata(spec.PaginationSpec, totalEntries),
+	return &AccessorGetProductVendorsPaginationData{
+		ProductVendors: res,
+		Metadata:       database.GeneratePaginationMetadata(spec.PaginationSpec, totalEntries),
 	}, nil
+}
+
+func (p *postgresProductAccessor) getPriceByPVID(
+	_ context.Context,
+	pvID string,
+) (*Price, error) {
+	rows := p.db.QueryRowx(getPriceByPVIDQuery, pvID)
+	res := Price{}
+	if err := rows.StructScan(&res); err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
+
+func (p *postgresProductAccessor) getProductByID(_ context.Context, productID string) (*Product, error) {
+	rows := p.db.QueryRowx(getProductByIDQuery, productID)
+	res := Product{}
+	if err := rows.StructScan(&res); err != nil {
+		return nil, err
+	}
+	return &res, nil
 }
 
 func (p *postgresProductAccessor) UpdateProduct(_ context.Context, payload Product) (Product, error) {
@@ -200,6 +389,7 @@ func (p *postgresProductAccessor) UpdateProduct(_ context.Context, payload Produ
 		&updatedProduct.ModifiedDate,
 		&updatedProduct.ModifiedBy,
 	); err != nil {
+		utils.Logger.Error(err.Error())
 		return Product{}, fmt.Errorf("failed to scan updated product: %w", err)
 	}
 
@@ -322,6 +512,7 @@ func (p *postgresProductAccessor) UpdatePrice(ctx context.Context, price Price) 
 		&updatedPrice.ModifiedDate,
 		&updatedPrice.ModifiedBy,
 	); err != nil {
+		utils.Logger.Error(err.Error())
 		return Price{}, err
 	}
 
@@ -330,7 +521,7 @@ func (p *postgresProductAccessor) UpdatePrice(ctx context.Context, price Price) 
 
 func (p *postgresProductAccessor) writeProduct(_ context.Context, product Product) error {
 	if _, err := p.db.NamedExec(insertProduct, product); err != nil {
-		log.Printf("failed inserting product: %s", product.ID)
+		utils.Logger.Errorf("failed inserting product: %s", product.ID)
 		return err
 	}
 	return nil
@@ -338,7 +529,7 @@ func (p *postgresProductAccessor) writeProduct(_ context.Context, product Produc
 
 func (p *postgresProductAccessor) writeProductCategory(_ context.Context, category ProductCategory) error {
 	if _, err := p.db.NamedExec(insertProductCategory, category); err != nil {
-		log.Printf("failed inserting product category: %s", category.ID)
+		utils.Logger.Errorf("failed inserting product category: %s", category.ID)
 		return err
 	}
 	return nil
@@ -346,7 +537,7 @@ func (p *postgresProductAccessor) writeProductCategory(_ context.Context, catego
 
 func (p *postgresProductAccessor) writeProductType(_ context.Context, pType ProductType) error {
 	if _, err := p.db.NamedExec(insertProductType, pType); err != nil {
-		log.Printf("failed inserting product type: %s", pType.ID)
+		utils.Logger.Errorf("failed inserting product type: %s", pType.ID)
 		return err
 	}
 	return nil
@@ -354,7 +545,7 @@ func (p *postgresProductAccessor) writeProductType(_ context.Context, pType Prod
 
 func (p *postgresProductAccessor) writeUOM(_ context.Context, uom UOM) error {
 	if _, err := p.db.NamedExec(insertUOM, uom); err != nil {
-		log.Printf("failed inserting uom: %s", uom.ID)
+		utils.Logger.Errorf("failed inserting uom: %s", uom.ID)
 		return err
 	}
 	return nil
@@ -362,7 +553,15 @@ func (p *postgresProductAccessor) writeUOM(_ context.Context, uom UOM) error {
 
 func (p *postgresProductAccessor) writeProductVendor(_ context.Context, pv ProductVendor) error {
 	if _, err := p.db.NamedExec(insertProductVendor, pv); err != nil {
-		log.Printf("failed inserting product_vendor, product_id: %s and vendor_id: %s", pv.ProductID, pv.VendorID)
+		utils.Logger.Errorf("failed inserting product_vendor: %s, product_id: %s", pv.ID, pv.ProductID)
+		return err
+	}
+	return nil
+}
+
+func (p *postgresProductAccessor) writePrice(_ context.Context, price Price) error {
+	if _, err := p.db.NamedExec(insertPrice, price); err != nil {
+		utils.Logger.Errorf("failed inserting price: %s", price.ID)
 		return err
 	}
 	return nil

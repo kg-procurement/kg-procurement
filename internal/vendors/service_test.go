@@ -464,3 +464,59 @@ func TestVendorService_BlastEmail(t *testing.T) {
 		g.Expect(errList).To(gomega.HaveLen(1))
 	})
 }
+
+func TestVendorService_AutomatedBlastEmail(t *testing.T) {
+	t.Parallel()
+
+	var (
+		mockVendorAccessor *MockvendorDBAccessor
+		service            *VendorService
+	)
+
+	setup := func(t *testing.T) *gomega.GomegaWithT {
+		ctrl := gomock.NewController(t)
+		mockVendorAccessor = NewMockvendorDBAccessor(ctrl)
+		service = &VendorService{
+			cfg:              config.Application{},
+			vendorDBAccessor: mockVendorAccessor,
+		}
+
+		return gomega.NewWithT(t)
+	}
+
+	var (
+		vendorIDs = []string{
+			"2550",
+			"2580",
+		}
+	)
+
+	t.Run("success", func(t *testing.T) {
+		g := setup(t)
+		ctx := context.Background()
+
+		product_name := "Buku"
+		mockVendorAccessor.EXPECT().
+			getAllVendorIdByProductName(ctx, product_name).
+			Return(vendorIDs, nil)
+
+		result, err := service.AutomatedEmailBlast(ctx, product_name)
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(result).To(gomega.Equal(vendorIDs))
+	})
+
+	t.Run("error", func(t *testing.T) {
+		g := setup(t)
+		ctx := context.Background()
+
+		product_name := "Buku"
+		mockVendorAccessor.EXPECT().
+			getAllVendorIdByProductName(ctx, product_name).
+			Return(nil, errors.New("error"))
+
+		result, err := service.AutomatedEmailBlast(ctx, product_name)
+		g.Expect(err).ToNot(gomega.BeNil())
+		g.Expect(result).To(gomega.BeNil())
+	})
+
+}

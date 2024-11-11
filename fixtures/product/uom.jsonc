@@ -41,6 +41,16 @@
     "modified_by": "0"
   },
   {
+    "id": "12",
+    "name": "Kg",
+    "description": "kilogram",
+    "dimension": "",
+    "sap_code": "",
+    "modified_date": "",
+    "modified_date": "2020-11-02 07:44:58",
+    "modified_by": "0"
+  },
+  {
     "id": "23",
     "name": "Unit",
     "description": "units",
@@ -81,6 +91,36 @@
     "modified_by": "0"
   },
   {
+    "id": "28",
+    "name": "Pack of 10",
+    "description": "pack of 10",
+    "dimension": "",
+    "sap_code": "",
+    "modified_date": "",
+    "modified_date": "2020-11-02 07:44:58",
+    "modified_by": "0"
+  },
+  {
+    "id": "29",
+    "name": "Pack of 20",
+    "description": "pack of 20",
+    "dimension": "",
+    "sap_code": "",
+    "modified_date": "",
+    "modified_date": "2020-11-02 07:44:58",
+    "modified_by": "0"
+  },
+  {
+    "id": "32",
+    "name": "License",
+    "description": "license",
+    "dimension": "",
+    "sap_code": "",
+    "modified_date": "",
+    "modified_date": "2020-11-02 07:44:58",
+    "modified_by": "0"
+  },
+  {
     "id": "34",
     "name": "Month",
     "description": "months",
@@ -91,9 +131,39 @@
     "modified_by": "0"
   },
   {
+    "id": "35",
+    "name": "Roll",
+    "description": "roll",
+    "dimension": "",
+    "sap_code": "",
+    "modified_date": "",
+    "modified_date": "2020-11-02 07:44:58",
+    "modified_by": "0"
+  },
+  {
     "id": "36",
     "name": "Pack of 100",
     "description": "pack of 100",
+    "dimension": "",
+    "sap_code": "",
+    "modified_date": "",
+    "modified_date": "2020-11-02 07:44:58",
+    "modified_by": "0"
+  },
+  {
+    "id": "38",
+    "name": "Pack of 50",
+    "description": "pack of 50",
+    "dimension": "",
+    "sap_code": "",
+    "modified_date": "",
+    "modified_date": "2020-11-02 07:44:58",
+    "modified_by": "0"
+  },
+  {
+    "id": "39",
+    "name": "Pack of 250",
+    "description": "pack of 250",
     "dimension": "",
     "sap_code": "",
     "modified_date": "",

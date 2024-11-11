@@ -1,778 +1,1402 @@
 [
   {
+    "id": "1",
     "product_id": "1",
-    "vendor_id": "2550"
+    "code": "",
+    "name": "Buku",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Buku",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-11 13:22:16",
+    "modified_by": "151"
   },
   {
-    "product_id": "1",
-    "vendor_id": "2580"
-  },
-  {
+    "id": "2",
     "product_id": "2",
-    "vendor_id": "2520"
+    "code": "",
+    "name": "Koran",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Koran",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-02 14:49:06",
+    "modified_by": "0"
   },
   {
-    "product_id": "2",
-    "vendor_id": "2541"
-  },
-  {
+    "id": "3",
     "product_id": "3",
-    "vendor_id": "4485"
+    "code": "",
+    "name": "Majalah",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Majalah",
+    "uom_id": "35",
+    "sap_code": "",
+    "modified_date": "2020-11-04 11:23:28",
+    "modified_by": "1"
   },
   {
+    "id": "4",
     "product_id": "4",
-    "vendor_id": "2593"
+    "code": "",
+    "name": "Cangkir",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Cangkir",
+    "uom_id": "1",
+    "sap_code": "",
+    "modified_date": "2020-11-04 12:10:53",
+    "modified_by": "1"
   },
   {
+    "id": "5",
     "product_id": "5",
-    "vendor_id": "2539"
+    "code": "",
+    "name": "Centong & Sendok Sayur",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Centong & Sendok Sayur",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-04 11:32:41",
+    "modified_by": "1"
   },
   {
-    "product_id": "5",
-    "vendor_id": "2520"
-  },
-  {
-    "product_id": "5",
-    "vendor_id": "2515"
-  },
-  {
+    "id": "6",
     "product_id": "6",
-    "vendor_id": "2588"
+    "code": "",
+    "name": "Cooler Box",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Cooler Box",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-04 11:37:55",
+    "modified_by": "1"
   },
   {
+    "id": "7",
     "product_id": "7",
-    "vendor_id": "2541"
+    "code": "",
+    "name": "Gelas & Mug",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Gelas & Mug",
+    "uom_id": "32",
+    "sap_code": "",
+    "modified_date": "2020-11-04 16:06:50",
+    "modified_by": "1"
   },
   {
+    "id": "8",
     "product_id": "8",
-    "vendor_id": "2513"
+    "code": "",
+    "name": "Gunting",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Gunting",
+    "uom_id": "32",
+    "sap_code": "",
+    "modified_date": "2020-11-06 09:09:23",
+    "modified_by": "151"
   },
   {
-    "product_id": "8",
-    "vendor_id": "4486"
-  },
-  {
-    "product_id": "8",
-    "vendor_id": "4481"
-  },
-  {
+    "id": "9",
     "product_id": "9",
-    "vendor_id": "4483"
+    "code": "",
+    "name": "Mangkok",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Mangkok",
+    "uom_id": "32",
+    "sap_code": "",
+    "modified_date": "2020-11-06 11:46:46",
+    "modified_by": "151"
   },
   {
-    "product_id": "9",
-    "vendor_id": "2583"
-  },
-  {
+    "id": "10",
     "product_id": "10",
-    "vendor_id": "2544"
+    "code": "",
+    "name": "Piring",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Piring",
+    "uom_id": "32",
+    "sap_code": "",
+    "modified_date": "2020-11-10 16:23:15",
+    "modified_by": "151"
   },
   {
-    "product_id": "10",
-    "vendor_id": "2577"
-  },
-  {
+    "id": "11",
     "product_id": "11",
-    "vendor_id": "2572"
+    "code": "",
+    "name": "Pisau",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Pisau",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-12 22:25:46",
+    "modified_by": "0"
   },
   {
-    "product_id": "11",
-    "vendor_id": "2595"
-  },
-  {
+    "id": "12",
     "product_id": "12",
-    "vendor_id": "2514"
+    "code": "",
+    "name": "Plastic Wrap",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Plastic Wrap",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-12 22:25:46",
+    "modified_by": "0"
   },
   {
-    "product_id": "12",
-    "vendor_id": "2541"
-  },
-  {
-    "product_id": "12",
-    "vendor_id": "2544"
-  },
-  {
+    "id": "13",
     "product_id": "13",
-    "vendor_id": "2518"
+    "code": "",
+    "name": "Sendok & Garpu",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Sendok & Garpu",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-12 22:25:46",
+    "modified_by": "0"
   },
   {
-    "product_id": "13",
-    "vendor_id": "2539"
-  },
-  {
+    "id": "14",
     "product_id": "14",
-    "vendor_id": "2548"
+    "code": "",
+    "name": "Talenan",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Talenan",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2021-01-27 15:59:14",
+    "modified_by": "151"
   },
   {
-    "product_id": "14",
-    "vendor_id": "2507"
-  },
-  {
+    "id": "16",
     "product_id": "16",
-    "vendor_id": "2524"
+    "code": "",
+    "name": "Tempat Sendok & Garpu",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Tempat Sendok & Garpu",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-12 22:25:46",
+    "modified_by": "0"
   },
   {
-    "product_id": "16",
-    "vendor_id": "4485"
-  },
-  {
-    "product_id": "16",
-    "vendor_id": "2532"
-  },
-  {
+    "id": "17",
     "product_id": "17",
-    "vendor_id": "2577"
+    "code": "",
+    "name": "Toples",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Toples",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-12 22:25:46",
+    "modified_by": "0"
   },
   {
-    "product_id": "17",
-    "vendor_id": "4482"
-  },
-  {
+    "id": "18",
     "product_id": "18",
-    "vendor_id": "2538"
+    "code": "",
+    "name": "Sabun Cuci Piring",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Sabun Cuci Piring",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-12 22:25:46",
+    "modified_by": "0"
   },
   {
-    "product_id": "18",
-    "vendor_id": "2568"
-  },
-  {
-    "product_id": "18",
-    "vendor_id": "2595"
-  },
-  {
+    "id": "20",
     "product_id": "20",
-    "vendor_id": "2554"
+    "code": "",
+    "name": "Apron",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Apron",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-12 22:25:46",
+    "modified_by": "0"
   },
   {
+    "id": "21",
     "product_id": "21",
-    "vendor_id": "2575"
+    "code": "",
+    "name": "Vas Bunga",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Vas Bunga",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-12 22:25:46",
+    "modified_by": "0"
   },
   {
+    "id": "22",
     "product_id": "22",
-    "vendor_id": "2581"
+    "code": "",
+    "name": "Hiasan Dinding",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Hiasan Dinding",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-12 22:25:46",
+    "modified_by": "0"
   },
   {
+    "id": "23",
     "product_id": "23",
-    "vendor_id": "2562"
+    "code": "",
+    "name": "Jemuran Baju",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Jemuran Baju",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-12 22:25:46",
+    "modified_by": "0"
   },
   {
+    "id": "24",
     "product_id": "24",
-    "vendor_id": "2556"
+    "code": "",
+    "name": "Sprei",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Sprei",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-12 22:25:46",
+    "modified_by": "0"
   },
   {
+    "id": "25",
     "product_id": "25",
-    "vendor_id": "2552"
+    "code": "",
+    "name": "Bantal & Guling",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Bantal & Guling",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-12 22:25:46",
+    "modified_by": "0"
   },
   {
-    "product_id": "25",
-    "vendor_id": "2539"
-  },
-  {
+    "id": "26",
     "product_id": "26",
-    "vendor_id": "2551"
+    "code": "",
+    "name": "Bean Bag",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Bean Bag",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-12 22:25:46",
+    "modified_by": "0"
   },
   {
-    "product_id": "26",
-    "vendor_id": "2588"
-  },
-  {
-    "product_id": "26",
-    "vendor_id": "2571"
-  },
-  {
+    "id": "27",
     "product_id": "27",
-    "vendor_id": "2575"
+    "code": "",
+    "name": "Payung",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Payung",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-12 22:25:46",
+    "modified_by": "0"
   },
   {
-    "product_id": "27",
-    "vendor_id": "2526"
-  },
-  {
-    "product_id": "27",
-    "vendor_id": "2591"
-  },
-  {
+    "id": "28",
     "product_id": "28",
-    "vendor_id": "4488"
+    "code": "",
+    "name": "Bingkai /Frame Foto",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Bingkai /Frame Foto",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-12 22:25:46",
+    "modified_by": "0"
   },
   {
-    "product_id": "28",
-    "vendor_id": "2508"
-  },
-  {
+    "id": "29",
     "product_id": "29",
-    "vendor_id": "2534"
+    "code": "",
+    "name": "Air Conditioner (AC)",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Air Conditioner (AC)",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-12 22:25:46",
+    "modified_by": "0"
   },
   {
-    "product_id": "29",
-    "vendor_id": "2551"
-  },
-  {
-    "product_id": "29",
-    "vendor_id": "2595"
-  },
-  {
+    "id": "30",
     "product_id": "30",
-    "vendor_id": "4485"
+    "code": "",
+    "name": "Kipas Angin",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Kipas Angin",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-12-04 14:07:51",
+    "modified_by": "151"
   },
   {
-    "product_id": "30",
-    "vendor_id": "2512"
-  },
-  {
+    "id": "31",
     "product_id": "31",
-    "vendor_id": "2545"
+    "code": "",
+    "name": "Exhaust Fan",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Exhaust Fan",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-12 22:25:46",
+    "modified_by": "0"
   },
   {
+    "id": "32",
     "product_id": "32",
-    "vendor_id": "4487"
+    "code": "",
+    "name": "Blu Ray Player",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Blu Ray Player",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-12 22:25:46",
+    "modified_by": "0"
   },
   {
-    "product_id": "32",
-    "vendor_id": "2548"
-  },
-  {
-    "product_id": "32",
-    "vendor_id": "2589"
-  },
-  {
+    "id": "33",
     "product_id": "33",
-    "vendor_id": "2577"
+    "code": "",
+    "name": "CD/DVD Player",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "CD/DVD Player",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-12 22:25:46",
+    "modified_by": "0"
   },
   {
-    "product_id": "33",
-    "vendor_id": "2530"
-  },
-  {
-    "product_id": "33",
-    "vendor_id": "4487"
-  },
-  {
+    "id": "34",
     "product_id": "34",
-    "vendor_id": "4487"
+    "code": "",
+    "name": "Radio & Tape Player",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Radio & Tape Player",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-12 22:25:46",
+    "modified_by": "0"
   },
   {
-    "product_id": "34",
-    "vendor_id": "2513"
-  },
-  {
-    "product_id": "34",
-    "vendor_id": "2571"
-  },
-  {
+    "id": "35",
     "product_id": "35",
-    "vendor_id": "2586"
+    "code": "",
+    "name": "MP3 & MP4 Plyer",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "MP3 & MP4 Plyer",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-12 22:25:46",
+    "modified_by": "0"
   },
   {
-    "product_id": "35",
-    "vendor_id": "2507"
-  },
-  {
-    "product_id": "35",
-    "vendor_id": "2516"
-  },
-  {
+    "id": "36",
     "product_id": "36",
-    "vendor_id": "2523"
+    "code": "",
+    "name": "Headset",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Headset",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-12 22:25:46",
+    "modified_by": "0"
   },
   {
+    "id": "37",
     "product_id": "37",
-    "vendor_id": "2512"
+    "code": "",
+    "name": "Blender",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Blender",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-12 22:25:46",
+    "modified_by": "0"
   },
   {
-    "product_id": "37",
-    "vendor_id": "2581"
-  },
-  {
-    "product_id": "37",
-    "vendor_id": "2560"
-  },
-  {
+    "id": "38",
     "product_id": "38",
-    "vendor_id": "2509"
+    "code": "",
+    "name": "Hand Blower",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Hand Blower",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-12 22:25:46",
+    "modified_by": "0"
   },
   {
+    "id": "39",
     "product_id": "39",
-    "vendor_id": "2502"
+    "code": "",
+    "name": "Juicer",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Juicer",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-12-02 11:06:34",
+    "modified_by": "151"
   },
   {
+    "id": "40",
     "product_id": "40",
-    "vendor_id": "2542"
+    "code": "",
+    "name": "Kompor Listrik",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Kompor Listrik",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-12 22:25:46",
+    "modified_by": "0"
   },
   {
+    "id": "41",
     "product_id": "41",
-    "vendor_id": "2536"
+    "code": "",
+    "name": "Kulkas",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Kulkas",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-12 22:25:46",
+    "modified_by": "0"
   },
   {
+    "id": "42",
     "product_id": "42",
-    "vendor_id": "2580"
+    "code": "",
+    "name": "Mesin Cuci",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Mesin Cuci",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-12 22:25:46",
+    "modified_by": "0"
   },
   {
+    "id": "43",
     "product_id": "43",
-    "vendor_id": "2583"
+    "code": "",
+    "name": "Microwave",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Microwave",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-12 22:25:46",
+    "modified_by": "0"
   },
   {
+    "id": "44",
     "product_id": "44",
-    "vendor_id": "2595"
+    "code": "",
+    "name": "Mixer Kue",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Mixer Kue",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-12 22:25:46",
+    "modified_by": "0"
   },
   {
+    "id": "45",
     "product_id": "45",
-    "vendor_id": "2516"
+    "code": "",
+    "name": "Oven",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Oven",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-12 22:25:46",
+    "modified_by": "0"
   },
   {
+    "id": "46",
     "product_id": "46",
-    "vendor_id": "2534"
+    "code": "",
+    "name": "Rice Cooker",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Rice Cooker",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-12 22:25:46",
+    "modified_by": "0"
   },
   {
-    "product_id": "46",
-    "vendor_id": "2541"
-  },
-  {
+    "id": "47",
     "product_id": "47",
-    "vendor_id": "2508"
+    "code": "",
+    "name": "Setrika",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Setrika",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-12 22:25:46",
+    "modified_by": "0"
   },
   {
-    "product_id": "47",
-    "vendor_id": "4487"
-  },
-  {
+    "id": "48",
     "product_id": "48",
-    "vendor_id": "2531"
+    "code": "",
+    "name": "Toaster",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Toaster",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2023-06-20 14:44:58",
+    "modified_by": "165"
   },
   {
+    "id": "49",
     "product_id": "49",
-    "vendor_id": "2538"
+    "code": "",
+    "name": "Vacuum Cleaner",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Vacuum Cleaner",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
-    "product_id": "49",
-    "vendor_id": "2583"
-  },
-  {
+    "id": "50",
     "product_id": "50",
-    "vendor_id": "2523"
+    "code": "",
+    "name": "Layar Projector",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Layar Projector",
+    "uom_id": "38",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
+    "id": "51",
     "product_id": "51",
-    "vendor_id": "2519"
+    "code": "",
+    "name": "Mesin Fax",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Mesin Fax",
+    "uom_id": "39",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
-    "product_id": "51",
-    "vendor_id": "2544"
-  },
-  {
-    "product_id": "51",
-    "vendor_id": "4484"
-  },
-  {
+    "id": "52",
     "product_id": "52",
-    "vendor_id": "2553"
+    "code": "",
+    "name": "Mesin Hitung Uang",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Mesin Hitung Uang",
+    "uom_id": "12",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
-    "product_id": "52",
-    "vendor_id": "2585"
-  },
-  {
+    "id": "53",
     "product_id": "53",
-    "vendor_id": "2530"
+    "code": "",
+    "name": "Mesin Jilid",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Mesin Jilid",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
+    "id": "54",
     "product_id": "54",
-    "vendor_id": "2527"
+    "code": "",
+    "name": "Mesin Laminating",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Mesin Laminating",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
-    "product_id": "54",
-    "vendor_id": "2547"
-  },
-  {
+    "id": "55",
     "product_id": "55",
-    "vendor_id": "2544"
+    "code": "",
+    "name": "Mesin Penghancur Kertas",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Mesin Penghancur Kertas",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
-    "product_id": "55",
-    "vendor_id": "2542"
-  },
-  {
-    "product_id": "55",
-    "vendor_id": "2560"
-  },
-  {
+    "id": "56",
     "product_id": "56",
-    "vendor_id": "2509"
+    "code": "",
+    "name": "Projector",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Projector",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
-    "product_id": "56",
-    "vendor_id": "2589"
-  },
-  {
-    "product_id": "56",
-    "vendor_id": "4479"
-  },
-  {
+    "id": "57",
     "product_id": "57",
-    "vendor_id": "2562"
+    "code": "",
+    "name": "Printer All in One",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Printer All in One",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
-    "product_id": "57",
-    "vendor_id": "2530"
-  },
-  {
+    "id": "58",
     "product_id": "58",
-    "vendor_id": "4486"
+    "code": "",
+    "name": "Printer Barcode",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Printer Barcode",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
-    "product_id": "58",
-    "vendor_id": "2596"
-  },
-  {
-    "product_id": "58",
-    "vendor_id": "2572"
-  },
-  {
+    "id": "59",
     "product_id": "59",
-    "vendor_id": "2529"
+    "code": "",
+    "name": "Printer Dot Matrix",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Printer Dot Matrix",
+    "uom_id": "29",
+    "sap_code": "",
+    "modified_date": "2023-10-16 10:41:09",
+    "modified_by": "1075"
   },
   {
-    "product_id": "59",
-    "vendor_id": "2530"
-  },
-  {
-    "product_id": "59",
-    "vendor_id": "4488"
-  },
-  {
+    "id": "60",
     "product_id": "60",
-    "vendor_id": "2509"
+    "code": "",
+    "name": "Printer Label",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Printer Label",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
-    "product_id": "60",
-    "vendor_id": "2554"
-  },
-  {
-    "product_id": "60",
-    "vendor_id": "2541"
-  },
-  {
+    "id": "61",
     "product_id": "61",
-    "vendor_id": "2553"
+    "code": "",
+    "name": "Printer Ink Jet",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Printer Ink Jet",
+    "uom_id": "1",
+    "sap_code": "",
+    "modified_date": "2024-07-03 13:07:47",
+    "modified_by": "7"
   },
   {
-    "product_id": "61",
-    "vendor_id": "2556"
-  },
-  {
+    "id": "62",
     "product_id": "62",
-    "vendor_id": "2586"
+    "code": "",
+    "name": "Printer Laser Color",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Printer Laser Color",
+    "uom_id": "28",
+    "sap_code": "",
+    "modified_date": "2024-01-16 10:04:50",
+    "modified_by": "7"
   },
   {
-    "product_id": "62",
-    "vendor_id": "2560"
-  },
-  {
+    "id": "63",
     "product_id": "63",
-    "vendor_id": "2582"
+    "code": "",
+    "name": "Printer Laser BW",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Printer Laser BW",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
-    "product_id": "63",
-    "vendor_id": "2522"
-  },
-  {
+    "id": "64",
     "product_id": "64",
-    "vendor_id": "2572"
+    "code": "",
+    "name": "Scanner",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Scanner",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
+    "id": "65",
     "product_id": "65",
-    "vendor_id": "2577"
+    "code": "",
+    "name": "Fuser Kit",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Fuser Kit",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
-    "product_id": "65",
-    "vendor_id": "2509"
-  },
-  {
+    "id": "66",
     "product_id": "66",
-    "vendor_id": "2509"
+    "code": "",
+    "name": "Maintenance Tank",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Maintenance Tank",
+    "uom_id": "36",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
+    "id": "67",
     "product_id": "67",
-    "vendor_id": "2535"
+    "code": "",
+    "name": "Access Control Door",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Access Control Door",
+    "uom_id": "36",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
-    "product_id": "67",
-    "vendor_id": "2507"
-  },
-  {
-    "product_id": "67",
-    "vendor_id": "2558"
-  },
-  {
+    "id": "68",
     "product_id": "68",
-    "vendor_id": "2525"
+    "code": "",
+    "name": "Alarm",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Alarm",
+    "uom_id": "36",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
-    "product_id": "68",
-    "vendor_id": "2578"
-  },
-  {
+    "id": "69",
     "product_id": "69",
-    "vendor_id": "2553"
+    "code": "",
+    "name": "DVR",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "DVR",
+    "uom_id": "36",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
-    "product_id": "69",
-    "vendor_id": "2573"
-  },
-  {
+    "id": "70",
     "product_id": "70",
-    "vendor_id": "2537"
+    "code": "",
+    "name": "Camera CCTV",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Camera CCTV",
+    "uom_id": "36",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
+    "id": "71",
     "product_id": "71",
-    "vendor_id": "2558"
+    "code": "",
+    "name": "Kartu RFID",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Kartu RFID",
+    "uom_id": "36",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
+    "id": "72",
     "product_id": "72",
-    "vendor_id": "2593"
+    "code": "",
+    "name": "Metal Detector",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Metal Detector",
+    "uom_id": "36",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
-    "product_id": "72",
-    "vendor_id": "2555"
-  },
-  {
-    "product_id": "72",
-    "vendor_id": "2539"
-  },
-  {
+    "id": "73",
     "product_id": "73",
-    "vendor_id": "2513"
+    "code": "",
+    "name": "Reader RFID",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Reader RFID",
+    "uom_id": "36",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
+    "id": "74",
     "product_id": "74",
-    "vendor_id": "2595"
+    "code": "",
+    "name": "Smoke Detector",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Smoke Detector",
+    "uom_id": "36",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
-    "product_id": "74",
-    "vendor_id": "2513"
-  },
-  {
+    "id": "75",
     "product_id": "75",
-    "vendor_id": "4481"
+    "code": "",
+    "name": "Lampu Bohlam",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Lampu Bohlam",
+    "uom_id": "36",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
-    "product_id": "75",
-    "vendor_id": "2557"
-  },
-  {
+    "id": "76",
     "product_id": "76",
-    "vendor_id": "2544"
+    "code": "",
+    "name": "Fitting Lampu",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Fitting Lampu",
+    "uom_id": "36",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
+    "id": "77",
     "product_id": "77",
-    "vendor_id": "4481"
+    "code": "",
+    "name": "Lampu Darurat",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Lampu Darurat",
+    "uom_id": "36",
+    "sap_code": "",
+    "modified_date": "2022-02-15 09:54:10",
+    "modified_by": "166"
   },
   {
-    "product_id": "77",
-    "vendor_id": "2521"
-  },
-  {
+    "id": "78",
     "product_id": "78",
-    "vendor_id": "2513"
+    "code": "",
+    "name": "Senter",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Senter",
+    "uom_id": "36",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
+    "id": "79",
     "product_id": "79",
-    "vendor_id": "2593"
+    "code": "",
+    "name": "Telepon Wireless",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Telepon Wireless",
+    "uom_id": "36",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
-    "product_id": "79",
-    "vendor_id": "2574"
-  },
-  {
+    "id": "80",
     "product_id": "80",
-    "vendor_id": "2515"
+    "code": "",
+    "name": "Telepon Kabel",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Telepon Kabel",
+    "uom_id": "36",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
+    "id": "81",
     "product_id": "81",
-    "vendor_id": "2567"
+    "code": "",
+    "name": "Telepon Satelit",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Telepon Satelit",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
-    "product_id": "81",
-    "vendor_id": "2543"
-  },
-  {
+    "id": "82",
     "product_id": "82",
-    "vendor_id": "2532"
+    "code": "",
+    "name": "Walkie Talkie",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Walkie Talkie",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
-    "product_id": "82",
-    "vendor_id": "2588"
-  },
-  {
-    "product_id": "82",
-    "vendor_id": "2569"
-  },
-  {
+    "id": "83",
     "product_id": "83",
-    "vendor_id": "2587"
+    "code": "",
+    "name": "Antena TV & Parabola",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Antena TV & Parabola",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
-    "product_id": "83",
-    "vendor_id": "2569"
-  },
-  {
+    "id": "84",
     "product_id": "84",
-    "vendor_id": "2549"
+    "code": "",
+    "name": "Bracket TV",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Bracket TV",
+    "uom_id": "28",
+    "sap_code": "",
+    "modified_date": "2023-03-09 15:54:10",
+    "modified_by": "7"
   },
   {
-    "product_id": "84",
-    "vendor_id": "2551"
-  },
-  {
-    "product_id": "84",
-    "vendor_id": "2579"
-  },
-  {
+    "id": "85",
     "product_id": "85",
-    "vendor_id": "2543"
+    "code": "",
+    "name": "Remote TV",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Remote TV",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2022-07-13 13:28:18",
+    "modified_by": "7"
   },
   {
-    "product_id": "85",
-    "vendor_id": "2512"
-  },
-  {
+    "id": "86",
     "product_id": "86",
-    "vendor_id": "2551"
+    "code": "",
+    "name": "Televisi",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Televisi",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
-    "product_id": "86",
-    "vendor_id": "2595"
-  },
-  {
-    "product_id": "86",
-    "vendor_id": "2589"
-  },
-  {
+    "id": "87",
     "product_id": "87",
-    "vendor_id": "4479"
+    "code": "",
+    "name": "TV Box",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "TV Box",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2022-07-13 13:29:16",
+    "modified_by": "7"
   },
   {
-    "product_id": "87",
-    "vendor_id": "2525"
-  },
-  {
-    "product_id": "87",
-    "vendor_id": "2542"
-  },
-  {
+    "id": "88",
     "product_id": "88",
-    "vendor_id": "2543"
+    "code": "",
+    "name": "Kemeja",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Kemeja",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
-    "product_id": "88",
-    "vendor_id": "2589"
-  },
-  {
+    "id": "89",
     "product_id": "89",
-    "vendor_id": "2593"
+    "code": "",
+    "name": "Kaos",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Kaos",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
-    "product_id": "89",
-    "vendor_id": "2519"
-  },
-  {
+    "id": "90",
     "product_id": "90",
-    "vendor_id": "2508"
+    "code": "",
+    "name": "Topi",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Topi",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
+    "id": "91",
     "product_id": "91",
-    "vendor_id": "2564"
+    "code": "",
+    "name": "Kaca Mata",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Kaca Mata",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
-    "product_id": "91",
-    "vendor_id": "4481"
-  },
-  {
-    "product_id": "91",
-    "vendor_id": "2508"
-  },
-  {
+    "id": "92",
     "product_id": "92",
-    "vendor_id": "2532"
+    "code": "",
+    "name": "Sarung Tangan",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Sarung Tangan",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
-    "product_id": "92",
-    "vendor_id": "2517"
-  },
-  {
-    "product_id": "92",
-    "vendor_id": "2565"
-  },
-  {
+    "id": "93",
     "product_id": "93",
-    "vendor_id": "2594"
+    "code": "",
+    "name": "Ikat Pinggang",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Ikat Pinggang",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
+    "id": "94",
     "product_id": "94",
-    "vendor_id": "2556"
+    "code": "",
+    "name": "Jam Tangan",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Jam Tangan",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
+    "id": "95",
     "product_id": "95",
-    "vendor_id": "2527"
+    "code": "",
+    "name": "Bando",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Bando",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
-    "product_id": "95",
-    "vendor_id": "2515"
-  },
-  {
-    "product_id": "95",
-    "vendor_id": "2591"
-  },
-  {
+    "id": "96",
     "product_id": "96",
-    "vendor_id": "2519"
+    "code": "",
+    "name": "Tas",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Tas",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
+    "id": "97",
     "product_id": "97",
-    "vendor_id": "2536"
+    "code": "",
+    "name": "Dompet",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Dompet",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2023-06-02 15:32:19",
+    "modified_by": "7"
   },
   {
+    "id": "98",
     "product_id": "98",
-    "vendor_id": "2590"
+    "code": "",
+    "name": "Hand Bag",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Hand Bag",
+    "uom_id": "4",
+    "sap_code": "",
+    "modified_date": "2023-06-02 15:30:17",
+    "modified_by": "7"
   },
   {
-    "product_id": "98",
-    "vendor_id": "2540"
-  },
-  {
+    "id": "99",
     "product_id": "99",
-    "vendor_id": "2531"
+    "code": "",
+    "name": "Pouch",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Pouch",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
-    "product_id": "99",
-    "vendor_id": "4488"
-  },
-  {
+    "id": "100",
     "product_id": "100",
-    "vendor_id": "2516"
+    "code": "",
+    "name": "Sling Bag",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Sling Bag",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2022-07-28 15:22:41",
+    "modified_by": "7"
   },
   {
-    "product_id": "100",
-    "vendor_id": "2592"
-  },
-  {
-    "product_id": "100",
-    "vendor_id": "2560"
-  },
-  {
+    "id": "101",
     "product_id": "101",
-    "vendor_id": "2545"
+    "code": "",
+    "name": "Tote Bag",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Tote Bag",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   },
   {
+    "id": "102",
     "product_id": "102",
-    "vendor_id": "2551"
-  },
-  {
-    "product_id": "102",
-    "vendor_id": "2521"
-  },
-  {
-    "product_id": "102",
-    "vendor_id": "2527"
+    "code": "",
+    "name": "Waist Bag",
+    "income_tax_id": "0",
+    "income_tax_name": "",
+    "income_tax_percentage": "0",
+    "description": "Waist Bag",
+    "uom_id": "26",
+    "sap_code": "",
+    "modified_date": "2020-11-14 19:16:42",
+    "modified_by": "0"
   }
 ]

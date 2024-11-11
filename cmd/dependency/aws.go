@@ -3,7 +3,7 @@ package dependency
 import (
 	"context"
 	"kg/procurement/cmd/config"
-	"log"
+	"kg/procurement/cmd/utils"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
@@ -17,7 +17,7 @@ func NewAWSConfig(cfg config.AWS) *aws.Config {
 		awsconfig.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(cfg.AccessKey, cfg.SecretAccessKey, "")),
 	)
 	if err != nil {
-		log.Fatalf("unable to load SES configuration: %v", err)
+		utils.Logger.Fatalf("unable to load SES configuration: %v", err)
 	}
 
 	return &awsCfg

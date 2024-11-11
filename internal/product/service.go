@@ -9,7 +9,10 @@ import (
 )
 
 type productDBAccessor interface {
-	GetProductsByVendor(ctx context.Context, vendorID string, spec GetProductsByVendorSpec) (*AccessorGetProductsByVendorPaginationData, error)
+	GetProductVendorsByVendor(ctx context.Context, vendorID string, spec GetProductVendorByVendorSpec) (*AccessorGetProductVendorsByVendorPaginationData, error)
+	getProductByID(ctx context.Context, productID string) (*Product, error)
+	getPriceByPVID(ctx context.Context, pvID string) (*Price, error)
+	GetAllProductVendors(ctx context.Context, spec GetProductVendorsSpec) (*AccessorGetProductVendorsPaginationData, error)
 	UpdatePrice(ctx context.Context, price Price) (Price, error)
 	UpdateProduct(ctx context.Context, payload Product) (Product, error)
 }
@@ -18,12 +21,41 @@ type ProductService struct {
 	productDBAccessor
 }
 
-func (p *ProductService) GetProductsByVendor(
+func (p *ProductService) GetProductVendorsByVendor(
 	ctx context.Context,
 	vendorID string,
-	spec GetProductsByVendorSpec,
-) (*AccessorGetProductsByVendorPaginationData, error) {
-	return p.productDBAccessor.GetProductsByVendor(ctx, vendorID, spec)
+	spec GetProductVendorByVendorSpec,
+) (*GetProductVendorsByVendorResponse, error) {
+	res := GetProductVendorsByVendorResponse{}
+	productVendors, err := p.productDBAccessor.GetProductVendorsByVendor(ctx, vendorID, spec)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, pv := range productVendors.ProductVendors {
+		product, err := p.getProductByID(ctx, pv.ProductID)
+		if err != nil {
+			return nil, err
+		}
+
+		price, err := p.getPriceByPVID(ctx, pv.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		pvr := ToProductVendorResponse(&pv, product, price)
+		res.ProductVendors = append(res.ProductVendors, *pvr)
+	}
+
+	res.Metadata = productVendors.Metadata
+	return &res, nil
+}
+
+func (p *ProductService) GetProductVendors(
+	ctx context.Context,
+	spec GetProductVendorsSpec,
+) (*AccessorGetProductVendorsPaginationData, error) {
+	return p.productDBAccessor.GetAllProductVendors(ctx, spec)
 }
 
 func (p *ProductService) UpdateProduct(ctx context.Context, payload Product) (Product, error) {
@@ -32,6 +64,14 @@ func (p *ProductService) UpdateProduct(ctx context.Context, payload Product) (Pr
 
 func (p *ProductService) UpdatePrice(ctx context.Context, price Price) (Price, error) {
 	return p.productDBAccessor.UpdatePrice(ctx, price)
+}
+
+func (p *ProductService) getProductByID(ctx context.Context, productID string) (*Product, error) {
+	product, err := p.productDBAccessor.getProductByID(ctx, productID)
+	if err != nil {
+		return nil, err
+	}
+	return product, nil
 }
 
 func NewProductService(

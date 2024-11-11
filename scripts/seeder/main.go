@@ -6,9 +6,9 @@ import (
 	"io"
 	"kg/procurement/cmd/config"
 	"kg/procurement/cmd/dependency"
+	"kg/procurement/cmd/utils"
 	"kg/procurement/internal/product"
 	"kg/procurement/internal/vendors"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -25,6 +25,7 @@ const (
 	uomFixtureFile             = "./fixtures/product/uom.jsonc"
 	vendorFixtureFile          = "./fixtures/vendors/vendor.jsonc"
 	productVendorFixtureFile   = "./fixtures/product/product_vendor.jsonc"
+	priceFixtureFile           = "./fixtures/product/price.jsonc"
 )
 
 var (
@@ -34,7 +35,7 @@ var (
 
 func main() {
 	if len(os.Args) < 2 {
-		log.Println("Usage: go run scripts/seeder/main.go [product|product_category|product_type|uom|vendor|product_vendor].")
+		utils.Logger.Info("Usage: go run scripts/seeder/main.go [product|product_category|product_type|uom|vendor|product_vendor].")
 		return
 	}
 
@@ -56,8 +57,10 @@ func main() {
 		seedVendor(ctx)
 	case "product_vendor":
 		seedProductVendor(ctx)
+	case "price":
+		seedPrice(ctx)
 	default:
-		log.Println("Usage: go run scripts/seeder/main.go [product|product_category|product_type|uom|vendor|product_vendor].")
+		utils.Logger.Info("Usage: go run scripts/seeder/main.go [product|product_category|product_type|uom|vendor|product_vendor].")
 	}
 }
 
@@ -86,8 +89,7 @@ func seedProduct(ctx context.Context) {
 	}
 	byteValue := readBytesFromFixture(productFixtureFile)
 	if err := json.Unmarshal(byteValue, &temp); err != nil {
-		log.Println("Error unmarshalling")
-		panic(err)
+		utils.Logger.Fatalf("Error unmarshalling")
 	}
 
 	for _, tProduct := range temp {
@@ -97,7 +99,7 @@ func seedProduct(ctx context.Context) {
 	}
 
 	if err := productSeeder.SetupProducts(ctx, products); err != nil {
-		panic(err)
+		utils.Logger.Fatal(err.Error())
 	}
 }
 
@@ -111,8 +113,7 @@ func seedProductCategory(ctx context.Context) {
 	}
 	byteValue := readBytesFromFixture(productCategoryFixtureFile)
 	if err := json.Unmarshal(byteValue, &temp); err != nil {
-		log.Println("Error unmarshalling")
-		panic(err)
+		utils.Logger.Fatal("Error unmarshalling")
 	}
 
 	for _, tCategory := range temp {
@@ -122,7 +123,7 @@ func seedProductCategory(ctx context.Context) {
 	}
 
 	if err := productSeeder.SetupProductCategory(ctx, productCategory); err != nil {
-		panic(err)
+		utils.Logger.Fatal(err.Error())
 	}
 }
 
@@ -136,8 +137,7 @@ func seedProductType(ctx context.Context) {
 	}
 	byteValue := readBytesFromFixture(productTypeFixtureFile)
 	if err := json.Unmarshal(byteValue, &temp); err != nil {
-		log.Println("Error unmarshalling")
-		panic(err)
+		utils.Logger.Fatal("Error unmarshalling")
 	}
 
 	for _, tType := range temp {
@@ -147,7 +147,7 @@ func seedProductType(ctx context.Context) {
 	}
 
 	if err := productSeeder.SetupProductType(ctx, productType); err != nil {
-		panic(err)
+		utils.Logger.Fatal(err.Error())
 	}
 }
 
@@ -161,8 +161,7 @@ func seedUOM(ctx context.Context) {
 	}
 	byteValue := readBytesFromFixture(uomFixtureFile)
 	if err := json.Unmarshal(byteValue, &temp); err != nil {
-		log.Println("Error unmarshalling")
-		panic(err)
+		utils.Logger.Fatal("Error unmarshalling")
 	}
 
 	for _, tUOM := range temp {
@@ -172,7 +171,7 @@ func seedUOM(ctx context.Context) {
 	}
 
 	if err := productSeeder.SetupUOM(ctx, uoms); err != nil {
-		panic(err)
+		utils.Logger.Fatal(err.Error())
 	}
 }
 
@@ -186,8 +185,7 @@ func seedVendor(ctx context.Context) {
 	}
 	byteValue := readBytesFromFixture(vendorFixtureFile)
 	if err := json.Unmarshal(byteValue, &temp); err != nil {
-		log.Println("Error unmarshalling")
-		panic(err)
+		utils.Logger.Fatal("Error unmarshalling")
 	}
 
 	for _, tempVendor := range temp {
@@ -198,20 +196,61 @@ func seedVendor(ctx context.Context) {
 	}
 
 	if err := vendorSeeder.SetupVendors(ctx, listOfVendor); err != nil {
-		panic(err)
+		utils.Logger.Fatal(err.Error())
 	}
 }
 
 func seedProductVendor(ctx context.Context) {
 	var listOfProductVendor []product.ProductVendor
 
+	// parsing issue from data given not conforming to RFC3339 format
+	var temp []struct {
+		product.ProductVendor
+		ModifiedDate string `json:"modified_date"`
+	}
 	byteValue := readBytesFromFixture(productVendorFixtureFile)
-	if err := json.Unmarshal(byteValue, &listOfProductVendor); err != nil {
-		log.Println("Error unmarshalling")
-		panic(err)
+	if err := json.Unmarshal(byteValue, &temp); err != nil {
+		utils.Logger.Fatal("Error unmarshalling")
+	}
+
+	for _, tProductVendor := range temp {
+		pv := tProductVendor.ProductVendor
+		pv.ModifiedDate, _ = time.Parse(time.DateTime, tProductVendor.ModifiedDate)
+		listOfProductVendor = append(listOfProductVendor, pv)
 	}
 
 	if err := productSeeder.SetupProductVendor(ctx, listOfProductVendor); err != nil {
+		utils.Logger.Fatal(err.Error())
+	}
+}
+
+func seedPrice(ctx context.Context) {
+	var listOfPrice []product.Price
+
+	// parsing issue from data given not conforming to RFC3339 format
+	var temp []struct {
+		product.Price
+		ValidFrom     string `json:"valid_from"`
+		ValidTo       string `json:"valid_to"`
+		ReferenceDate string `json:"reference_date"`
+		ModifiedDate  string `json:"modified_date"`
+	}
+	byteValue := readBytesFromFixture(priceFixtureFile)
+	if err := json.Unmarshal(byteValue, &temp); err != nil {
+		utils.Logger.Fatal("Error unmarshalling")
+		panic(err)
+	}
+
+	for _, tPrice := range temp {
+		p := tPrice.Price
+		p.ValidFrom, _ = time.Parse(time.DateTime, tPrice.ValidFrom)
+		p.ValidTo, _ = time.Parse(time.DateTime, tPrice.ValidTo)
+		p.ReferenceDate, _ = time.Parse(time.DateOnly, tPrice.ReferenceDate)
+		p.ModifiedDate, _ = time.Parse(time.DateTime, tPrice.ModifiedDate)
+		listOfPrice = append(listOfPrice, p)
+	}
+
+	if err := productSeeder.SetupPrice(ctx, listOfPrice); err != nil {
 		panic(err)
 	}
 }
@@ -219,7 +258,7 @@ func seedProductVendor(ctx context.Context) {
 func readBytesFromFixture(filePath string) []byte {
 	file, err := os.Open(filepath.Clean(filePath))
 	if err != nil {
-		panic(err)
+		utils.Logger.Fatal(err.Error())
 	}
 	defer func() {
 		_ = file.Close()
@@ -227,7 +266,7 @@ func readBytesFromFixture(filePath string) []byte {
 
 	byteValue, err := io.ReadAll(file)
 	if err != nil {
-		panic(err)
+		utils.Logger.Fatal(err.Error())
 	}
 
 	// enable jsonc support, lots of editor already support it

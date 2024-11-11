@@ -2,6 +2,7 @@ package account
 
 import (
 	"context"
+	"kg/procurement/cmd/utils"
 	"kg/procurement/internal/common/database"
 
 	"github.com/benbjohnson/clock"
@@ -24,7 +25,7 @@ const (
 	findAccountByEmailQuery = `
 		SELECT id, email, password, modified_date, created_at
 		FROM account
-		WHERE email = :email
+		WHERE email = $1
 	`
 )
 
@@ -37,6 +38,7 @@ func (r *postgresAccountAccessor) RegisterAccount(ctx context.Context, account A
 	account.ModifiedDate = r.clock.Now()
 	_, err := r.db.NamedExec(insertAccountQuery, &account)
 	if err != nil {
+		utils.Logger.Error(err.Error())
 		return err
 	}
 	return nil
@@ -46,6 +48,7 @@ func (r *postgresAccountAccessor) FindAccountByEmail(ctx context.Context, email 
 	account := &Account{}
 	err := r.db.Get(account, findAccountByEmailQuery, email)
 	if err != nil {
+		utils.Logger.Error(err.Error())
 		return nil, err
 	}
 	return account, nil
