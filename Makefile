@@ -37,8 +37,8 @@ seed-price:
 seed-all: seed-product-category seed-product-type seed-uom seed-product seed-vendor seed-product-vendor seed-price
 
 migrate-up:
-	@goose -dir migrations postgres "password=postgres user=postgres port=5432 dbname=kg-procurement host=postgres-local sslmode=disable" up
+	@goose -dir migrations postgres "password=postgres user=postgres port=5434 dbname=kg-procurement host=localhost sslmode=disable" up
 migrate-down:
-	@goose -dir migrations postgres "password=postgres user=postgres port=5432 dbname=kg-procurement host=postgres-local sslmode=disable" down
+	@goose -dir migrations postgres "password=postgres user=postgres port=5434 dbname=kg-procurement host=localhost sslmode=disable" down
 migrate-status:
-	@goose -dir migrations postgres "password=postgres user=postgres port=5432 dbname=kg-procurement host=postgres-local sslmode=disable" status
+	@goose -dir migrations postgres "password=postgres user=postgres port=5434 dbname=kg-procurement host=localhost sslmode=disable" status
