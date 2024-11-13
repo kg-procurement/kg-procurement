@@ -79,10 +79,10 @@ func (c *MockproductDBAccessorGetAllProductVendorsCall) DoAndReturn(f func(conte
 }
 
 // GetProductVendorsByVendor mocks base method.
-func (m *MockproductDBAccessor) GetProductVendorsByVendor(ctx context.Context, vendorID string, spec GetProductVendorByVendorSpec) (*AccessorGetProductVendorsByVendorPaginationData, error) {
+func (m *MockproductDBAccessor) GetProductVendorsByVendor(ctx context.Context, vendorID string, spec GetProductVendorByVendorSpec) (*AccessorGetProductVendorsPaginationData, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetProductVendorsByVendor", ctx, vendorID, spec)
-	ret0, _ := ret[0].(*AccessorGetProductVendorsByVendorPaginationData)
+	ret0, _ := ret[0].(*AccessorGetProductVendorsPaginationData)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -100,19 +100,19 @@ type MockproductDBAccessorGetProductVendorsByVendorCall struct {
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockproductDBAccessorGetProductVendorsByVendorCall) Return(arg0 *AccessorGetProductVendorsByVendorPaginationData, arg1 error) *MockproductDBAccessorGetProductVendorsByVendorCall {
+func (c *MockproductDBAccessorGetProductVendorsByVendorCall) Return(arg0 *AccessorGetProductVendorsPaginationData, arg1 error) *MockproductDBAccessorGetProductVendorsByVendorCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockproductDBAccessorGetProductVendorsByVendorCall) Do(f func(context.Context, string, GetProductVendorByVendorSpec) (*AccessorGetProductVendorsByVendorPaginationData, error)) *MockproductDBAccessorGetProductVendorsByVendorCall {
+func (c *MockproductDBAccessorGetProductVendorsByVendorCall) Do(f func(context.Context, string, GetProductVendorByVendorSpec) (*AccessorGetProductVendorsPaginationData, error)) *MockproductDBAccessorGetProductVendorsByVendorCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockproductDBAccessorGetProductVendorsByVendorCall) DoAndReturn(f func(context.Context, string, GetProductVendorByVendorSpec) (*AccessorGetProductVendorsByVendorPaginationData, error)) *MockproductDBAccessorGetProductVendorsByVendorCall {
+func (c *MockproductDBAccessorGetProductVendorsByVendorCall) DoAndReturn(f func(context.Context, string, GetProductVendorByVendorSpec) (*AccessorGetProductVendorsPaginationData, error)) *MockproductDBAccessorGetProductVendorsByVendorCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
