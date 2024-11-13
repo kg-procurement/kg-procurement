@@ -467,7 +467,7 @@ func Test_GetProductVendorsByVendor(t *testing.T) {
 			WithArgs(vendorID).
 			WillReturnRows(totalRows)
 
-		expect := &AccessorGetProductVendorsByVendorPaginationData{
+		expect := &AccessorGetProductVendorsPaginationData{
 			ProductVendors: productVendors,
 			Metadata: database.PaginationMetadata{
 				TotalPage:    1,
@@ -509,7 +509,7 @@ func Test_GetProductVendorsByVendor(t *testing.T) {
 			WithArgs(vendorID, "%"+productNameList[0]+"%", "%"+productNameList[1]+"%").
 			WillReturnRows(totalRows)
 
-		expect := &AccessorGetProductVendorsByVendorPaginationData{
+		expect := &AccessorGetProductVendorsPaginationData{
 			ProductVendors: productVendors[1:],
 			Metadata: database.PaginationMetadata{
 				TotalPage:    1,
@@ -555,7 +555,7 @@ func Test_GetProductVendorsByVendor(t *testing.T) {
 			WithArgs(vendorID).
 			WillReturnRows(totalRows)
 
-		expect := &AccessorGetProductVendorsByVendorPaginationData{
+		expect := &AccessorGetProductVendorsPaginationData{
 			ProductVendors: productVendors,
 			Metadata: database.PaginationMetadata{
 				TotalPage:    1,
@@ -603,7 +603,7 @@ func Test_GetProductVendorsByVendor(t *testing.T) {
 			WithArgs(vendorID, "%"+productNameList[0]+"%", "%"+productNameList[1]+"%").
 			WillReturnRows(totalRows)
 
-		expect := &AccessorGetProductVendorsByVendorPaginationData{
+		expect := &AccessorGetProductVendorsPaginationData{
 			ProductVendors: productVendors[1:],
 			Metadata: database.PaginationMetadata{
 				TotalPage:    1,
@@ -865,28 +865,17 @@ func Test_GetAllProductVendors(t *testing.T) {
 		args           = database.BuildPaginationArgs(spec.PaginationSpec)
 		productColumns = []string{
 			"id", "product_id", "code", "name",
-			"quantity_min", "quantity_max", "currency_name",
-			"currency_code", "price", "price_quantity",
-			"vendor_id", "vendor_name", "vendor_rating",
-			"income_tax_id", "income_tax_name", "income_tax_percentage",
+			"income_tax_id", "income_tax_name",
+			"income_tax_percentage",
 			"description", "uom_id", "sap_code",
 			"modified_date", "modified_by",
 		}
-		productVendors = []GetProductVendorsDBResponse{
+		productVendors = []ProductVendor{
 			{
 				ID:                  "1",
 				ProductID:           "1",
 				Code:                "",
 				Name:                "Buku",
-				QuantityMin:         1,
-				QuantityMax:         300,
-				CurrencyName:        "Rupiah",
-				CurrencyCode:        "IDR",
-				Price:               23000,
-				PriceQuantity:       1,
-				VendorID:            "1",
-				VendorName:          "Multi Kharisma Solusindo, PT",
-				VendorRating:        -100,
 				IncomeTaxID:         "0",
 				IncomeTaxName:       "",
 				IncomeTaxPercentage: "0",
@@ -901,15 +890,6 @@ func Test_GetAllProductVendors(t *testing.T) {
 				ProductID:           "2",
 				Code:                "",
 				Name:                "Koran",
-				QuantityMin:         1,
-				QuantityMax:         4,
-				CurrencyName:        "Rupiah",
-				CurrencyCode:        "IDR",
-				Price:               290000,
-				PriceQuantity:       1,
-				VendorID:            "2",
-				VendorName:          "Toko Amazon",
-				VendorRating:        0,
 				IncomeTaxID:         "0",
 				IncomeTaxName:       "",
 				IncomeTaxPercentage: "0",
@@ -936,15 +916,6 @@ func Test_GetAllProductVendors(t *testing.T) {
 				p.ProductID,
 				p.Code,
 				p.Name,
-				p.QuantityMin,
-				p.QuantityMax,
-				p.CurrencyName,
-				p.CurrencyCode,
-				p.Price,
-				p.PriceQuantity,
-				p.VendorID,
-				p.VendorName,
-				p.VendorRating,
 				p.IncomeTaxID,
 				p.IncomeTaxName,
 				p.IncomeTaxPercentage,
@@ -1007,15 +978,6 @@ func Test_GetAllProductVendors(t *testing.T) {
 				p.ProductID,
 				p.Code,
 				p.Name,
-				p.QuantityMin,
-				p.QuantityMax,
-				p.CurrencyName,
-				p.CurrencyCode,
-				p.Price,
-				p.PriceQuantity,
-				p.VendorID,
-				p.VendorName,
-				p.VendorRating,
 				p.IncomeTaxID,
 				p.IncomeTaxName,
 				p.IncomeTaxPercentage,
@@ -1094,15 +1056,6 @@ func Test_GetAllProductVendors(t *testing.T) {
 				p.ProductID,
 				p.Code,
 				p.Name,
-				p.QuantityMin,
-				p.QuantityMax,
-				p.CurrencyName,
-				p.CurrencyCode,
-				p.Price,
-				p.PriceQuantity,
-				p.VendorID,
-				p.VendorName,
-				p.VendorRating,
 				p.IncomeTaxID,
 				p.IncomeTaxName,
 				p.IncomeTaxPercentage,
@@ -1168,15 +1121,6 @@ func Test_GetAllProductVendors(t *testing.T) {
 				p.ProductID,
 				p.Code,
 				p.Name,
-				p.QuantityMin,
-				p.QuantityMax,
-				p.CurrencyName,
-				p.CurrencyCode,
-				p.Price,
-				p.PriceQuantity,
-				p.VendorID,
-				p.VendorName,
-				p.VendorRating,
 				p.IncomeTaxID,
 				p.IncomeTaxName,
 				p.IncomeTaxPercentage,
@@ -1276,15 +1220,6 @@ func Test_GetAllProductVendors(t *testing.T) {
 				p.ProductID,
 				p.Code,
 				p.Name,
-				p.QuantityMin,
-				p.QuantityMax,
-				p.CurrencyName,
-				p.CurrencyCode,
-				p.Price,
-				p.PriceQuantity,
-				p.VendorID,
-				p.VendorName,
-				p.VendorRating,
 				p.IncomeTaxID,
 				p.IncomeTaxName,
 				p.IncomeTaxPercentage,
@@ -1296,15 +1231,6 @@ func Test_GetAllProductVendors(t *testing.T) {
 			)
 		}
 		expectedResult.AddRow(
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
 			nil,
 			nil,
 			nil,
@@ -1354,15 +1280,6 @@ func Test_GetAllProductVendors(t *testing.T) {
 				p.ProductID,
 				p.Code,
 				p.Name,
-				p.QuantityMin,
-				p.QuantityMax,
-				p.CurrencyName,
-				p.CurrencyCode,
-				p.Price,
-				p.PriceQuantity,
-				p.VendorID,
-				p.VendorName,
-				p.VendorRating,
 				p.IncomeTaxID,
 				p.IncomeTaxName,
 				p.IncomeTaxPercentage,
@@ -1410,15 +1327,6 @@ func Test_GetAllProductVendors(t *testing.T) {
 				p.ProductID,
 				p.Code,
 				p.Name,
-				p.QuantityMin,
-				p.QuantityMax,
-				p.CurrencyName,
-				p.CurrencyCode,
-				p.Price,
-				p.PriceQuantity,
-				p.VendorID,
-				p.VendorName,
-				p.VendorRating,
 				p.IncomeTaxID,
 				p.IncomeTaxName,
 				p.IncomeTaxPercentage,
@@ -1467,15 +1375,6 @@ func Test_GetAllProductVendors(t *testing.T) {
 				p.ProductID,
 				p.Code,
 				p.Name,
-				p.QuantityMin,
-				p.QuantityMax,
-				p.CurrencyName,
-				p.CurrencyCode,
-				p.Price,
-				p.PriceQuantity,
-				p.VendorID,
-				p.VendorName,
-				p.VendorRating,
 				p.IncomeTaxID,
 				p.IncomeTaxName,
 				p.IncomeTaxPercentage,
@@ -1525,15 +1424,6 @@ func Test_GetAllProductVendors(t *testing.T) {
 				p.ProductID,
 				p.Code,
 				p.Name,
-				p.QuantityMin,
-				p.QuantityMax,
-				p.CurrencyName,
-				p.CurrencyCode,
-				p.Price,
-				p.PriceQuantity,
-				p.VendorID,
-				p.VendorName,
-				p.VendorRating,
 				p.IncomeTaxID,
 				p.IncomeTaxName,
 				p.IncomeTaxPercentage,
