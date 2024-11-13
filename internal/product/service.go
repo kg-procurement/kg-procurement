@@ -11,8 +11,9 @@ import (
 
 type productDBAccessor interface {
 	getProductCategoryByID(ctx context.Context, pvID string) (*ProductCategory, error)
-	GetProductVendorsByVendor(ctx context.Context, vendorID string, spec GetProductVendorByVendorSpec) (*AccessorGetProductVendorsByVendorPaginationData, error)
+	GetProductVendorsByVendor(ctx context.Context, vendorID string, spec GetProductVendorByVendorSpec) (*AccessorGetProductVendorsPaginationData, error)
 	getProductByID(ctx context.Context, productID string) (*Product, error)
+	getPriceByPVID(ctx context.Context, pvID string) (*Price, error)
 	GetAllProductVendors(ctx context.Context, spec GetProductVendorsSpec) (*AccessorGetProductVendorsPaginationData, error)
 	UpdatePrice(ctx context.Context, price Price) (Price, error)
 	UpdateProduct(ctx context.Context, payload Product) (Product, error)
@@ -26,14 +27,33 @@ func (p *ProductService) GetProductVendorsByVendor(
 	ctx context.Context,
 	vendorID string,
 	spec GetProductVendorByVendorSpec,
-) (*GetProductVendorsByVendorResponse, error) {
-	res := GetProductVendorsByVendorResponse{}
+) (*GetProductVendorsResponse, error) {
 	productVendors, err := p.productDBAccessor.GetProductVendorsByVendor(ctx, vendorID, spec)
 	if err != nil {
 		utils.Logger.Errorf(err.Error())
 		return nil, err
 	}
 
+	return p.buildProductVendorsResponse(ctx, productVendors)
+}
+
+func (p *ProductService) GetProductVendors(
+	ctx context.Context,
+	spec GetProductVendorsSpec,
+) (*GetProductVendorsResponse, error) {
+	productVendors, err := p.productDBAccessor.GetAllProductVendors(ctx, spec)
+	if err != nil {
+		utils.Logger.Errorf(err.Error())
+		return nil, err
+	}
+	return p.buildProductVendorsResponse(ctx, productVendors)
+}
+
+func (p *ProductService) buildProductVendorsResponse(
+	ctx context.Context,
+	productVendors *AccessorGetProductVendorsPaginationData,
+) (*GetProductVendorsResponse, error) {
+	res := GetProductVendorsResponse{}
 	for _, pv := range productVendors.ProductVendors {
 		product, err := p.getProductByID(ctx, pv.ProductID)
 		if err != nil {
@@ -47,19 +67,18 @@ func (p *ProductService) GetProductVendorsByVendor(
 			return nil, err
 		}
 
-		pvr := ToProductVendorResponse(&pv, product, category)
+		price, err := p.getPriceByPVID(ctx, pv.ID)
+		if err != nil {
+			utils.Logger.Errorf(err.Error())
+			return nil, err
+		}
+
+		pvr := ToProductVendorResponse(&pv, product, price, category)
 		res.ProductVendors = append(res.ProductVendors, *pvr)
 	}
 
 	res.Metadata = productVendors.Metadata
 	return &res, nil
-}
-
-func (p *ProductService) GetProductVendors(
-	ctx context.Context,
-	spec GetProductVendorsSpec,
-) (*AccessorGetProductVendorsPaginationData, error) {
-	return p.productDBAccessor.GetAllProductVendors(ctx, spec)
 }
 
 func (p *ProductService) UpdateProduct(ctx context.Context, payload Product) (Product, error) {

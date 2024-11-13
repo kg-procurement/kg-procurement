@@ -79,10 +79,10 @@ func (c *MockproductDBAccessorGetAllProductVendorsCall) DoAndReturn(f func(conte
 }
 
 // GetProductVendorsByVendor mocks base method.
-func (m *MockproductDBAccessor) GetProductVendorsByVendor(ctx context.Context, vendorID string, spec GetProductVendorByVendorSpec) (*AccessorGetProductVendorsByVendorPaginationData, error) {
+func (m *MockproductDBAccessor) GetProductVendorsByVendor(ctx context.Context, vendorID string, spec GetProductVendorByVendorSpec) (*AccessorGetProductVendorsPaginationData, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetProductVendorsByVendor", ctx, vendorID, spec)
-	ret0, _ := ret[0].(*AccessorGetProductVendorsByVendorPaginationData)
+	ret0, _ := ret[0].(*AccessorGetProductVendorsPaginationData)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -100,19 +100,19 @@ type MockproductDBAccessorGetProductVendorsByVendorCall struct {
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockproductDBAccessorGetProductVendorsByVendorCall) Return(arg0 *AccessorGetProductVendorsByVendorPaginationData, arg1 error) *MockproductDBAccessorGetProductVendorsByVendorCall {
+func (c *MockproductDBAccessorGetProductVendorsByVendorCall) Return(arg0 *AccessorGetProductVendorsPaginationData, arg1 error) *MockproductDBAccessorGetProductVendorsByVendorCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockproductDBAccessorGetProductVendorsByVendorCall) Do(f func(context.Context, string, GetProductVendorByVendorSpec) (*AccessorGetProductVendorsByVendorPaginationData, error)) *MockproductDBAccessorGetProductVendorsByVendorCall {
+func (c *MockproductDBAccessorGetProductVendorsByVendorCall) Do(f func(context.Context, string, GetProductVendorByVendorSpec) (*AccessorGetProductVendorsPaginationData, error)) *MockproductDBAccessorGetProductVendorsByVendorCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockproductDBAccessorGetProductVendorsByVendorCall) DoAndReturn(f func(context.Context, string, GetProductVendorByVendorSpec) (*AccessorGetProductVendorsByVendorPaginationData, error)) *MockproductDBAccessorGetProductVendorsByVendorCall {
+func (c *MockproductDBAccessorGetProductVendorsByVendorCall) DoAndReturn(f func(context.Context, string, GetProductVendorByVendorSpec) (*AccessorGetProductVendorsPaginationData, error)) *MockproductDBAccessorGetProductVendorsByVendorCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -191,6 +191,45 @@ func (c *MockproductDBAccessorUpdateProductCall) Do(f func(context.Context, Prod
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockproductDBAccessorUpdateProductCall) DoAndReturn(f func(context.Context, Product) (Product, error)) *MockproductDBAccessorUpdateProductCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// getPriceByPVID mocks base method.
+func (m *MockproductDBAccessor) getPriceByPVID(ctx context.Context, pvID string) (*Price, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "getPriceByPVID", ctx, pvID)
+	ret0, _ := ret[0].(*Price)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// getPriceByPVID indicates an expected call of getPriceByPVID.
+func (mr *MockproductDBAccessorMockRecorder) getPriceByPVID(ctx, pvID any) *MockproductDBAccessorgetPriceByPVIDCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "getPriceByPVID", reflect.TypeOf((*MockproductDBAccessor)(nil).getPriceByPVID), ctx, pvID)
+	return &MockproductDBAccessorgetPriceByPVIDCall{Call: call}
+}
+
+// MockproductDBAccessorgetPriceByPVIDCall wrap *gomock.Call
+type MockproductDBAccessorgetPriceByPVIDCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockproductDBAccessorgetPriceByPVIDCall) Return(arg0 *Price, arg1 error) *MockproductDBAccessorgetPriceByPVIDCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockproductDBAccessorgetPriceByPVIDCall) Do(f func(context.Context, string) (*Price, error)) *MockproductDBAccessorgetPriceByPVIDCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockproductDBAccessorgetPriceByPVIDCall) DoAndReturn(f func(context.Context, string) (*Price, error)) *MockproductDBAccessorgetPriceByPVIDCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
