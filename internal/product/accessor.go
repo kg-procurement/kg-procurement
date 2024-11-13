@@ -84,43 +84,26 @@ const (
 
 	getProductVendorsQuery = `
 		SELECT 
-			pv.id, 
-			pv.product_id, 
-			pv.code, 
-			pv.name, 
-			pr.quantity_min, 
-			pr.quantity_max, 
-			pr.currency_name, 
-			pr.currency_code, 
-			pr.price, 
-			pr.price_quantity,
-			v.id AS vendor_id,
-			v.name AS vendor_name, 
-			v.rating AS vendor_rating,
-			pv.income_tax_id, 
-			pv.income_tax_name, 
-			pv.income_tax_percentage, 
-			pv.description, 
-			pv.uom_id, 
-			pv.sap_code, 
-			pv.modified_date, 
+			pv.id,
+			pv.product_id,
+			pv.code,
+			pv.name,
+			pv.income_tax_id,
+			pv.income_tax_name,
+			pv.income_tax_percentage,
+			pv.description,
+			pv.uom_id,
+			pv.sap_code,
+			pv.modified_date,
 			pv.modified_by
 		FROM 
 			product_vendor pv
-		JOIN 
-			price pr ON pr.product_vendor_id = pv.id
-		JOIN 
-			vendor v ON pr.vendor_id = v.id
 	`
 	countProductVendorsQuery = `
 		SELECT 
 			COUNT(*)
 		FROM 
 			product_vendor pv
-		JOIN 
-			price pr ON pr.product_vendor_id = pv.id
-		JOIN 
-			vendor v ON pr.vendor_id = v.id
 	`
 )
 
@@ -130,11 +113,6 @@ type postgresProductAccessor struct {
 }
 
 type AccessorGetProductVendorsPaginationData struct {
-	ProductVendors []GetProductVendorsDBResponse `json:"product_vendors"`
-	Metadata       database.PaginationMetadata   `json:"metadata"`
-}
-
-type AccessorGetProductVendorsByVendorPaginationData struct {
 	ProductVendors []ProductVendor             `json:"product_vendors"`
 	Metadata       database.PaginationMetadata `json:"metadata"`
 }
@@ -143,7 +121,7 @@ func (p *postgresProductAccessor) GetProductVendorsByVendor(
 	_ context.Context,
 	vendorID string,
 	spec GetProductVendorByVendorSpec,
-) (*AccessorGetProductVendorsByVendorPaginationData, error) {
+) (*AccessorGetProductVendorsPaginationData, error) {
 	paginationArgs := database.BuildPaginationArgs(spec.PaginationSpec)
 
 	// Initialize clauses and arguments
@@ -238,7 +216,7 @@ func (p *postgresProductAccessor) GetProductVendorsByVendor(
 		return nil, fmt.Errorf("failed to execute count query: %w", err)
 	}
 
-	return &AccessorGetProductVendorsByVendorPaginationData{
+	return &AccessorGetProductVendorsPaginationData{
 		ProductVendors: res,
 		Metadata:       database.GeneratePaginationMetadata(spec.PaginationSpec, totalEntries),
 	}, nil
@@ -302,10 +280,10 @@ func (p *postgresProductAccessor) GetAllProductVendors(
 	}
 	defer rows.Close()
 
-	res := []GetProductVendorsDBResponse{}
+	res := []ProductVendor{}
 
 	for rows.Next() {
-		var product GetProductVendorsDBResponse
+		var product ProductVendor
 		if err := rows.StructScan(&product); err != nil {
 			utils.Logger.Error(err.Error())
 			return nil, err
