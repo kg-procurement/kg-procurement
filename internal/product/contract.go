@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type GetProductVendorsByVendorResponse struct {
+type GetProductVendorsResponse struct {
 	ProductVendors []ProductVendorResponse     `json:"product_vendors"`
 	Metadata       database.PaginationMetadata `json:"metadata"`
 }
@@ -39,6 +39,8 @@ func newProductResponseFromProduct(product *Product) *ProductResponse {
 type PriceResponse struct {
 	ID           string    `json:"id"`
 	Price        float64   `json:"price"`
+	CurrencyCode string    `json:"currency_code"`
+	VendorID     string    `json:"vendor_id"`
 	ModifiedDate time.Time `json:"modified_date"`
 	ModifiedBy   string    `json:"modified_by"`
 }
@@ -47,6 +49,8 @@ func newPriceResponseFromPrice(price *Price) *PriceResponse {
 	return &PriceResponse{
 		ID:           price.ID,
 		Price:        price.Price,
+		CurrencyCode: price.CurrencyCode,
+		VendorID:     price.VendorID,
 		ModifiedDate: price.ModifiedDate,
 		ModifiedBy:   price.ModifiedBy,
 	}
