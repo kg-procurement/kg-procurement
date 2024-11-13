@@ -47,18 +47,6 @@ func (p *ProductService) GetProductVendors(
 	return p.buildProductVendorsResponse(ctx, productVendors)
 }
 
-func (p *ProductService) GetProductVendors(
-	ctx context.Context,
-	spec GetProductVendorsSpec,
-) (*GetProductVendorsResponse, error) {
-	productVendors, err := p.productDBAccessor.GetAllProductVendors(ctx, spec)
-	if err != nil {
-		utils.Logger.Errorf(err.Error())
-		return nil, err
-	}
-	return p.buildProductVendorsResponse(ctx, productVendors)
-}
-
 func (p *ProductService) buildProductVendorsResponse(
 	ctx context.Context,
 	productVendors *AccessorGetProductVendorsPaginationData,
