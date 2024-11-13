@@ -33,7 +33,17 @@ func (p *ProductService) GetProductVendorsByVendor(
 		utils.Logger.Errorf(err.Error())
 		return nil, err
 	}
+	return p.buildProductVendorsResponse(ctx, productVendors)
+}
 
+func (p *ProductService) GetProductVendors(
+	ctx context.Context,
+	spec GetProductVendorsSpec,
+) (*GetProductVendorsResponse, error) {
+	productVendors, err := p.productDBAccessor.GetAllProductVendors(ctx, spec)
+	if err != nil {
+		return nil, err
+	}
 	return p.buildProductVendorsResponse(ctx, productVendors)
 }
 
@@ -74,6 +84,7 @@ func (p *ProductService) buildProductVendorsResponse(
 		}
 
 		pvr := ToProductVendorResponse(&pv, product, price, category)
+    
 		res.ProductVendors = append(res.ProductVendors, *pvr)
 	}
 

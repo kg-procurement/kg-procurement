@@ -23,7 +23,7 @@ const (
 		FROM product_category
 		WHERE id = $1
 	`
-	
+  
 	getProductByIDQuery = `SELECT * FROM product WHERE id = $1`
 	getPriceByPVIDQuery = `
 		SELECT pr.*

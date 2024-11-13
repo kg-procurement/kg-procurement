@@ -198,7 +198,7 @@ func TestProductService_GetProductVendorsByVendor(t *testing.T) {
 		g.Expect(res).To(gomega.BeNil())
 		g.Expect(err).ShouldNot(gomega.BeNil())
 	})
-
+  
 	t.Run("returns err on product category accessor error", func(t *testing.T) {
 		var (
 			g                   = gomega.NewWithT(t)

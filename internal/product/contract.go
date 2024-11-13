@@ -91,7 +91,6 @@ type ProductVendorResponse struct {
 	ModifiedBy          string          `json:"modified_by"`
 }
 
-
 func ToProductVendorResponse(pv *ProductVendor, p *Product, pr *Price, pc *ProductCategory) *ProductVendorResponse {
 	productResponse := newProductResponseFromProduct(p, pc)
 	priceResponse := newPriceResponseFromPrice(pr)
