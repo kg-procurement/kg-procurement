@@ -287,6 +287,8 @@ func TestProductService_GetProductVendors(t *testing.T) {
 			Metadata: metadata,
 		}
 
+		mockProductAccessor.EXPECT().getProductCategoryByID(ctx, gomock.Any()).
+			Return(&ProductCategory{}, nil).AnyTimes()
 		mockProductAccessor.EXPECT().getPriceByPVID(ctx, gomock.Any()).
 			Return(&Price{}, nil).AnyTimes()
 		mockProductAccessor.EXPECT().getProductByID(ctx, gomock.Any()).
@@ -337,7 +339,9 @@ func TestProductService_GetProductVendors(t *testing.T) {
 			},
 			Metadata: metadata,
 		}
-
+		
+		mockProductAccessor.EXPECT().getProductCategoryByID(ctx, gomock.Any()).
+			Return(&ProductCategory{}, nil).AnyTimes()
 		mockProductAccessor.EXPECT().getPriceByPVID(ctx, gomock.Any()).
 			Return(&Price{}, nil).AnyTimes()
 		mockProductAccessor.EXPECT().getProductByID(ctx, gomock.Any()).
@@ -400,6 +404,8 @@ func TestProductService_GetProductVendors(t *testing.T) {
 			Metadata: metadata,
 		}
 
+		mockProductAccessor.EXPECT().getProductCategoryByID(ctx, gomock.Any()).
+			Return(&ProductCategory{}, nil).AnyTimes()
 		mockProductAccessor.EXPECT().getPriceByPVID(ctx, gomock.Any()).
 			Return(&Price{}, nil).AnyTimes()
 		mockProductAccessor.EXPECT().getProductByID(ctx, gomock.Any()).
@@ -425,6 +431,8 @@ func TestProductService_GetProductVendors(t *testing.T) {
 			mockProductAccessor,
 		}
 
+		mockProductAccessor.EXPECT().getProductCategoryByID(ctx, gomock.Any()).
+			Return(&ProductCategory{}, nil).AnyTimes()
 		mockProductAccessor.EXPECT().getPriceByPVID(ctx, gomock.Any()).
 			Return(&Price{}, nil).AnyTimes()
 		mockProductAccessor.EXPECT().getProductByID(ctx, gomock.Any()).
