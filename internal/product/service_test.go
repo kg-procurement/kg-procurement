@@ -216,8 +216,6 @@ func TestProductService_GetProductVendorsByVendor(t *testing.T) {
 			Return(&Product{}, nil)
 		mockProductAccessor.EXPECT().getProductCategoryByID(ctx, gomock.Any()).
 			Return(nil, errors.New("error"))
-		mockProductAccessor.EXPECT().getPriceByPVID(ctx, gomock.Any()).
-			Return(&Price{}, nil)
 		mockProductAccessor.EXPECT().GetProductVendorsByVendor(ctx, vendorID, spec).
 			Return(accessorResponse, nil)
 
