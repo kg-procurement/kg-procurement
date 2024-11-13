@@ -671,9 +671,10 @@ func Test_postgresVendorAccessor_GetAll_WithLocationAndProduct(t *testing.T) {
 			v.modified_by,
 			v.dt
 		FROM vendor v
-		JOIN product_vendor pv ON pv.vendor_id = v.id
+		JOIN price pr ON pr.vendor_id = v.id
+		JOIN product_vendor pv ON pv.id = pr.product_vendor_id
 		JOIN product p ON p.id = pv.product_id
-		WHERE area_group_name = $1 AND p.name iLIKE $2 AND p.name iLIKE $3
+		WHERE v.area_group_name = $1 AND p.name iLIKE $2 AND p.name iLIKE $3
 		ORDER BY v.dt %s
 		LIMIT $4
 		OFFSET $5
@@ -793,7 +794,7 @@ func Test_postgresVendorAccessor_GetAll_WithLocationAndProduct(t *testing.T) {
 				v.modified_by,
 				v.dt
 			FROM vendor v
-			WHERE area_group_name = $1
+			WHERE v.area_group_name = $1
 			ORDER BY v.dt DESC
 			LIMIT $2
 			OFFSET $3
@@ -880,7 +881,8 @@ func Test_postgresVendorAccessor_GetAll_WithLocationAndProduct(t *testing.T) {
 				v.modified_by,
 				v.dt
 			FROM vendor v
-			JOIN product_vendor pv ON pv.vendor_id = v.id
+			JOIN price pr ON pr.vendor_id = v.id
+			JOIN product_vendor pv ON pv.id = pr.product_vendor_id
 			JOIN product p ON p.id = pv.product_id
 			WHERE p.name iLIKE $1 AND p.name iLIKE $2
 			ORDER BY v.dt DESC
