@@ -17,7 +17,13 @@ const (
 		FROM product_vendor pv
 		JOIN price pr ON pr.product_vendor_id = pv.id
 		WHERE pr.vendor_id = $1
+	`	
+	getProductCategoryByIDQuery = `
+		SELECT *
+		FROM product_category
+		WHERE id = $1
 	`
+  
 	getProductByIDQuery = `SELECT * FROM product WHERE id = $1`
 	getPriceByPVIDQuery = `
 		SELECT pr.*
@@ -336,6 +342,17 @@ func (p *postgresProductAccessor) getProductByID(_ context.Context, productID st
 	rows := p.db.QueryRowx(getProductByIDQuery, productID)
 	res := Product{}
 	if err := rows.StructScan(&res); err != nil {
+		utils.Logger.Errorf(err.Error())
+		return nil, err
+	}
+	return &res, nil
+}
+
+func (p *postgresProductAccessor) getProductCategoryByID(_ context.Context, productCategoryID string) (*ProductCategory, error) {
+	rows := p.db.QueryRowx(getProductCategoryByIDQuery, productCategoryID)
+	res := ProductCategory{}
+	if err := rows.StructScan(&res); err != nil {
+		utils.Logger.Errorf(err.Error())
 		return nil, err
 	}
 	return &res, nil

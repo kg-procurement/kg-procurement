@@ -4,11 +4,13 @@ package product
 import (
 	"context"
 	"kg/procurement/internal/common/database"
+	"kg/procurement/cmd/utils"
 
 	"github.com/benbjohnson/clock"
 )
 
 type productDBAccessor interface {
+	getProductCategoryByID(ctx context.Context, pvID string) (*ProductCategory, error)
 	GetProductVendorsByVendor(ctx context.Context, vendorID string, spec GetProductVendorByVendorSpec) (*AccessorGetProductVendorsPaginationData, error)
 	getProductByID(ctx context.Context, productID string) (*Product, error)
 	getPriceByPVID(ctx context.Context, pvID string) (*Price, error)
@@ -28,6 +30,7 @@ func (p *ProductService) GetProductVendorsByVendor(
 ) (*GetProductVendorsResponse, error) {
 	productVendors, err := p.productDBAccessor.GetProductVendorsByVendor(ctx, vendorID, spec)
 	if err != nil {
+		utils.Logger.Errorf(err.Error())
 		return nil, err
 	}
 	return p.buildProductVendorsResponse(ctx, productVendors)
@@ -52,15 +55,24 @@ func (p *ProductService) buildProductVendorsResponse(
 	for _, pv := range productVendors.ProductVendors {
 		product, err := p.getProductByID(ctx, pv.ProductID)
 		if err != nil {
+			utils.Logger.Errorf(err.Error())
+			return nil, err
+		}
+
+		category, err := p.getProductCategoryByID(ctx, product.ProductCategoryID)
+		if err != nil {
+			utils.Logger.Errorf(err.Error())
 			return nil, err
 		}
 
 		price, err := p.getPriceByPVID(ctx, pv.ID)
 		if err != nil {
+			utils.Logger.Errorf(err.Error())
 			return nil, err
 		}
 
-		pvr := ToProductVendorResponse(&pv, product, price)
+		pvr := ToProductVendorResponse(&pv, product, price, category)
+    
 		res.ProductVendors = append(res.ProductVendors, *pvr)
 	}
 
@@ -79,6 +91,7 @@ func (p *ProductService) UpdatePrice(ctx context.Context, price Price) (Price, e
 func (p *ProductService) getProductByID(ctx context.Context, productID string) (*Product, error) {
 	product, err := p.productDBAccessor.getProductByID(ctx, productID)
 	if err != nil {
+		utils.Logger.Errorf(err.Error())
 		return nil, err
 	}
 	return product, nil
