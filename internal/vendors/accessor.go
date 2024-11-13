@@ -83,14 +83,15 @@ func (p *postgresVendorAccessor) GetAll(ctx context.Context, spec GetAllVendorSp
 
 	// Build WHERE clause for location
 	if spec.Location != "" {
-		whereClauses = append(whereClauses, fmt.Sprintf("area_group_name = $%d", argsIndex))
+		whereClauses = append(whereClauses, fmt.Sprintf("v.area_group_name = $%d", argsIndex))
 		args = append(args, spec.Location)
 		argsIndex++
 	}
 
 	// Build JOIN and WHERE clauses for product
 	if spec.Product != "" {
-		joinClauses = append(joinClauses, "JOIN product_vendor pv ON pv.vendor_id = v.id")
+		joinClauses = append(joinClauses, "JOIN price pr ON pr.vendor_id = v.id")
+		joinClauses = append(joinClauses, "JOIN product_vendor pv ON pv.id = pr.product_vendor_id")
 		joinClauses = append(joinClauses, "JOIN product p ON p.id = pv.product_id")
 
 		productNameList := strings.Fields(spec.Product)
