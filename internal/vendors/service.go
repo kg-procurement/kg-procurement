@@ -107,6 +107,7 @@ func (v *VendorService) BlastEmail(ctx context.Context, vendorIDs []string, temp
 }
 
 func (v *VendorService) AutomatedEmailBlast(ctx context.Context, productName string) ([]string, error) {
+<<<<<<< Updated upstream
 	return v.vendorDBAccessor.getAllVendorIdByProductName(ctx, productName)
 }
 
@@ -117,6 +118,14 @@ func (*VendorService) applyDefaultEmailTemplate(template *emailTemplate) {
 	if template.Body == "" {
 		template.Body = "Kepada Yth {{name}},\n\nKami mengajukan permintaan untuk pengadaan produk tertentu yang dibutuhkan oleh perusahaan kami. Mohon informasi mengenai ketersediaan, harga, dan waktu pengiriman untuk produk tersebut.\n\nTerima kasih atas perhatian dan kerjasamanya.\n\nHormat kami"
 	}
+=======
+	vendorIds, err := v.vendorDBAccessor.getAllVendorIdByProductName(ctx, productName)
+	if err != nil {
+		return nil, err
+	}
+
+	errCh := make(chan error, len(vendorIds))
+>>>>>>> Stashed changes
 }
 
 func NewVendorService(
