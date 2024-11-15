@@ -57,59 +57,7 @@ func (v *VendorService) BlastEmail(ctx context.Context, vendorIDs []string, temp
 
 	v.applyDefaultEmailTemplate(&template)
 
-	errCh := make(chan error, len(vendors))
-	defer close(errCh)
-
-	// limit the number of concurrent workers to 20
-	workerLimit := 20
-	sem := make(chan struct{}, workerLimit)
-
-	var wg sync.WaitGroup
-
-	for _, vendor := range vendors {
-		wg.Add(1)
-
-		sem <- struct{}{}
-
-		go func(vendor Vendor) {
-			defer wg.Done()
-
-			templateCopy := template
-
-			// replaces {{name}} keyword to vendor name
-			replacements := map[string]string{
-				"{{name}}": vendor.Name,
-			}
-
-			templateCopy.Body = mailer.ReplacePlaceholder(templateCopy.Body, replacements)
-
-			err := v.smtpProvider.SendEmail(mailer.Email{
-				From:    v.cfg.SMTP.AuthEmail,
-				To:      []string{vendor.Email},
-				Subject: templateCopy.Subject,
-				Body:    templateCopy.Body,
-			})
-			errCh <- err
-
-			<-sem
-		}(vendor)
-	}
-	wg.Wait()
-
-	var errList []string
-	for i := 0; i < len(vendors); i++ {
-		if err := <-errCh; err != nil {
-			utils.Logger.Errorf("fail sending email %v", err)
-			errList = append(errList, err.Error())
-		}
-	}
-
-	if len(errList) > 0 {
-		utils.Logger.Error("fail sending emails")
-		return errList, fmt.Errorf("fail sending emails")
-	}
-
-	return nil, nil
+	return v.executeBlastEmail(vendors, template)
 }
 
 func (v *VendorService) AutomatedEmailBlast(ctx context.Context, productName string) ([]string, error) {
@@ -121,7 +69,25 @@ func (v *VendorService) AutomatedEmailBlast(ctx context.Context, productName str
 
 	template := &emailTemplate{}
 	v.applyDefaultEmailTemplate(template)
+	replacements := map[string]string{
+		"{{product_name}}": productName,
+	}
 
+	template.Body = mailer.ReplacePlaceholder(template.Body, replacements)
+
+	return v.executeBlastEmail(vendors, *template)
+}
+
+func (*VendorService) applyDefaultEmailTemplate(template *emailTemplate) {
+	if template.Subject == "" {
+		template.Subject = "Request for products"
+	}
+	if template.Body == "" {
+		template.Body = "Kepada Yth {{name}},\n\nKami mengajukan permintaan untuk pengadaan produk {{product_name}} yang dibutuhkan oleh perusahaan kami. Mohon informasi mengenai ketersediaan, harga, dan waktu pengiriman untuk produk tersebut.\n\nTerima kasih atas perhatian dan kerjasamanya.\n\nHormat kami"
+	}
+}
+
+func (v *VendorService) executeBlastEmail(vendors []Vendor, template emailTemplate) ([]string, error) {
 	errCh := make(chan error, len(vendors))
 	defer close(errCh)
 
@@ -139,20 +105,18 @@ func (v *VendorService) AutomatedEmailBlast(ctx context.Context, productName str
 		go func(vendor Vendor) {
 			defer wg.Done()
 
-			templateCopy := *template
-
+			// replaces {{name}} keyword to vendor name
 			replacements := map[string]string{
-				"{{name}}":         vendor.Name,
-				"{{product_name}}": productName,
+				"{{name}}": vendor.Name,
 			}
 
-			templateCopy.Body = mailer.ReplacePlaceholder(templateCopy.Body, replacements)
+			templateBody := mailer.ReplacePlaceholder(template.Body, replacements)
 
 			err := v.smtpProvider.SendEmail(mailer.Email{
 				From:    v.cfg.SMTP.AuthEmail,
-				To:      []string{vendor.Email},
-				Subject: templateCopy.Subject,
-				Body:    templateCopy.Body,
+				To:      []string{"v.apriady@gmail.com"},
+				Subject: template.Subject,
+				Body:    templateBody,
 			})
 			errCh <- err
 
@@ -175,15 +139,6 @@ func (v *VendorService) AutomatedEmailBlast(ctx context.Context, productName str
 	}
 
 	return nil, nil
-}
-
-func (*VendorService) applyDefaultEmailTemplate(template *emailTemplate) {
-	if template.Subject == "" {
-		template.Subject = "Request for products"
-	}
-	if template.Body == "" {
-		template.Body = "Kepada Yth {{name}},\n\nKami mengajukan permintaan untuk pengadaan produk {{product_name}} yang dibutuhkan oleh perusahaan kami. Mohon informasi mengenai ketersediaan, harga, dan waktu pengiriman untuk produk tersebut.\n\nTerima kasih atas perhatian dan kerjasamanya.\n\nHormat kami"
-	}
 }
 
 func NewVendorService(
