@@ -14,7 +14,7 @@ import (
 )
 
 func Test_NewVendorService(t *testing.T) {
-	_ = NewVendorService(config.Application{}, nil, nil, nil)
+	_ = NewVendorService(config.Application{}, nil, nil, nil, nil)
 }
 
 func TestVendorService_GetAll(t *testing.T) {
@@ -369,6 +369,7 @@ func TestVendorService_BlastEmail(t *testing.T) {
 	var (
 		mockVendorAccessor *MockvendorDBAccessor
 		mockEmailProvider  *mailer.MockEmailProvider
+		mockEmailStatusSvc *MockemailStatusSvc
 		subject            *VendorService
 	)
 
@@ -376,10 +377,13 @@ func TestVendorService_BlastEmail(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		mockVendorAccessor = NewMockvendorDBAccessor(ctrl)
 		mockEmailProvider = mailer.NewMockEmailProvider(ctrl)
+		mockEmailStatusSvc = NewMockemailStatusSvc(ctrl)
+
 		subject = &VendorService{
 			cfg:              config.Application{},
 			vendorDBAccessor: mockVendorAccessor,
 			smtpProvider:     mockEmailProvider,
+			emailStatusSvc:   mockEmailStatusSvc,
 		}
 
 		return gomega.NewWithT(t)
@@ -409,6 +413,11 @@ func TestVendorService_BlastEmail(t *testing.T) {
 
 		mockEmailProvider.EXPECT().
 			SendEmail(gomock.Any()).
+			Return(nil).
+			Times(2)
+
+		mockEmailStatusSvc.EXPECT().
+			WriteEmailStatus(ctx, gomock.Any()).
 			Return(nil).
 			Times(2)
 
@@ -453,6 +462,11 @@ func TestVendorService_BlastEmail(t *testing.T) {
 		mockEmailProvider.EXPECT().
 			SendEmail(gomock.Any()).
 			Return(nil)
+
+		mockEmailStatusSvc.EXPECT().
+			WriteEmailStatus(ctx, gomock.Any()).
+			Return(nil).
+			Times(2)
 
 		errList, err := subject.BlastEmail(ctx, vendorIDs, emailTemplate{
 			Subject: "test",
