@@ -1,4 +1,4 @@
-package account
+package helper
 
 import (
 	"crypto/rand"
@@ -8,7 +8,7 @@ import (
 
 const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
-func generateRandomID() (string, error) {
+func GenerateRandomID() (string, error) {
 	var result strings.Builder
 	length := 15
 
