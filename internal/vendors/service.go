@@ -90,11 +90,7 @@ func (v *VendorService) BlastEmail(ctx context.Context, vendorIDs []string, temp
 
 			sendErr := v.smtpProvider.SendEmail(email)
 
-			id, err := helper.GenerateRandomID()
-			if err != nil {
-				utils.Logger.Errorf("failed to generate random ID: %v", err)
-			}
-
+			id, _ := helper.GenerateRandomID()
 			emailStatus := mailer.EmailStatus{
 				ID:           id,
 				EmailTo:      vendor.Email,

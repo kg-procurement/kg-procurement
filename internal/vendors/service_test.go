@@ -475,6 +475,35 @@ func TestVendorService_BlastEmail(t *testing.T) {
 		g.Expect(err).ToNot(gomega.BeNil())
 		g.Expect(errList).To(gomega.HaveLen(1))
 	})
+
+	t.Run("error writing email status", func(t *testing.T) {
+		g := setup(t)
+		ctx := context.Background()
+
+		vendorIDs := []string{"1111", "2222"}
+		mockVendorAccessor.EXPECT().
+			BulkGetByIDs(ctx, vendorIDs).
+			Return(vendors, nil)
+
+		mockEmailProvider.EXPECT().
+			SendEmail(gomock.Any()).
+			Return(nil).
+			Times(2)
+
+		// simulate error when inserting to email_status
+		mockEmailStatusSvc.EXPECT().
+			WriteEmailStatus(ctx, gomock.Any()).
+			Return(errors.New("write error")).
+			Times(2)
+
+		errList, err := subject.BlastEmail(ctx, vendorIDs, emailTemplate{
+			Subject: "Test Subject",
+			Body:    "Test Body",
+		})
+
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(errList).To(gomega.BeNil())
+	})
 }
 
 func TestVendorService_AutomatedBlastEmail(t *testing.T) {
