@@ -7,9 +7,11 @@ import (
 	"kg/procurement/cmd/config"
 	"kg/procurement/cmd/utils"
 	"kg/procurement/internal/common/database"
+	"kg/procurement/internal/common/helper"
 	"kg/procurement/internal/mailer"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/benbjohnson/clock"
 )
@@ -24,14 +26,15 @@ type vendorDBAccessor interface {
 	getAllVendorIdByProductName(ctx context.Context, productName string) ([]string, error)
 }
 
+type emailStatusSvc interface {
+	WriteEmailStatus(ctx context.Context, status mailer.EmailStatus) error
+}
+
 type VendorService struct {
 	cfg config.Application
 	vendorDBAccessor
-	smtpProvider mailer.EmailProvider
-}
-
-func (v *VendorService) GetSomeStuff(ctx context.Context) ([]string, error) {
-	return v.vendorDBAccessor.GetSomeStuff(ctx)
+	smtpProvider   mailer.EmailProvider
+	emailStatusSvc emailStatusSvc
 }
 
 func (v *VendorService) GetById(ctx context.Context, id string) (*Vendor, error) {
@@ -59,9 +62,9 @@ func (v *VendorService) BlastEmail(ctx context.Context, vendorIDs []string, temp
 	v.applyDefaultEmailTemplate(&template)
 
 	errCh := make(chan error, len(vendors))
-	defer close(errCh)
+	statusCh := make(chan mailer.EmailStatus, len(vendors))
 
-	// limit the number of concurrent workers to 20
+	// Limit the number of concurrent workers to 20
 	workerLimit := 20
 	sem := make(chan struct{}, workerLimit)
 
@@ -74,33 +77,61 @@ func (v *VendorService) BlastEmail(ctx context.Context, vendorIDs []string, temp
 
 		go func(vendor Vendor) {
 			defer wg.Done()
+			defer func() { <-sem }() // release the semaphore slot
 
 			// replaces {{name}} keyword to vendor name
 			bodyWithVendorName := strings.Replace(template.Body, "{{name}}", vendor.Name, -1)
-			err := v.smtpProvider.SendEmail(mailer.Email{
+			email := mailer.Email{
 				From:    v.cfg.SMTP.AuthEmail,
 				To:      []string{vendor.Email},
 				Subject: template.Subject,
 				Body:    bodyWithVendorName,
-			})
-			errCh <- err
+			}
 
-			<-sem
+			sendErr := v.smtpProvider.SendEmail(email)
+
+			id, _ := helper.GenerateRandomID()
+			emailStatus := mailer.EmailStatus{
+				ID:           id,
+				EmailTo:      vendor.Email,
+				ModifiedDate: time.Now(),
+			}
+
+			if sendErr != nil {
+				emailStatus.Status = "failed"
+				errCh <- sendErr
+			} else {
+				emailStatus.Status = "success"
+				errCh <- nil
+			}
+
+			statusCh <- emailStatus
 		}(vendor)
 	}
+
 	wg.Wait()
+	close(errCh)
+	close(statusCh)
 
 	var errList []string
-	for i := 0; i < len(vendors); i++ {
-		if err := <-errCh; err != nil {
-			utils.Logger.Errorf("fail sending email %v", err)
+	for err := range errCh {
+		if err != nil {
+			utils.Logger.Errorf("failed to send email: %v", err)
 			errList = append(errList, err.Error())
 		}
 	}
 
+	// write email statuses to the database so we can track the status
+	for status := range statusCh {
+		writeErr := v.emailStatusSvc.WriteEmailStatus(ctx, status)
+		if writeErr != nil {
+			utils.Logger.Errorf("failed to write email status: %v", writeErr)
+		}
+	}
+
 	if len(errList) > 0 {
-		utils.Logger.Error("fail sending emails")
-		return errList, fmt.Errorf("fail sending emails")
+		utils.Logger.Error("failed to send some emails")
+		return errList, fmt.Errorf("failed to send some emails")
 	}
 
 	return nil, nil
@@ -124,10 +155,12 @@ func NewVendorService(
 	conn database.DBConnector,
 	clock clock.Clock,
 	smtpProvider mailer.EmailProvider,
+	emailStatusSvc emailStatusSvc,
 ) *VendorService {
 	return &VendorService{
 		cfg:              cfg,
 		vendorDBAccessor: newPostgresVendorAccessor(conn, clock),
 		smtpProvider:     smtpProvider,
+		emailStatusSvc:   emailStatusSvc,
 	}
 }
