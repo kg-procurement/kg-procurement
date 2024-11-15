@@ -13,8 +13,6 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-var ()
-
 func Test_NewVendorService(t *testing.T) {
 	_ = NewVendorService(config.Application{}, nil, nil, nil)
 }
@@ -518,5 +516,63 @@ func TestVendorService_AutomatedBlastEmail(t *testing.T) {
 		g.Expect(err).ToNot(gomega.BeNil())
 		g.Expect(result).To(gomega.BeNil())
 	})
+}
 
+func TestVendorService_applyDefaultEmailTemplate(t *testing.T) {
+	t.Parallel()
+
+	var (
+		mockVendorAccessor *MockvendorDBAccessor
+		service            *VendorService
+	)
+
+	setup := func(t *testing.T) *gomega.GomegaWithT {
+		ctrl := gomock.NewController(t)
+		mockVendorAccessor = NewMockvendorDBAccessor(ctrl)
+		service = &VendorService{
+			cfg:              config.Application{},
+			vendorDBAccessor: mockVendorAccessor,
+		}
+
+		return gomega.NewWithT(t)
+	}
+
+	t.Run("subject is empty", func(t *testing.T) {
+		g := setup(t)
+		temp := emailTemplate{
+			Body: "this is body",
+		}
+		service.applyDefaultEmailTemplate(&temp)
+		g.Expect(temp.Subject).ToNot(gomega.BeEmpty())
+		g.Expect(temp.Body).To(gomega.Equal("this is body"))
+	})
+
+	t.Run("body is empty", func(t *testing.T) {
+		g := setup(t)
+		temp := emailTemplate{
+			Subject: "this is subject",
+		}
+		service.applyDefaultEmailTemplate(&temp)
+		g.Expect(temp.Body).ToNot(gomega.BeEmpty())
+		g.Expect(temp.Subject).To(gomega.Equal("this is subject"))
+	})
+
+	t.Run("both are empty", func(t *testing.T) {
+		g := setup(t)
+		temp := emailTemplate{}
+		service.applyDefaultEmailTemplate(&temp)
+		g.Expect(temp.Body).ToNot(gomega.BeEmpty())
+		g.Expect(temp.Subject).ToNot(gomega.BeEmpty())
+	})
+
+	t.Run("both are filled", func(t *testing.T) {
+		g := setup(t)
+		temp := emailTemplate{
+			Subject: "this is subject",
+			Body:    "this is body",
+		}
+		service.applyDefaultEmailTemplate(&temp)
+		g.Expect(temp.Body).To(gomega.Equal("this is body"))
+		g.Expect(temp.Subject).To(gomega.Equal("this is subject"))
+	})
 }

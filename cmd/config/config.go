@@ -41,9 +41,10 @@ type PostgresConfig struct {
 }
 
 type Routes struct {
-	Vendor  VendorRoutes  `mapstructure:"vendor" validate:"required"`
-	Product ProductRoutes `mapstructure:"product" validate:"required"`
-	Account AccountRoutes `mapstructure:"account" validate:"required"`
+	Vendor      VendorRoutes      `mapstructure:"vendor" validate:"required"`
+	Product     ProductRoutes     `mapstructure:"product" validate:"required"`
+	Account     AccountRoutes     `mapstructure:"account" validate:"required"`
+	EmailStatus EmailStatusRoutes `mapstructure:"email-status" validate:"required"`
 }
 
 type VendorRoutes struct {
@@ -70,6 +71,10 @@ type AccountRoutes struct {
 	Register string `mapstructure:"register" validate:"required"`
 	Login    string `mapstructure:"login" validate:"required"`
 	GetCurrentUser string `mapstructure:"get-current-user" validate:"required"`
+}
+
+type EmailStatusRoutes struct {
+	GetAll string `mapstructure:"get-all" validate:"required"`
 }
 
 func Load() Application {

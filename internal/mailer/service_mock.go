@@ -39,6 +39,45 @@ func (m *MockemailStatusDBAccessor) EXPECT() *MockemailStatusDBAccessorMockRecor
 	return m.recorder
 }
 
+// GetAll mocks base method.
+func (m *MockemailStatusDBAccessor) GetAll(ctx context.Context, spec GetAllEmailStatusSpec) (*AccessorGetAllPaginationData, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAll", ctx, spec)
+	ret0, _ := ret[0].(*AccessorGetAllPaginationData)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAll indicates an expected call of GetAll.
+func (mr *MockemailStatusDBAccessorMockRecorder) GetAll(ctx, spec any) *MockemailStatusDBAccessorGetAllCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockemailStatusDBAccessor)(nil).GetAll), ctx, spec)
+	return &MockemailStatusDBAccessorGetAllCall{Call: call}
+}
+
+// MockemailStatusDBAccessorGetAllCall wrap *gomock.Call
+type MockemailStatusDBAccessorGetAllCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockemailStatusDBAccessorGetAllCall) Return(arg0 *AccessorGetAllPaginationData, arg1 error) *MockemailStatusDBAccessorGetAllCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockemailStatusDBAccessorGetAllCall) Do(f func(context.Context, GetAllEmailStatusSpec) (*AccessorGetAllPaginationData, error)) *MockemailStatusDBAccessorGetAllCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockemailStatusDBAccessorGetAllCall) DoAndReturn(f func(context.Context, GetAllEmailStatusSpec) (*AccessorGetAllPaginationData, error)) *MockemailStatusDBAccessorGetAllCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // WriteEmailStatus mocks base method.
 func (m *MockemailStatusDBAccessor) WriteEmailStatus(ctx context.Context, payload EmailStatus) error {
 	m.ctrl.T.Helper()

@@ -6,6 +6,6 @@ type EmailBlastContract struct {
 }
 
 type emailTemplate struct {
-	Subject string `json:"subject" binding:"required"`
-	Body    string `json:"body" binding:"required"`
+	Subject string `json:"subject"`
+	Body    string `json:"body"`
 }
