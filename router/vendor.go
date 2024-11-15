@@ -152,8 +152,8 @@ func NewVendorEngine(
 			})
 			return
 		}
-		vendorIDs := []string{}
-		vendorIDs, err := vendorSvc.AutomatedEmailBlast(ctx, productName)
+		// vendors := []vendors.Vendor{}
+		vendors, err := vendorSvc.AutomatedEmailBlast(ctx, productName)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
@@ -161,7 +161,7 @@ func NewVendorEngine(
 			return
 		}
 		ctx.JSON(http.StatusOK, gin.H{
-			"vendor_ids": vendorIDs,
+			"vendors": vendors,
 		})
 	})
 }

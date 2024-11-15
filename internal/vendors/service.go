@@ -8,7 +8,6 @@ import (
 	"kg/procurement/cmd/utils"
 	"kg/procurement/internal/common/database"
 	"kg/procurement/internal/mailer"
-	"strings"
 	"sync"
 
 	"github.com/benbjohnson/clock"
@@ -21,7 +20,7 @@ type vendorDBAccessor interface {
 	UpdateDetail(ctx context.Context, spec Vendor) (*Vendor, error)
 	GetAllLocations(ctx context.Context) ([]string, error)
 	BulkGetByIDs(_ context.Context, ids []string) ([]Vendor, error)
-	getAllVendorIdByProductName(ctx context.Context, productName string) ([]string, error)
+	BulkGetByProductName(_ context.Context, productName string) ([]Vendor, error)
 }
 
 type VendorService struct {
@@ -76,12 +75,17 @@ func (v *VendorService) BlastEmail(ctx context.Context, vendorIDs []string, temp
 			defer wg.Done()
 
 			// replaces {{name}} keyword to vendor name
-			bodyWithVendorName := strings.Replace(template.Body, "{{name}}", vendor.Name, -1)
+			replacements := map[string]string{
+				"{{name}}": vendor.Name,
+			}
+
+			templateBody := mailer.ReplacePlaceholder(template.Body, replacements)
+
 			err := v.smtpProvider.SendEmail(mailer.Email{
 				From:    v.cfg.SMTP.AuthEmail,
 				To:      []string{vendor.Email},
 				Subject: template.Subject,
-				Body:    bodyWithVendorName,
+				Body:    templateBody,
 			})
 			errCh <- err
 
@@ -107,8 +111,67 @@ func (v *VendorService) BlastEmail(ctx context.Context, vendorIDs []string, temp
 }
 
 func (v *VendorService) AutomatedEmailBlast(ctx context.Context, productName string) ([]string, error) {
-<<<<<<< Updated upstream
-	return v.vendorDBAccessor.getAllVendorIdByProductName(ctx, productName)
+	vendors, err := v.vendorDBAccessor.BulkGetByProductName(ctx, productName)
+
+	if err != nil {
+		return nil, err
+	}
+
+	template := &emailTemplate{}
+	v.applyDefaultEmailTemplate(template)
+
+	errCh := make(chan error, len(vendors))
+	defer close(errCh)
+
+	// limit the number of concurrent workers to 20
+	workerLimit := 20
+	sem := make(chan struct{}, workerLimit)
+
+	var wg sync.WaitGroup
+
+	for _, vendor := range vendors {
+		wg.Add(1)
+
+		sem <- struct{}{}
+
+		go func(vendor Vendor) {
+			defer wg.Done()
+
+			replacements := map[string]string{
+				"{{name}}":         vendor.Name,
+				"{{product_name}}": productName,
+			}
+
+			templateBody := mailer.ReplacePlaceholder(template.Body, replacements)
+			template.Body = templateBody
+
+			err := v.smtpProvider.SendEmail(mailer.Email{
+				From:    v.cfg.SMTP.AuthEmail,
+				To:      []string{vendor.Email},
+				Subject: template.Subject,
+				Body:    template.Body,
+			})
+			errCh <- err
+
+			<-sem
+		}(vendor)
+	}
+	wg.Wait()
+
+	var errList []string
+	for i := 0; i < len(vendors); i++ {
+		if err := <-errCh; err != nil {
+			utils.Logger.Errorf("fail sending email %v", err)
+			errList = append(errList, err.Error())
+		}
+	}
+
+	if len(errList) > 0 {
+		utils.Logger.Error("fail sending emails")
+		return errList, fmt.Errorf("fail sending emails")
+	}
+
+	return nil, nil
 }
 
 func (*VendorService) applyDefaultEmailTemplate(template *emailTemplate) {
@@ -116,16 +179,8 @@ func (*VendorService) applyDefaultEmailTemplate(template *emailTemplate) {
 		template.Subject = "Request for products"
 	}
 	if template.Body == "" {
-		template.Body = "Kepada Yth {{name}},\n\nKami mengajukan permintaan untuk pengadaan produk tertentu yang dibutuhkan oleh perusahaan kami. Mohon informasi mengenai ketersediaan, harga, dan waktu pengiriman untuk produk tersebut.\n\nTerima kasih atas perhatian dan kerjasamanya.\n\nHormat kami"
+		template.Body = "Kepada Yth {{name}},\n\nKami mengajukan permintaan untuk pengadaan produk {{product_name}} yang dibutuhkan oleh perusahaan kami. Mohon informasi mengenai ketersediaan, harga, dan waktu pengiriman untuk produk tersebut.\n\nTerima kasih atas perhatian dan kerjasamanya.\n\nHormat kami"
 	}
-=======
-	vendorIds, err := v.vendorDBAccessor.getAllVendorIdByProductName(ctx, productName)
-	if err != nil {
-		return nil, err
-	}
-
-	errCh := make(chan error, len(vendorIds))
->>>>>>> Stashed changes
 }
 
 func NewVendorService(

@@ -78,6 +78,45 @@ func (c *MockvendorDBAccessorBulkGetByIDsCall) DoAndReturn(f func(context.Contex
 	return c
 }
 
+// BulkGetByProductName mocks base method.
+func (m *MockvendorDBAccessor) BulkGetByProductName(arg0 context.Context, productName string) ([]Vendor, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BulkGetByProductName", arg0, productName)
+	ret0, _ := ret[0].([]Vendor)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// BulkGetByProductName indicates an expected call of BulkGetByProductName.
+func (mr *MockvendorDBAccessorMockRecorder) BulkGetByProductName(arg0, productName any) *MockvendorDBAccessorBulkGetByProductNameCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BulkGetByProductName", reflect.TypeOf((*MockvendorDBAccessor)(nil).BulkGetByProductName), arg0, productName)
+	return &MockvendorDBAccessorBulkGetByProductNameCall{Call: call}
+}
+
+// MockvendorDBAccessorBulkGetByProductNameCall wrap *gomock.Call
+type MockvendorDBAccessorBulkGetByProductNameCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockvendorDBAccessorBulkGetByProductNameCall) Return(arg0 []Vendor, arg1 error) *MockvendorDBAccessorBulkGetByProductNameCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockvendorDBAccessorBulkGetByProductNameCall) Do(f func(context.Context, string) ([]Vendor, error)) *MockvendorDBAccessorBulkGetByProductNameCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockvendorDBAccessorBulkGetByProductNameCall) DoAndReturn(f func(context.Context, string) ([]Vendor, error)) *MockvendorDBAccessorBulkGetByProductNameCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // GetAll mocks base method.
 func (m *MockvendorDBAccessor) GetAll(ctx context.Context, spec GetAllVendorSpec) (*AccessorGetAllPaginationData, error) {
 	m.ctrl.T.Helper()
@@ -269,45 +308,6 @@ func (c *MockvendorDBAccessorUpdateDetailCall) Do(f func(context.Context, Vendor
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockvendorDBAccessorUpdateDetailCall) DoAndReturn(f func(context.Context, Vendor) (*Vendor, error)) *MockvendorDBAccessorUpdateDetailCall {
-	c.Call = c.Call.DoAndReturn(f)
-	return c
-}
-
-// getAllVendorIdByProductName mocks base method.
-func (m *MockvendorDBAccessor) getAllVendorIdByProductName(ctx context.Context, productName string) ([]string, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "getAllVendorIdByProductName", ctx, productName)
-	ret0, _ := ret[0].([]string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// getAllVendorIdByProductName indicates an expected call of getAllVendorIdByProductName.
-func (mr *MockvendorDBAccessorMockRecorder) getAllVendorIdByProductName(ctx, productName any) *MockvendorDBAccessorgetAllVendorIdByProductNameCall {
-	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "getAllVendorIdByProductName", reflect.TypeOf((*MockvendorDBAccessor)(nil).getAllVendorIdByProductName), ctx, productName)
-	return &MockvendorDBAccessorgetAllVendorIdByProductNameCall{Call: call}
-}
-
-// MockvendorDBAccessorgetAllVendorIdByProductNameCall wrap *gomock.Call
-type MockvendorDBAccessorgetAllVendorIdByProductNameCall struct {
-	*gomock.Call
-}
-
-// Return rewrite *gomock.Call.Return
-func (c *MockvendorDBAccessorgetAllVendorIdByProductNameCall) Return(arg0 []string, arg1 error) *MockvendorDBAccessorgetAllVendorIdByProductNameCall {
-	c.Call = c.Call.Return(arg0, arg1)
-	return c
-}
-
-// Do rewrite *gomock.Call.Do
-func (c *MockvendorDBAccessorgetAllVendorIdByProductNameCall) Do(f func(context.Context, string) ([]string, error)) *MockvendorDBAccessorgetAllVendorIdByProductNameCall {
-	c.Call = c.Call.Do(f)
-	return c
-}
-
-// DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockvendorDBAccessorgetAllVendorIdByProductNameCall) DoAndReturn(f func(context.Context, string) ([]string, error)) *MockvendorDBAccessorgetAllVendorIdByProductNameCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

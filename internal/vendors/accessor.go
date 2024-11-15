@@ -23,11 +23,11 @@ const (
 		VALUES 
 			(:id, :name, :email, :description, :bp_id, :bp_name, :rating, :area_group_id, :area_group_name, :sap_code, :modified_date, :modified_by, :dt)
 	`
-	getBulkByID                 = `SELECT * FROM vendor WHERE id IN (?)`
-	getAllLocationsQuery        = `SELECT DISTINCT area_group_name FROM vendor`
-	getAllVendorIdByProductName = `
+	getBulkByID          = `SELECT * FROM vendor WHERE id IN (?)`
+	getAllLocationsQuery = `SELECT DISTINCT area_group_name FROM vendor`
+	getBulkByProductName = `
 		SELECT
-			v.id
+			v.*
 		FROM
 			vendor v
 		JOIN 
@@ -331,31 +331,34 @@ func (p *postgresVendorAccessor) writeVendor(ctx context.Context, vendor Vendor)
 	return nil
 }
 
-func (p *postgresVendorAccessor) getAllVendorIdByProductName(ctx context.Context, productName string) ([]string, error) {
-	query := getAllVendorIdByProductName
+func (p *postgresVendorAccessor) BulkGetByProductName(_ context.Context, productName string) ([]Vendor, error) {
+	query := getBulkByProductName
 
 	rows, err := p.db.NamedQuery(query, map[string]interface{}{
 		"product_name": productName,
 	})
 
 	if err != nil {
+		utils.Logger.Error(err.Error())
 		return nil, err
 	}
 	defer rows.Close()
 
-	vendorIDs := []string{}
+	vendors := []Vendor{}
 	for rows.Next() {
-		var vendorID string
-		if err = rows.Scan(&vendorID); err != nil {
+		var vendor Vendor
+		if err = rows.StructScan(&vendor); err != nil {
+			utils.Logger.Error(err.Error())
 			return nil, err
 		}
-		vendorIDs = append(vendorIDs, vendorID)
+		vendors = append(vendors, vendor)
 	}
 	if err := rows.Err(); err != nil {
+		utils.Logger.Error(err.Error())
 		return nil, err
 	}
 
-	return vendorIDs, nil
+	return vendors, nil
 }
 
 func (p *postgresVendorAccessor) Close() error {
