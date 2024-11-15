@@ -49,7 +49,6 @@ func TestVendorService_GetAll(t *testing.T) {
 
 	type fields struct {
 		mockVendorDBAccessor *MockvendorDBAccessor
-		mockDBConnector      *database.MockDBConnector
 	}
 
 	type args struct {
@@ -159,7 +158,6 @@ func TestVendorService_GetById(t *testing.T) {
 
 	type fields struct {
 		mockVendorDBAccessor *MockvendorDBAccessor
-		mockDBConnector      *database.MockDBConnector
 	}
 
 	type args struct {
