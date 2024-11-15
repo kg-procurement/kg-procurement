@@ -14,6 +14,7 @@ type productDBAccessor interface {
 	GetProductVendorsByVendor(ctx context.Context, vendorID string, spec GetProductVendorByVendorSpec) (*AccessorGetProductVendorsPaginationData, error)
 	getProductByID(ctx context.Context, productID string) (*Product, error)
 	getPriceByPVID(ctx context.Context, pvID string) (*Price, error)
+	getUOMByID(ctx context.Context, uomID string) (*UOM, error)
 	GetAllProductVendors(ctx context.Context, spec GetProductVendorsSpec) (*AccessorGetProductVendorsPaginationData, error)
 	UpdatePrice(ctx context.Context, price Price) (Price, error)
 	UpdateProduct(ctx context.Context, payload Product) (Product, error)
@@ -71,7 +72,13 @@ func (p *ProductService) buildProductVendorsResponse(
 			return nil, err
 		}
 
-		pvr := ToProductVendorResponse(&pv, product, price, category)
+		uom, err := p.getUOMByID(ctx, price.PriceUOMID)
+		if err != nil {
+			utils.Logger.Errorf(err.Error())
+			return nil, err
+		}
+
+		pvr := ToProductVendorResponse(&pv, product, price, category, uom)
     
 		res.ProductVendors = append(res.ProductVendors, *pvr)
 	}
