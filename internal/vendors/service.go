@@ -8,6 +8,7 @@ import (
 	"kg/procurement/cmd/utils"
 	"kg/procurement/internal/common/database"
 	"kg/procurement/internal/mailer"
+	"strings"
 	"sync"
 
 	"github.com/benbjohnson/clock"
@@ -73,7 +74,7 @@ func (v *VendorService) AutomatedEmailBlast(ctx context.Context, productName str
 		"{{product_name}}": productName,
 	}
 
-	template.Body = mailer.ReplacePlaceholder(template.Body, replacements)
+	template.Body = v.replacePlaceholder(template.Body, replacements)
 
 	return v.executeBlastEmail(vendors, *template)
 }
@@ -110,7 +111,7 @@ func (v *VendorService) executeBlastEmail(vendors []Vendor, template emailTempla
 				"{{name}}": vendor.Name,
 			}
 
-			templateBody := mailer.ReplacePlaceholder(template.Body, replacements)
+			templateBody := v.replacePlaceholder(template.Body, replacements)
 
 			err := v.smtpProvider.SendEmail(mailer.Email{
 				From:    v.cfg.SMTP.AuthEmail,
@@ -139,6 +140,13 @@ func (v *VendorService) executeBlastEmail(vendors []Vendor, template emailTempla
 	}
 
 	return nil, nil
+}
+
+func (v *VendorService) replacePlaceholder(template string, replacements map[string]string) string {
+	for placeholder, value := range replacements {
+		template = strings.ReplaceAll(template, placeholder, value)
+	}
+	return template
 }
 
 func NewVendorService(
