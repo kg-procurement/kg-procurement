@@ -74,18 +74,20 @@ func (v *VendorService) BlastEmail(ctx context.Context, vendorIDs []string, temp
 		go func(vendor Vendor) {
 			defer wg.Done()
 
+			templateCopy := template
+
 			// replaces {{name}} keyword to vendor name
 			replacements := map[string]string{
 				"{{name}}": vendor.Name,
 			}
 
-			templateBody := mailer.ReplacePlaceholder(template.Body, replacements)
+			templateCopy.Body = mailer.ReplacePlaceholder(templateCopy.Body, replacements)
 
 			err := v.smtpProvider.SendEmail(mailer.Email{
 				From:    v.cfg.SMTP.AuthEmail,
 				To:      []string{vendor.Email},
-				Subject: template.Subject,
-				Body:    templateBody,
+				Subject: templateCopy.Subject,
+				Body:    templateCopy.Body,
 			})
 			errCh <- err
 
@@ -137,19 +139,20 @@ func (v *VendorService) AutomatedEmailBlast(ctx context.Context, productName str
 		go func(vendor Vendor) {
 			defer wg.Done()
 
+			templateCopy := template
+
 			replacements := map[string]string{
 				"{{name}}":         vendor.Name,
 				"{{product_name}}": productName,
 			}
 
-			templateBody := mailer.ReplacePlaceholder(template.Body, replacements)
-			template.Body = templateBody
+			templateCopy.Body = mailer.ReplacePlaceholder(templateCopy.Body, replacements)
 
 			err := v.smtpProvider.SendEmail(mailer.Email{
 				From:    v.cfg.SMTP.AuthEmail,
 				To:      []string{vendor.Email},
-				Subject: template.Subject,
-				Body:    template.Body,
+				Subject: templateCopy.Subject,
+				Body:    templateCopy.Body,
 			})
 			errCh <- err
 
