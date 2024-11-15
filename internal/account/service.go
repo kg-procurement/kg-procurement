@@ -91,13 +91,13 @@ func (a *AccountService) Login(ctx context.Context, spec LoginContract) (string,
 func (a *AccountService) GetCurrentUser(ctx context.Context, tokenString string) (*Account, error) {
 	// Parse and validate the JWT token
 	claims, err := a.tokenService.ValidateToken(tokenString)
-	userID := claims.Subject
 	if err != nil {
 		utils.Logger.Errorf("failed to parse token: %v", err)
 		return nil, fmt.Errorf("invalid token: %w", err)
 	}
 
 	// Find the account associated with the user ID in the token claims
+	userID := claims.Subject
 	account, err := a.accountDBAccessor.FindAccountByID(ctx, userID)
 	if err != nil {
 		utils.Logger.Errorf("account not found for user ID: %v", userID)
