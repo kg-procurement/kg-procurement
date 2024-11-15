@@ -1476,7 +1476,17 @@ func Test_getAllVendorIdByProductName(t *testing.T) {
 
 	var (
 		productName   = "book"
-		vendorColumns = []string{"id"}
+		vendorColumns = []string{"id", "email"}
+		vendors       = []Vendor{
+			{
+				ID:    "1",
+				Email: "valerian@outlook.com",
+			},
+			{
+				ID:    "2",
+				Email: "salim@outlook.com",
+			},
+		}
 	)
 
 	t.Run("success", func(t *testing.T) {
@@ -1486,15 +1496,15 @@ func Test_getAllVendorIdByProductName(t *testing.T) {
 		)
 		defer c.db.Close()
 
-		expected := []string{"2550", "2580"}
+		// expected := []string{"2550", "2580"}
 
-		transformedQuery, args, _ := sqlx.Named(getAllVendorIdByProductName, map[string]interface{}{
+		transformedQuery, args, _ := sqlx.Named(getBulkByProductName, map[string]interface{}{
 			"product_name": productName,
 		})
 
 		rows := sqlmock.NewRows(vendorColumns).
-			AddRow("2550").
-			AddRow("2580")
+			AddRow("1", "valerian@outlook.com").
+			AddRow("2", "salim@outlook.com")
 
 		driverArgs := make([]driver.Value, len(args))
 		for i, arg := range args {
@@ -1505,10 +1515,10 @@ func Test_getAllVendorIdByProductName(t *testing.T) {
 			WithArgs(driverArgs...).
 			WillReturnRows(rows)
 
-		results, err := c.accessor.getAllVendorIdByProductName(ctx, productName)
+		results, err := c.accessor.BulkGetByProductName(ctx, productName)
 
 		c.g.Expect(err).To(gomega.BeNil())
-		c.g.Expect(results).To(gomega.Equal(expected))
+		c.g.Expect(results).To(gomega.Equal(vendors))
 	})
 
 	t.Run("success returning empty array", func(t *testing.T) {
@@ -1518,11 +1528,11 @@ func Test_getAllVendorIdByProductName(t *testing.T) {
 		)
 		defer c.db.Close()
 
-		expected := []string{}
+		expected := []Vendor{}
 
 		rows := sqlmock.NewRows(vendorColumns)
 
-		transformedQuery, args, _ := sqlx.Named(getAllVendorIdByProductName, map[string]interface{}{
+		transformedQuery, args, _ := sqlx.Named(getBulkByProductName, map[string]interface{}{
 			"product_name": productName,
 		})
 
@@ -1535,7 +1545,7 @@ func Test_getAllVendorIdByProductName(t *testing.T) {
 			WithArgs(driverArgs...).
 			WillReturnRows(rows)
 
-		results, err := c.accessor.getAllVendorIdByProductName(ctx, productName)
+		results, err := c.accessor.BulkGetByProductName(ctx, productName)
 
 		c.g.Expect(err).To(gomega.BeNil())
 		c.g.Expect(results).To(gomega.Equal(expected))
@@ -1548,7 +1558,7 @@ func Test_getAllVendorIdByProductName(t *testing.T) {
 		)
 		defer c.db.Close()
 
-		transformedQuery, args, _ := sqlx.Named(getAllVendorIdByProductName, map[string]interface{}{
+		transformedQuery, args, _ := sqlx.Named(getBulkByProductName, map[string]interface{}{
 			"product_name": productName,
 		})
 
@@ -1561,7 +1571,7 @@ func Test_getAllVendorIdByProductName(t *testing.T) {
 			WithArgs(driverArgs...).
 			WillReturnError(errors.New("error"))
 
-		results, err := c.accessor.getAllVendorIdByProductName(ctx, productName)
+		results, err := c.accessor.BulkGetByProductName(ctx, productName)
 
 		c.g.Expect(err).ToNot(gomega.BeNil())
 		c.g.Expect(results).To(gomega.BeNil())
@@ -1575,11 +1585,11 @@ func Test_getAllVendorIdByProductName(t *testing.T) {
 		defer c.db.Close()
 
 		rows := sqlmock.NewRows(vendorColumns).
-			AddRow("2550").
-			AddRow("2580").
+			AddRow("1", "valerian@outlook.com").
+			AddRow("2", "salim@outlook.com").
 			RowError(1, errors.New("error"))
 
-		transformedQuery, args, _ := sqlx.Named(getAllVendorIdByProductName, map[string]interface{}{
+		transformedQuery, args, _ := sqlx.Named(getBulkByProductName, map[string]interface{}{
 			"product_name": productName,
 		})
 
@@ -1592,7 +1602,7 @@ func Test_getAllVendorIdByProductName(t *testing.T) {
 			WithArgs(driverArgs...).
 			WillReturnRows(rows)
 
-		results, err := c.accessor.getAllVendorIdByProductName(ctx, productName)
+		results, err := c.accessor.BulkGetByProductName(ctx, productName)
 
 		c.g.Expect(err).ToNot(gomega.BeNil())
 		c.g.Expect(results).To(gomega.BeNil())
@@ -1606,9 +1616,9 @@ func Test_getAllVendorIdByProductName(t *testing.T) {
 		defer c.db.Close()
 
 		rows := sqlmock.NewRows(vendorColumns).
-			AddRow(nil)
+			AddRow(nil, nil)
 
-		transformedQuery, args, _ := sqlx.Named(getAllVendorIdByProductName, map[string]interface{}{
+		transformedQuery, args, _ := sqlx.Named(getBulkByProductName, map[string]interface{}{
 			"product_name": productName,
 		})
 
@@ -1621,7 +1631,7 @@ func Test_getAllVendorIdByProductName(t *testing.T) {
 			WithArgs(driverArgs...).
 			WillReturnRows(rows)
 
-		results, err := c.accessor.getAllVendorIdByProductName(ctx, productName)
+		results, err := c.accessor.BulkGetByProductName(ctx, productName)
 
 		c.g.Expect(err).ToNot(gomega.BeNil())
 		c.g.Expect(results).To(gomega.BeNil())
