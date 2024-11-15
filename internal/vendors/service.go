@@ -115,7 +115,7 @@ func (v *VendorService) executeBlastEmail(vendors []Vendor, template emailTempla
 
 			err := v.smtpProvider.SendEmail(mailer.Email{
 				From:    v.cfg.SMTP.AuthEmail,
-				To:      []string{"v.apriady@gmail.com"},
+				To:      []string{vendor.Email},
 				Subject: template.Subject,
 				Body:    templateBody,
 			})
