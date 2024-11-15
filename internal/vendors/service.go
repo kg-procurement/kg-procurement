@@ -139,7 +139,7 @@ func (v *VendorService) AutomatedEmailBlast(ctx context.Context, productName str
 		go func(vendor Vendor) {
 			defer wg.Done()
 
-			templateCopy := template
+			templateCopy := *template
 
 			replacements := map[string]string{
 				"{{name}}":         vendor.Name,
