@@ -30,10 +30,6 @@ type emailStatusSvc interface {
 	WriteEmailStatus(ctx context.Context, status mailer.EmailStatus) error
 }
 
-type emailStatusSvc interface {
-	WriteEmailStatus(ctx context.Context, status mailer.EmailStatus) error
-}
-
 type VendorService struct {
 	cfg config.Application
 	vendorDBAccessor
