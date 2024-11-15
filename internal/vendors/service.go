@@ -37,10 +37,6 @@ type VendorService struct {
 	emailStatusSvc emailStatusSvc
 }
 
-func (v *VendorService) GetSomeStuff(ctx context.Context) ([]string, error) {
-	return v.vendorDBAccessor.GetSomeStuff(ctx)
-}
-
 func (v *VendorService) GetById(ctx context.Context, id string) (*Vendor, error) {
 	return v.vendorDBAccessor.GetById(ctx, id)
 }
