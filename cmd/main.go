@@ -39,11 +39,11 @@ func main() {
 
 	netSMTP := mailer.NewNativeSMTP(cfg.SMTP)
 
-	vendorSvc := vendors.NewVendorService(cfg, conn, clock, netSMTP)
+	mailerSvc := mailer.NewEmailStatusService(conn, clock)
+	vendorSvc := vendors.NewVendorService(cfg, conn, clock, netSMTP, mailerSvc)
 	productSvc := product.NewProductService(conn, clock)
 	tokenSvc := token.NewTokenService(cfg.Token, clock)
 	accountSvc := account.NewAccountService(conn, clock, tokenSvc)
-	mailerSvc := mailer.NewEmailStatusService(conn, clock)
 
 	r := gin.Default()
 	r.Use(cors.Default())
