@@ -27,6 +27,12 @@ const (
 		FROM account
 		WHERE email = $1
 	`
+
+	findAccountByIDQuery = `
+		SELECT id, email, password, modified_date, created_at
+		FROM account
+		WHERE id = $1
+	`
 )
 
 type postgresAccountAccessor struct {
@@ -47,6 +53,16 @@ func (r *postgresAccountAccessor) RegisterAccount(ctx context.Context, account A
 func (r *postgresAccountAccessor) FindAccountByEmail(ctx context.Context, email string) (*Account, error) {
 	account := &Account{}
 	err := r.db.Get(account, findAccountByEmailQuery, email)
+	if err != nil {
+		utils.Logger.Error(err.Error())
+		return nil, err
+	}
+	return account, nil
+}
+
+func (r *postgresAccountAccessor) FindAccountByID(ctx context.Context, id string) (*Account, error) {
+	account := &Account{}
+	err := r.db.Get(account, findAccountByIDQuery, id)
 	if err != nil {
 		utils.Logger.Error(err.Error())
 		return nil, err
