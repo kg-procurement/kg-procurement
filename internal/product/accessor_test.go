@@ -860,6 +860,86 @@ func Test_getProductCategoryByID(t *testing.T) {
 	})
 }
 
+func Test_getUOMByID(t *testing.T) {
+	t.Parallel()
+
+	var (
+		accessor *postgresProductAccessor
+		mock     sqlmock.Sqlmock
+	)
+
+	setup := func(t *testing.T) (*gomega.GomegaWithT, *sql.DB) {
+		g := gomega.NewWithT(t)
+		realClock := clock.New()
+
+		db, sqlMock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+		if err != nil {
+			log.Fatal("error initializing mock:", err)
+		}
+		sqlxDB := sqlx.NewDb(db, "sqlmock")
+
+		accessor = newPostgresProductAccessor(sqlxDB, realClock)
+		mock = sqlMock
+
+		return g, db
+	}
+
+	uomFields := []string{
+		"id", "name", "description", "dimension", "sap_code", 
+		"modified_date", "modified_by", "status_id",
+	}
+
+	uom := &UOM{
+		ID:           "1",
+		Name:         "Kilogram",
+		Description:  "Weight unit",
+		Dimension:    "Mass",
+		SAPCode:      "KG001",
+		ModifiedDate: time.Now(),
+		ModifiedBy:   "admin",
+		StatusID:     "active",
+	}
+
+	t.Run("success", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		rows := sqlmock.NewRows(uomFields).
+			AddRow(
+				uom.ID, uom.Name, uom.Description, uom.Dimension, 
+				uom.SAPCode, uom.ModifiedDate, uom.ModifiedBy, uom.StatusID,
+			)
+
+		mock.ExpectQuery(getUOMByIDQuery).
+			WithArgs("1").
+			WillReturnRows(rows)
+
+		ctx := context.Background()
+		res, err := accessor.getUOMByID(ctx, "1")
+
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(res).To(gomega.Equal(uom))
+	})
+
+	t.Run("error on row scan", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		rows := sqlmock.NewRows(uomFields).
+			RowError(0, fmt.Errorf("error scanning row"))
+
+		mock.ExpectQuery(getUOMByIDQuery).
+			WithArgs("1").
+			WillReturnRows(rows)
+
+		ctx := context.Background()
+		res, err := accessor.getUOMByID(ctx, "1")
+
+		g.Expect(err).ToNot(gomega.BeNil())
+		g.Expect(res).To(gomega.BeNil())
+	})
+}
+
 func Test_getProductByID(t *testing.T) {
 	t.Parallel()
 
