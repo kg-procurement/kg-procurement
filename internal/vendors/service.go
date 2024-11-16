@@ -111,12 +111,16 @@ func (v *VendorService) executeBlastEmail(ctx context.Context, vendors []Vendor,
 			defer func() { <-sem }() // release the semaphore slot
 
 			// replaces {{name}} keyword to vendor name
+<<<<<<< HEAD
 			replacements := map[string]string{
 				"{{name}}": vendor.Name,
 			}
 
 			templateBody := v.replacePlaceholder(template.Body, replacements)
 
+=======
+			bodyWithVendorName := strings.Replace(template.Body, "{{name}}", vendor.Name, -1)
+>>>>>>> 8436fb5f6ef2352f51140640c4153ddb72425ee9
 			email := mailer.Email{
 				From:    v.cfg.SMTP.AuthEmail,
 				To:      []string{vendor.Email},

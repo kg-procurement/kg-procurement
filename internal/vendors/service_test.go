@@ -510,6 +510,7 @@ func TestVendorService_AutomatedBlastEmail(t *testing.T) {
 	var (
 		mockVendorAccessor *MockvendorDBAccessor
 		mockEmailProvider  *mailer.MockEmailProvider
+		mockEmailStatusSvc *MockemailStatusSvc
 		service            *VendorService
 	)
 
@@ -517,10 +518,13 @@ func TestVendorService_AutomatedBlastEmail(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		mockVendorAccessor = NewMockvendorDBAccessor(ctrl)
 		mockEmailProvider = mailer.NewMockEmailProvider(ctrl)
+		mockEmailStatusSvc = NewMockemailStatusSvc(ctrl)
+
 		service = &VendorService{
 			cfg:              config.Application{},
 			vendorDBAccessor: mockVendorAccessor,
 			smtpProvider:     mockEmailProvider,
+			emailStatusSvc:   mockEmailStatusSvc,
 		}
 
 		return gomega.NewWithT(t)
@@ -550,6 +554,11 @@ func TestVendorService_AutomatedBlastEmail(t *testing.T) {
 
 		mockEmailProvider.EXPECT().
 			SendEmail(gomock.Any()).
+			Return(nil).
+			Times(2)
+
+		mockEmailStatusSvc.EXPECT().
+			WriteEmailStatus(ctx, gomock.Any()).
 			Return(nil).
 			Times(2)
 
@@ -586,6 +595,11 @@ func TestVendorService_AutomatedBlastEmail(t *testing.T) {
 		mockEmailProvider.EXPECT().
 			SendEmail(gomock.Any()).
 			Return(nil)
+
+		mockEmailStatusSvc.EXPECT().
+			WriteEmailStatus(ctx, gomock.Any()).
+			Return(nil).
+			Times(2)
 
 		errList, err := service.AutomatedEmailBlast(ctx, product_name)
 		g.Expect(err).ToNot(gomega.BeNil())
