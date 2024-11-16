@@ -23,6 +23,11 @@ const (
 		FROM product_category
 		WHERE id = $1
 	`
+	getUOMByIDQuery = `
+		SELECT *
+		FROM uom
+		WHERE id = $1
+	`
   
 	getProductByIDQuery = `SELECT * FROM product WHERE id = $1`
 	getPriceByPVIDQuery = `
@@ -351,6 +356,16 @@ func (p *postgresProductAccessor) getProductByID(_ context.Context, productID st
 func (p *postgresProductAccessor) getProductCategoryByID(_ context.Context, productCategoryID string) (*ProductCategory, error) {
 	rows := p.db.QueryRowx(getProductCategoryByIDQuery, productCategoryID)
 	res := ProductCategory{}
+	if err := rows.StructScan(&res); err != nil {
+		utils.Logger.Errorf(err.Error())
+		return nil, err
+	}
+	return &res, nil
+}
+
+func (p *postgresProductAccessor) getUOMByID(_ context.Context, uomID string) (*UOM, error) {
+	rows := p.db.QueryRowx(getUOMByIDQuery, uomID)
+	res := UOM{}
 	if err := rows.StructScan(&res); err != nil {
 		utils.Logger.Errorf(err.Error())
 		return nil, err

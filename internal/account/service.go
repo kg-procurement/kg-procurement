@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"kg/procurement/cmd/utils"
 	"kg/procurement/internal/common/database"
+	"kg/procurement/internal/common/helper"
 	"kg/procurement/internal/token"
 	"net/mail"
 
@@ -47,7 +48,7 @@ func (a *AccountService) RegisterAccount(ctx context.Context, spec RegisterContr
 	}
 
 	// Generate ID
-	id, err := generateRandomID()
+	id, err := helper.GenerateRandomID()
 	if err != nil {
 		utils.Logger.Errorf("failed to generate random ID: %v", err)
 		return fmt.Errorf("failed to generate random ID: %w", err)

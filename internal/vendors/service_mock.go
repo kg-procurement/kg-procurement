@@ -11,6 +11,7 @@ package vendors
 
 import (
 	context "context"
+	mailer "kg/procurement/internal/mailer"
 	reflect "reflect"
 
 	gomock "go.uber.org/mock/gomock"
@@ -74,6 +75,45 @@ func (c *MockvendorDBAccessorBulkGetByIDsCall) Do(f func(context.Context, []stri
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockvendorDBAccessorBulkGetByIDsCall) DoAndReturn(f func(context.Context, []string) ([]Vendor, error)) *MockvendorDBAccessorBulkGetByIDsCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// BulkGetByProductName mocks base method.
+func (m *MockvendorDBAccessor) BulkGetByProductName(arg0 context.Context, productName string) ([]Vendor, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BulkGetByProductName", arg0, productName)
+	ret0, _ := ret[0].([]Vendor)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// BulkGetByProductName indicates an expected call of BulkGetByProductName.
+func (mr *MockvendorDBAccessorMockRecorder) BulkGetByProductName(arg0, productName any) *MockvendorDBAccessorBulkGetByProductNameCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BulkGetByProductName", reflect.TypeOf((*MockvendorDBAccessor)(nil).BulkGetByProductName), arg0, productName)
+	return &MockvendorDBAccessorBulkGetByProductNameCall{Call: call}
+}
+
+// MockvendorDBAccessorBulkGetByProductNameCall wrap *gomock.Call
+type MockvendorDBAccessorBulkGetByProductNameCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockvendorDBAccessorBulkGetByProductNameCall) Return(arg0 []Vendor, arg1 error) *MockvendorDBAccessorBulkGetByProductNameCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockvendorDBAccessorBulkGetByProductNameCall) Do(f func(context.Context, string) ([]Vendor, error)) *MockvendorDBAccessorBulkGetByProductNameCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockvendorDBAccessorBulkGetByProductNameCall) DoAndReturn(f func(context.Context, string) ([]Vendor, error)) *MockvendorDBAccessorBulkGetByProductNameCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -273,41 +313,63 @@ func (c *MockvendorDBAccessorUpdateDetailCall) DoAndReturn(f func(context.Contex
 	return c
 }
 
-// getAllVendorIdByProductName mocks base method.
-func (m *MockvendorDBAccessor) getAllVendorIdByProductName(ctx context.Context, productName string) ([]string, error) {
+// MockemailStatusSvc is a mock of emailStatusSvc interface.
+type MockemailStatusSvc struct {
+	ctrl     *gomock.Controller
+	recorder *MockemailStatusSvcMockRecorder
+}
+
+// MockemailStatusSvcMockRecorder is the mock recorder for MockemailStatusSvc.
+type MockemailStatusSvcMockRecorder struct {
+	mock *MockemailStatusSvc
+}
+
+// NewMockemailStatusSvc creates a new mock instance.
+func NewMockemailStatusSvc(ctrl *gomock.Controller) *MockemailStatusSvc {
+	mock := &MockemailStatusSvc{ctrl: ctrl}
+	mock.recorder = &MockemailStatusSvcMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockemailStatusSvc) EXPECT() *MockemailStatusSvcMockRecorder {
+	return m.recorder
+}
+
+// WriteEmailStatus mocks base method.
+func (m *MockemailStatusSvc) WriteEmailStatus(ctx context.Context, status mailer.EmailStatus) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "getAllVendorIdByProductName", ctx, productName)
-	ret0, _ := ret[0].([]string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret := m.ctrl.Call(m, "WriteEmailStatus", ctx, status)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
-// getAllVendorIdByProductName indicates an expected call of getAllVendorIdByProductName.
-func (mr *MockvendorDBAccessorMockRecorder) getAllVendorIdByProductName(ctx, productName any) *MockvendorDBAccessorgetAllVendorIdByProductNameCall {
+// WriteEmailStatus indicates an expected call of WriteEmailStatus.
+func (mr *MockemailStatusSvcMockRecorder) WriteEmailStatus(ctx, status any) *MockemailStatusSvcWriteEmailStatusCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "getAllVendorIdByProductName", reflect.TypeOf((*MockvendorDBAccessor)(nil).getAllVendorIdByProductName), ctx, productName)
-	return &MockvendorDBAccessorgetAllVendorIdByProductNameCall{Call: call}
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WriteEmailStatus", reflect.TypeOf((*MockemailStatusSvc)(nil).WriteEmailStatus), ctx, status)
+	return &MockemailStatusSvcWriteEmailStatusCall{Call: call}
 }
 
-// MockvendorDBAccessorgetAllVendorIdByProductNameCall wrap *gomock.Call
-type MockvendorDBAccessorgetAllVendorIdByProductNameCall struct {
+// MockemailStatusSvcWriteEmailStatusCall wrap *gomock.Call
+type MockemailStatusSvcWriteEmailStatusCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockvendorDBAccessorgetAllVendorIdByProductNameCall) Return(arg0 []string, arg1 error) *MockvendorDBAccessorgetAllVendorIdByProductNameCall {
-	c.Call = c.Call.Return(arg0, arg1)
+func (c *MockemailStatusSvcWriteEmailStatusCall) Return(arg0 error) *MockemailStatusSvcWriteEmailStatusCall {
+	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockvendorDBAccessorgetAllVendorIdByProductNameCall) Do(f func(context.Context, string) ([]string, error)) *MockvendorDBAccessorgetAllVendorIdByProductNameCall {
+func (c *MockemailStatusSvcWriteEmailStatusCall) Do(f func(context.Context, mailer.EmailStatus) error) *MockemailStatusSvcWriteEmailStatusCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockvendorDBAccessorgetAllVendorIdByProductNameCall) DoAndReturn(f func(context.Context, string) ([]string, error)) *MockvendorDBAccessorgetAllVendorIdByProductNameCall {
+func (c *MockemailStatusSvcWriteEmailStatusCall) DoAndReturn(f func(context.Context, mailer.EmailStatus) error) *MockemailStatusSvcWriteEmailStatusCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

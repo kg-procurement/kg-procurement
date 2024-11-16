@@ -3,6 +3,7 @@ package account
 import (
 	"context"
 	"errors"
+	"kg/procurement/internal/common/helper"
 	"testing"
 
 	"bou.ke/monkey"
@@ -129,10 +130,10 @@ func TestAccountService_RegisterAccount(t *testing.T) {
 				defer monkey.Unpatch(bcrypt.GenerateFromPassword)
 			} else if tt.name == "failed to generate ID" {
 				// Mock GenerateRandomID to return an error
-				monkey.Patch(generateRandomID, func() (string, error) {
+				monkey.Patch(helper.GenerateRandomID, func() (string, error) {
 					return "", errors.New("failed to generate ID")
 				})
-				defer monkey.Unpatch(generateRandomID)
+				defer monkey.Unpatch(helper.GenerateRandomID)
 			}
 
 			err := a.RegisterAccount(tt.args.ctx, tt.args.spec)
@@ -440,3 +441,4 @@ func TestAccountService_GetCurrentUser(t *testing.T) {
 		})
 	}
 }
+

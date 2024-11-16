@@ -14,7 +14,7 @@ import (
 )
 
 func Test_NewVendorService(t *testing.T) {
-	_ = NewVendorService(config.Application{}, nil, nil, nil)
+	_ = NewVendorService(config.Application{}, nil, nil, nil, nil)
 }
 
 func TestVendorService_GetAll(t *testing.T) {
@@ -49,7 +49,6 @@ func TestVendorService_GetAll(t *testing.T) {
 
 	type fields struct {
 		mockVendorDBAccessor *MockvendorDBAccessor
-		mockDBConnector      *database.MockDBConnector
 	}
 
 	type args struct {
@@ -159,7 +158,6 @@ func TestVendorService_GetById(t *testing.T) {
 
 	type fields struct {
 		mockVendorDBAccessor *MockvendorDBAccessor
-		mockDBConnector      *database.MockDBConnector
 	}
 
 	type args struct {
@@ -369,6 +367,7 @@ func TestVendorService_BlastEmail(t *testing.T) {
 	var (
 		mockVendorAccessor *MockvendorDBAccessor
 		mockEmailProvider  *mailer.MockEmailProvider
+		mockEmailStatusSvc *MockemailStatusSvc
 		subject            *VendorService
 	)
 
@@ -376,10 +375,13 @@ func TestVendorService_BlastEmail(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		mockVendorAccessor = NewMockvendorDBAccessor(ctrl)
 		mockEmailProvider = mailer.NewMockEmailProvider(ctrl)
+		mockEmailStatusSvc = NewMockemailStatusSvc(ctrl)
+
 		subject = &VendorService{
 			cfg:              config.Application{},
 			vendorDBAccessor: mockVendorAccessor,
 			smtpProvider:     mockEmailProvider,
+			emailStatusSvc:   mockEmailStatusSvc,
 		}
 
 		return gomega.NewWithT(t)
@@ -409,6 +411,11 @@ func TestVendorService_BlastEmail(t *testing.T) {
 
 		mockEmailProvider.EXPECT().
 			SendEmail(gomock.Any()).
+			Return(nil).
+			Times(2)
+
+		mockEmailStatusSvc.EXPECT().
+			WriteEmailStatus(ctx, gomock.Any()).
 			Return(nil).
 			Times(2)
 
@@ -454,12 +461,46 @@ func TestVendorService_BlastEmail(t *testing.T) {
 			SendEmail(gomock.Any()).
 			Return(nil)
 
+		mockEmailStatusSvc.EXPECT().
+			WriteEmailStatus(ctx, gomock.Any()).
+			Return(nil).
+			Times(2)
+
 		errList, err := subject.BlastEmail(ctx, vendorIDs, emailTemplate{
 			Subject: "test",
 			Body:    "email body here uwaa",
 		})
 		g.Expect(err).ToNot(gomega.BeNil())
 		g.Expect(errList).To(gomega.HaveLen(1))
+	})
+
+	t.Run("error writing email status", func(t *testing.T) {
+		g := setup(t)
+		ctx := context.Background()
+
+		vendorIDs := []string{"1111", "2222"}
+		mockVendorAccessor.EXPECT().
+			BulkGetByIDs(ctx, vendorIDs).
+			Return(vendors, nil)
+
+		mockEmailProvider.EXPECT().
+			SendEmail(gomock.Any()).
+			Return(nil).
+			Times(2)
+
+		// simulate error when inserting to email_status
+		mockEmailStatusSvc.EXPECT().
+			WriteEmailStatus(ctx, gomock.Any()).
+			Return(errors.New("write error")).
+			Times(2)
+
+		errList, err := subject.BlastEmail(ctx, vendorIDs, emailTemplate{
+			Subject: "Test Subject",
+			Body:    "Test Body",
+		})
+
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(errList).To(gomega.BeNil())
 	})
 }
 
@@ -468,53 +509,101 @@ func TestVendorService_AutomatedBlastEmail(t *testing.T) {
 
 	var (
 		mockVendorAccessor *MockvendorDBAccessor
+		mockEmailProvider  *mailer.MockEmailProvider
+		mockEmailStatusSvc *MockemailStatusSvc
 		service            *VendorService
 	)
 
 	setup := func(t *testing.T) *gomega.GomegaWithT {
 		ctrl := gomock.NewController(t)
 		mockVendorAccessor = NewMockvendorDBAccessor(ctrl)
+		mockEmailProvider = mailer.NewMockEmailProvider(ctrl)
+		mockEmailStatusSvc = NewMockemailStatusSvc(ctrl)
+
 		service = &VendorService{
 			cfg:              config.Application{},
 			vendorDBAccessor: mockVendorAccessor,
+			smtpProvider:     mockEmailProvider,
+			emailStatusSvc:   mockEmailStatusSvc,
 		}
 
 		return gomega.NewWithT(t)
 	}
 
 	var (
-		vendorIDs = []string{
-			"2550",
-			"2580",
+		vendors = []Vendor{
+			{
+				ID:    "1",
+				Email: "valerian@outlook.com",
+			},
+			{
+				ID:    "2",
+				Email: "salim@outlook.com",
+			},
 		}
+		product_name = "Buku"
 	)
 
 	t.Run("success", func(t *testing.T) {
 		g := setup(t)
 		ctx := context.Background()
 
-		product_name := "Buku"
 		mockVendorAccessor.EXPECT().
-			getAllVendorIdByProductName(ctx, product_name).
-			Return(vendorIDs, nil)
+			BulkGetByProductName(ctx, product_name).
+			Return(vendors, nil)
 
-		result, err := service.AutomatedEmailBlast(ctx, product_name)
+		mockEmailProvider.EXPECT().
+			SendEmail(gomock.Any()).
+			Return(nil).
+			Times(2)
+
+		mockEmailStatusSvc.EXPECT().
+			WriteEmailStatus(ctx, gomock.Any()).
+			Return(nil).
+			Times(2)
+
+		errList, err := service.AutomatedEmailBlast(ctx, product_name)
 		g.Expect(err).To(gomega.BeNil())
-		g.Expect(result).To(gomega.Equal(vendorIDs))
+		g.Expect(errList).To(gomega.BeNil())
 	})
 
 	t.Run("error", func(t *testing.T) {
 		g := setup(t)
 		ctx := context.Background()
 
-		product_name := "Buku"
 		mockVendorAccessor.EXPECT().
-			getAllVendorIdByProductName(ctx, product_name).
+			BulkGetByProductName(ctx, product_name).
 			Return(nil, errors.New("error"))
 
 		result, err := service.AutomatedEmailBlast(ctx, product_name)
 		g.Expect(err).ToNot(gomega.BeNil())
 		g.Expect(result).To(gomega.BeNil())
+	})
+
+	t.Run("not returning error even when email fails to send", func(t *testing.T) {
+		g := setup(t)
+		ctx := context.Background()
+
+		mockVendorAccessor.EXPECT().
+			BulkGetByProductName(ctx, product_name).
+			Return(vendors, nil)
+
+		mockEmailProvider.EXPECT().
+			SendEmail(gomock.Any()).
+			Return(errors.New("error"))
+
+		mockEmailProvider.EXPECT().
+			SendEmail(gomock.Any()).
+			Return(nil)
+
+		mockEmailStatusSvc.EXPECT().
+			WriteEmailStatus(ctx, gomock.Any()).
+			Return(nil).
+			Times(2)
+
+		errList, err := service.AutomatedEmailBlast(ctx, product_name)
+		g.Expect(err).ToNot(gomega.BeNil())
+		g.Expect(errList).To(gomega.HaveLen(1))
 	})
 }
 
