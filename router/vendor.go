@@ -152,7 +152,7 @@ func NewVendorEngine(
 			})
 			return
 		}
-		// vendors := []vendors.Vendor{}
+
 		errList, err := vendorSvc.AutomatedEmailBlast(ctx, productName)
 		if err != nil {
 			if len(errList) > 0 {

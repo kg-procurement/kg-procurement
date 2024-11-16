@@ -117,13 +117,6 @@ func (v *VendorService) executeBlastEmail(ctx context.Context, vendors []Vendor,
 
 			templateBody := v.replacePlaceholder(template.Body, replacements)
 
-			// err := v.smtpProvider.SendEmail(mailer.Email{
-			// 	From:    v.cfg.SMTP.AuthEmail,
-			// 	To:      []string{vendor.Email},
-			// 	Subject: template.Subject,
-			// 	Body:    templateBody,
-			// })
-			// errCh <- err
 			email := mailer.Email{
 				From:    v.cfg.SMTP.AuthEmail,
 				To:      []string{vendor.Email},
