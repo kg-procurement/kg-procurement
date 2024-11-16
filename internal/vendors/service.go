@@ -7,9 +7,11 @@ import (
 	"kg/procurement/cmd/config"
 	"kg/procurement/cmd/utils"
 	"kg/procurement/internal/common/database"
+	"kg/procurement/internal/common/helper"
 	"kg/procurement/internal/mailer"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/benbjohnson/clock"
 )
@@ -24,14 +26,15 @@ type vendorDBAccessor interface {
 	BulkGetByProductName(_ context.Context, productName string) ([]Vendor, error)
 }
 
+type emailStatusSvc interface {
+	WriteEmailStatus(ctx context.Context, status mailer.EmailStatus) error
+}
+
 type VendorService struct {
 	cfg config.Application
 	vendorDBAccessor
-	smtpProvider mailer.EmailProvider
-}
-
-func (v *VendorService) GetSomeStuff(ctx context.Context) ([]string, error) {
-	return v.vendorDBAccessor.GetSomeStuff(ctx)
+	smtpProvider   mailer.EmailProvider
+	emailStatusSvc emailStatusSvc
 }
 
 func (v *VendorService) GetById(ctx context.Context, id string) (*Vendor, error) {
@@ -58,7 +61,7 @@ func (v *VendorService) BlastEmail(ctx context.Context, vendorIDs []string, temp
 
 	v.applyDefaultEmailTemplate(&template)
 
-	return v.executeBlastEmail(vendors, template)
+	return v.executeBlastEmail(ctx, vendors, template)
 }
 
 func (v *VendorService) AutomatedEmailBlast(ctx context.Context, productName string) ([]string, error) {
@@ -76,7 +79,7 @@ func (v *VendorService) AutomatedEmailBlast(ctx context.Context, productName str
 
 	template.Body = v.replacePlaceholder(template.Body, replacements)
 
-	return v.executeBlastEmail(vendors, *template)
+	return v.executeBlastEmail(ctx, vendors, *template)
 }
 
 func (*VendorService) applyDefaultEmailTemplate(template *emailTemplate) {
@@ -88,11 +91,11 @@ func (*VendorService) applyDefaultEmailTemplate(template *emailTemplate) {
 	}
 }
 
-func (v *VendorService) executeBlastEmail(vendors []Vendor, template emailTemplate) ([]string, error) {
+func (v *VendorService) executeBlastEmail(ctx context.Context, vendors []Vendor, template emailTemplate) ([]string, error) {
 	errCh := make(chan error, len(vendors))
-	defer close(errCh)
+	statusCh := make(chan mailer.EmailStatus, len(vendors))
 
-	// limit the number of concurrent workers to 20
+	// Limit the number of concurrent workers to 20
 	workerLimit := 20
 	sem := make(chan struct{}, workerLimit)
 
@@ -105,6 +108,7 @@ func (v *VendorService) executeBlastEmail(vendors []Vendor, template emailTempla
 
 		go func(vendor Vendor) {
 			defer wg.Done()
+			defer func() { <-sem }() // release the semaphore slot
 
 			// replaces {{name}} keyword to vendor name
 			replacements := map[string]string{
@@ -113,30 +117,64 @@ func (v *VendorService) executeBlastEmail(vendors []Vendor, template emailTempla
 
 			templateBody := v.replacePlaceholder(template.Body, replacements)
 
-			err := v.smtpProvider.SendEmail(mailer.Email{
+			// err := v.smtpProvider.SendEmail(mailer.Email{
+			// 	From:    v.cfg.SMTP.AuthEmail,
+			// 	To:      []string{vendor.Email},
+			// 	Subject: template.Subject,
+			// 	Body:    templateBody,
+			// })
+			// errCh <- err
+			email := mailer.Email{
 				From:    v.cfg.SMTP.AuthEmail,
 				To:      []string{vendor.Email},
 				Subject: template.Subject,
 				Body:    templateBody,
-			})
-			errCh <- err
+			}
 
-			<-sem
+			sendErr := v.smtpProvider.SendEmail(email)
+
+			id, _ := helper.GenerateRandomID()
+			emailStatus := mailer.EmailStatus{
+				ID:           id,
+				EmailTo:      vendor.Email,
+				ModifiedDate: time.Now(),
+			}
+
+			if sendErr != nil {
+				emailStatus.Status = "failed"
+				errCh <- sendErr
+			} else {
+				emailStatus.Status = "success"
+				errCh <- nil
+			}
+
+			statusCh <- emailStatus
 		}(vendor)
 	}
+
 	wg.Wait()
+	close(errCh)
+	close(statusCh)
 
 	var errList []string
-	for i := 0; i < len(vendors); i++ {
-		if err := <-errCh; err != nil {
-			utils.Logger.Errorf("fail sending email %v", err)
+	for err := range errCh {
+		if err != nil {
+			utils.Logger.Errorf("failed to send email: %v", err)
 			errList = append(errList, err.Error())
 		}
 	}
 
+	// write email statuses to the database so we can track the status
+	for status := range statusCh {
+		writeErr := v.emailStatusSvc.WriteEmailStatus(ctx, status)
+		if writeErr != nil {
+			utils.Logger.Errorf("failed to write email status: %v", writeErr)
+		}
+	}
+
 	if len(errList) > 0 {
-		utils.Logger.Error("fail sending emails")
-		return errList, fmt.Errorf("fail sending emails")
+		utils.Logger.Error("failed to send some emails")
+		return errList, fmt.Errorf("failed to send some emails")
 	}
 
 	return nil, nil
@@ -154,10 +192,12 @@ func NewVendorService(
 	conn database.DBConnector,
 	clock clock.Clock,
 	smtpProvider mailer.EmailProvider,
+	emailStatusSvc emailStatusSvc,
 ) *VendorService {
 	return &VendorService{
 		cfg:              cfg,
 		vendorDBAccessor: newPostgresVendorAccessor(conn, clock),
 		smtpProvider:     smtpProvider,
+		emailStatusSvc:   emailStatusSvc,
 	}
 }
