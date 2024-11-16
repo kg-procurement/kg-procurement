@@ -23,7 +23,7 @@ type vendorDBAccessor interface {
 	UpdateDetail(ctx context.Context, spec Vendor) (*Vendor, error)
 	GetAllLocations(ctx context.Context) ([]string, error)
 	BulkGetByIDs(_ context.Context, ids []string) ([]Vendor, error)
-	getAllVendorIdByProductName(ctx context.Context, productName string) ([]string, error)
+	BulkGetByProductName(_ context.Context, productName string) ([]Vendor, error)
 }
 
 type emailStatusSvc interface {
@@ -61,6 +61,37 @@ func (v *VendorService) BlastEmail(ctx context.Context, vendorIDs []string, temp
 
 	v.applyDefaultEmailTemplate(&template)
 
+	return v.executeBlastEmail(ctx, vendors, template)
+}
+
+func (v *VendorService) AutomatedEmailBlast(ctx context.Context, productName string) ([]string, error) {
+	vendors, err := v.vendorDBAccessor.BulkGetByProductName(ctx, productName)
+
+	if err != nil {
+		return nil, err
+	}
+
+	template := &emailTemplate{}
+	v.applyDefaultEmailTemplate(template)
+	replacements := map[string]string{
+		"{{product_name}}": productName,
+	}
+
+	template.Body = v.replacePlaceholder(template.Body, replacements)
+
+	return v.executeBlastEmail(ctx, vendors, *template)
+}
+
+func (*VendorService) applyDefaultEmailTemplate(template *emailTemplate) {
+	if template.Subject == "" {
+		template.Subject = "Request for products"
+	}
+	if template.Body == "" {
+		template.Body = "Kepada Yth {{name}},\n\nKami mengajukan permintaan untuk pengadaan produk {{product_name}} yang dibutuhkan oleh perusahaan kami. Mohon informasi mengenai ketersediaan, harga, dan waktu pengiriman untuk produk tersebut.\n\nTerima kasih atas perhatian dan kerjasamanya.\n\nHormat kami"
+	}
+}
+
+func (v *VendorService) executeBlastEmail(ctx context.Context, vendors []Vendor, template emailTemplate) ([]string, error) {
 	errCh := make(chan error, len(vendors))
 	statusCh := make(chan mailer.EmailStatus, len(vendors))
 
@@ -80,12 +111,17 @@ func (v *VendorService) BlastEmail(ctx context.Context, vendorIDs []string, temp
 			defer func() { <-sem }() // release the semaphore slot
 
 			// replaces {{name}} keyword to vendor name
-			bodyWithVendorName := strings.Replace(template.Body, "{{name}}", vendor.Name, -1)
+			replacements := map[string]string{
+				"{{name}}": vendor.Name,
+			}
+
+			templateBody := v.replacePlaceholder(template.Body, replacements)
+
 			email := mailer.Email{
 				From:    v.cfg.SMTP.AuthEmail,
 				To:      []string{vendor.Email},
 				Subject: template.Subject,
-				Body:    bodyWithVendorName,
+				Body:    templateBody,
 			}
 
 			sendErr := v.smtpProvider.SendEmail(email)
@@ -137,17 +173,11 @@ func (v *VendorService) BlastEmail(ctx context.Context, vendorIDs []string, temp
 	return nil, nil
 }
 
-func (v *VendorService) AutomatedEmailBlast(ctx context.Context, productName string) ([]string, error) {
-	return v.vendorDBAccessor.getAllVendorIdByProductName(ctx, productName)
-}
-
-func (*VendorService) applyDefaultEmailTemplate(template *emailTemplate) {
-	if template.Subject == "" {
-		template.Subject = "Request for products"
+func (v *VendorService) replacePlaceholder(template string, replacements map[string]string) string {
+	for placeholder, value := range replacements {
+		template = strings.ReplaceAll(template, placeholder, value)
 	}
-	if template.Body == "" {
-		template.Body = "Kepada Yth {{name}},\n\nKami mengajukan permintaan untuk pengadaan produk tertentu yang dibutuhkan oleh perusahaan kami. Mohon informasi mengenai ketersediaan, harga, dan waktu pengiriman untuk produk tersebut.\n\nTerima kasih atas perhatian dan kerjasamanya.\n\nHormat kami"
-	}
+	return template
 }
 
 func NewVendorService(
