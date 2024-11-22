@@ -120,7 +120,7 @@ func Test_GetAll(t *testing.T) {
 		OFFSET $2
 	`
 
-	countQuery := "SELECT COUNT(*) from email_status"
+	countQuery := "SELECT COUNT(*) from email_status es"
 
 	fixedTime := time.Date(2024, time.September, 23, 12, 30, 0, 0, time.UTC)
 
@@ -164,13 +164,79 @@ func Test_GetAll(t *testing.T) {
 			ModifiedDate: fixedTime,
 		}}
 
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(res).ToNot(gomega.BeNil())
+
 		expectation := &AccessorGetAllPaginationData{
 			EmailStatus: emailStatusExpectation,
 			Metadata:    res.Metadata,
 		}
 
-		g.Expect(err).To(gomega.BeNil())
 		g.Expect(res).To(gomega.Equal(expectation))
+	})
+
+	t.Run("success with filter by email_to", func(t *testing.T) {
+		g, db := setup(t)
+		defer db.Close()
+
+		rows := sqlmock.NewRows(emailStatusFields).
+			AddRow(
+				"1",
+				"test@example.com",
+				"sent",
+				fixedTime,
+			)
+
+		customSpec := GetAllEmailStatusSpec{
+			EmailTo: "test@example.com",
+			PaginationSpec: database.PaginationSpec{
+				Order: "DESC",
+				Limit: 10,
+				Page:  1,
+			},
+		}
+
+		dataQuery := `SELECT DISTINCT es.id, es.email_to, es.status, es.modified_date FROM email_status es WHERE es.email_to ILIKE $1 ORDER BY es.modified_date DESC LIMIT $2 OFFSET $3`
+
+		args := []driver.Value{
+			"%" + customSpec.EmailTo + "%",
+			int64(customSpec.PaginationSpec.Limit),
+			int64((customSpec.PaginationSpec.Page - 1) * customSpec.PaginationSpec.Limit),
+		}
+
+		mock.ExpectQuery(dataQuery).
+			WithArgs(args...).
+			WillReturnRows(rows)
+
+		countQuery := `SELECT COUNT(*) from email_status es WHERE es.email_to ILIKE $1`
+
+		mock.ExpectQuery(countQuery).
+			WithArgs("%" + customSpec.EmailTo + "%").
+			WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
+
+		ctx := context.Background()
+		res, err := accessor.GetAll(ctx, customSpec)
+
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(res).ToNot(gomega.BeNil())
+
+		emailStatusExpectation := []EmailStatus{{
+			ID:           "1",
+			EmailTo:      "test@example.com",
+			Status:       "sent",
+			ModifiedDate: fixedTime,
+		}}
+
+		expectation := &AccessorGetAllPaginationData{
+			EmailStatus: emailStatusExpectation,
+			Metadata:    res.Metadata,
+		}
+
+		g.Expect(res).To(gomega.Equal(expectation))
+
+		if err := mock.ExpectationsWereMet(); err != nil {
+			t.Errorf("there were unfulfilled expectations: %s", err)
+		}
 	})
 
 	t.Run("success with ordering", func(t *testing.T) {
