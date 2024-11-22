@@ -36,11 +36,12 @@ func (p *postgresEmailStatusAccessor) WriteEmailStatus(_ context.Context, es Ema
 func (p *postgresEmailStatusAccessor) GetAll(ctx context.Context, spec GetAllEmailStatusSpec) (*AccessorGetAllPaginationData, error) {
 	paginationArgs := database.BuildPaginationArgs(spec.PaginationSpec)
 
-	// Initialize clauses and arguments
 	var (
+		whereClauses    []string
 		joinClauses     []string
 		extraClauses    []string
 		args            []interface{}
+		countArgs       []interface{}
 		argsIndex       = 1
 		extraClausesRaw = []string{
 			"LIMIT $%d",
@@ -48,7 +49,14 @@ func (p *postgresEmailStatusAccessor) GetAll(ctx context.Context, spec GetAllEma
 		}
 	)
 
-	// Set order by default value
+	if spec.EmailTo != "" {
+		whereClauses = append(whereClauses, fmt.Sprintf("es.email_to ILIKE $%d", argsIndex))
+		argValue := "%" + spec.EmailTo + "%"
+		args = append(args, argValue)
+		countArgs = append(countArgs, argValue)
+		argsIndex++
+	}
+
 	if paginationArgs.OrderBy == "" {
 		paginationArgs.OrderBy = "es.modified_date"
 	} else {
@@ -68,20 +76,26 @@ func (p *postgresEmailStatusAccessor) GetAll(ctx context.Context, spec GetAllEma
 	// Append pagination arguments to args
 	args = append(args, paginationArgs.Limit, paginationArgs.Offset)
 
+	whereClause := ""
+	if len(whereClauses) > 0 {
+		whereClause = "WHERE " + strings.Join(whereClauses, " AND ")
+	}
+
 	// Construct the final query
 	joinClause := strings.Join(joinClauses, "\n")
 	extraClause := strings.Join(extraClauses, "\n")
 
 	dataQuery := fmt.Sprintf(`
-		SELECT DISTINCT
-			es.id,
-			es.email_to,
-			es.status,
-			es.modified_date
-		FROM email_status es
-		%s
-		%s
-	`, joinClause, extraClause)
+        SELECT DISTINCT
+            es.id,
+            es.email_to,
+            es.status,
+            es.modified_date
+        FROM email_status es
+        %s
+        %s
+        %s
+    `, joinClause, whereClause, extraClause)
 
 	// Execute the query
 	rows, err := p.db.Queryx(dataQuery, args...)
@@ -106,16 +120,19 @@ func (p *postgresEmailStatusAccessor) GetAll(ctx context.Context, spec GetAllEma
 	}
 
 	// Get the total count of entries
-	countQuery := "SELECT COUNT(*) from email_status"
-	totalEntries := new(int)
-	row := p.db.QueryRow(countQuery)
-	if err = row.Scan(&totalEntries); err != nil {
+	countQuery := "SELECT COUNT(*) from email_status es"
+	if whereClause != "" {
+		countQuery += " " + whereClause
+	}
+	totalEntries := 0
+	err = p.db.QueryRow(countQuery, countArgs...).Scan(&totalEntries)
+	if err != nil {
 		utils.Logger.Error(err.Error())
 		return nil, err
 	}
 
 	// Generate pagination metadata
-	metadata := database.GeneratePaginationMetadata(spec.PaginationSpec, *totalEntries)
+	metadata := database.GeneratePaginationMetadata(spec.PaginationSpec, totalEntries)
 
 	return &AccessorGetAllPaginationData{EmailStatus: emailStatus, Metadata: metadata}, nil
 }
