@@ -49,6 +49,7 @@ func (p *postgresEmailStatusAccessor) GetAll(ctx context.Context, spec GetAllEma
 		}
 	)
 
+	// Build WHERE clauses
 	if spec.EmailTo != "" {
 		whereClauses = append(whereClauses, fmt.Sprintf("es.email_to ILIKE $%d", argsIndex))
 		argValue := "%" + spec.EmailTo + "%"
@@ -57,6 +58,7 @@ func (p *postgresEmailStatusAccessor) GetAll(ctx context.Context, spec GetAllEma
 		argsIndex++
 	}
 
+	// Set order by default value
 	if paginationArgs.OrderBy == "" {
 		paginationArgs.OrderBy = "es.modified_date"
 	} else {
@@ -76,6 +78,7 @@ func (p *postgresEmailStatusAccessor) GetAll(ctx context.Context, spec GetAllEma
 	// Append pagination arguments to args
 	args = append(args, paginationArgs.Limit, paginationArgs.Offset)
 
+	// Construct the WHERE clause
 	whereClause := ""
 	if len(whereClauses) > 0 {
 		whereClause = "WHERE " + strings.Join(whereClauses, " AND ")
