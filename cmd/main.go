@@ -36,8 +36,8 @@ func main() {
 			fmt.Println("unable to create New Relic Application", err)
 		}
 		nrApp = app
+		utils.ApplyNewRelicIntegration(nrApp)
 	}
-	utils.InitLogger(cfg.NewRelic, nrApp)
 
 	conn := dependency.NewPostgreSQL(cfg.Common.Postgres)
 	defer func() {
