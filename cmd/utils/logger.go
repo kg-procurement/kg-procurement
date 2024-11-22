@@ -49,4 +49,4 @@ func NewConsoleLogger() *ConsoleLogger {
 	return &ConsoleLogger{}
 }
 
-var Logger *ConsoleLogger = NewConsoleLogger()
+var Logger = NewConsoleLogger()
