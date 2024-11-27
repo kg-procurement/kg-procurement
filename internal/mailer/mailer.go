@@ -2,16 +2,52 @@
 package mailer
 
 import (
+	"io"
+	"kg/procurement/cmd/utils"
 	"kg/procurement/internal/common/database"
+	"mime/multipart"
 	"time"
 )
 
 type Email struct {
-	From    string
-	To      []string
-	CC      []string
-	Subject string
-	Body    string
+	From        string
+	To          []string
+	CC          []string
+	Subject     string
+	Body        string
+	Attachments []Attachment
+}
+
+type Attachment struct {
+	Filename string
+	Data     []byte
+	MIMEType string
+}
+
+func BulkFromMultipartForm(files []*multipart.FileHeader) ([]Attachment, error) {
+	var attachments []Attachment
+	for _, fileHeader := range files {
+		file, err := fileHeader.Open()
+		if err != nil {
+			utils.Logger.Error(err.Error())
+			return nil, err
+		}
+		defer file.Close()
+
+		fileData, err := io.ReadAll(file)
+		if err != nil {
+			utils.Logger.Error(err.Error())
+			return nil, err
+		}
+
+		attachments = append(attachments, Attachment{
+			Filename: fileHeader.Filename,
+			Data:     fileData,
+			MIMEType: fileHeader.Header.Get("Content-Type"),
+		})
+	}
+
+	return attachments, nil
 }
 
 type EmailStatus struct {
