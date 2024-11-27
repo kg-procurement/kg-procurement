@@ -5,6 +5,9 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+
+	"github.com/newrelic/go-agent/v3/integrations/logcontext-v2/logWriter"
+	"github.com/newrelic/go-agent/v3/newrelic"
 )
 
 var errorLogger *log.Logger
@@ -32,8 +35,18 @@ func init() {
 		fmt.Println("error opening file: ", err)
 		return
 	}
+
 	errorLogger = log.New(generalLog, "Error:\t", log.Ldate|log.Ltime|log.Lshortfile)
 	debugLogger = log.New(generalLog, "Debug:\t", log.Ldate|log.Ltime|log.Lshortfile)
 	infoLogger = log.New(generalLog, "Info:\t", log.Ldate|log.Ltime|log.Lshortfile)
 	fatalLogger = log.New(generalLog, "Fatal:\t", log.Ldate|log.Ltime|log.Lshortfile)
+}
+
+func ApplyNewRelicIntegration(nrApp *newrelic.Application) {
+	writer := logWriter.New(os.Stdout, nrApp)
+
+	errorLogger = log.New(&writer, "", log.Default().Flags())
+	debugLogger = log.New(&writer, "", log.Default().Flags())
+	infoLogger = log.New(&writer, "", log.Default().Flags())
+	fatalLogger = log.New(&writer, "", log.Default().Flags())
 }

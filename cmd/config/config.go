@@ -7,11 +7,18 @@ import (
 )
 
 type Application struct {
-	Common Common `mapstructure:"common" validate:"required"`
-	Routes Routes `mapstructure:"routes" validate:"required"`
-	Token  Token  `mapstructure:"token" validate:"required"`
-	SMTP   SMTP   `mapstructure:"smtp" validate:"required"`
-	AWS    AWS    `mapstructure:"aws" validate:"required"`
+	Common   Common   `mapstructure:"common" validate:"required"`
+	Routes   Routes   `mapstructure:"routes" validate:"required"`
+	Token    Token    `mapstructure:"token" validate:"required"`
+	SMTP     SMTP     `mapstructure:"smtp" validate:"required"`
+	AWS      AWS      `mapstructure:"aws" validate:"required"`
+	NewRelic NewRelic `mapstructure:"newrelic" validate:"required"`
+}
+
+type NewRelic struct {
+	Enabled         bool   `mapstructure:"enabled"`
+	ApplicationName string `mapstructure:"application-name" validate:"required"`
+	LicenseKey      string `mapstructure:"license-key" validate:"required"`
 }
 
 type SMTP struct {
@@ -68,8 +75,8 @@ type Token struct {
 }
 
 type AccountRoutes struct {
-	Register string `mapstructure:"register" validate:"required"`
-	Login    string `mapstructure:"login" validate:"required"`
+	Register       string `mapstructure:"register" validate:"required"`
+	Login          string `mapstructure:"login" validate:"required"`
 	GetCurrentUser string `mapstructure:"get-current-user" validate:"required"`
 }
 

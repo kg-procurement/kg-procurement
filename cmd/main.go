@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"kg/procurement/cmd/config"
 	"kg/procurement/cmd/dependency"
 	"kg/procurement/cmd/utils"
@@ -15,13 +16,28 @@ import (
 	"github.com/benbjohnson/clock"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/newrelic/go-agent/v3/integrations/nrgin"
+	"github.com/newrelic/go-agent/v3/newrelic"
 )
 
 // main is the entrypoint for the entire service
-
 func main() {
-
 	cfg := config.Load()
+
+	var nrApp *newrelic.Application
+	if cfg.NewRelic.Enabled {
+		app, err := newrelic.NewApplication(
+			newrelic.ConfigAppName(cfg.NewRelic.ApplicationName),
+			newrelic.ConfigLicense(cfg.NewRelic.LicenseKey),
+			newrelic.ConfigDebugLogger(os.Stdout),
+			newrelic.ConfigAppLogForwardingEnabled(true),
+		)
+		if err != nil {
+			fmt.Println("unable to create New Relic Application", err)
+		}
+		nrApp = app
+		utils.ApplyNewRelicIntegration(nrApp)
+	}
 
 	conn := dependency.NewPostgreSQL(cfg.Common.Postgres)
 	defer func() {
@@ -46,7 +62,10 @@ func main() {
 	accountSvc := account.NewAccountService(conn, clock, tokenSvc)
 
 	r := gin.Default()
+
 	r.Use(cors.Default())
+	r.Use(nrgin.Middleware(nrApp))
+
 	router.NewVendorEngine(r, cfg.Routes.Vendor, vendorSvc)
 	router.NewProductEngine(r, cfg.Routes.Product, productSvc)
 	router.NewAccountEngine(r, cfg.Routes.Account, accountSvc)

@@ -49,5 +49,10 @@
     "ses": {
       "domain": "your-domain"
     }
+  },
+  "newrelic": {
+    "enabled": false,
+    "application-name": "kg-local",
+    "license-key": "license should have len 40, ends in NRAL"
   }
 }
