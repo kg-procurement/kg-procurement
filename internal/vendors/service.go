@@ -115,11 +115,16 @@ func (v *VendorService) executeBlastEmail(ctx context.Context, vendors []Vendor,
 				"{{name}}": vendor.Name,
 			}
 
-			email.From = v.cfg.SMTP.AuthEmail
-			email.To = []string{vendor.Email}
-			email.Body = v.replacePlaceholder(email.Body, replacements)
+			em := mailer.Email{
+				From:        v.cfg.SMTP.AuthEmail,
+				To:          []string{vendor.Email},
+				CC:          email.CC,
+				Subject:     email.Subject,
+				Body:        v.replacePlaceholder(email.Body, replacements),
+				Attachments: email.Attachments,
+			}
 
-			sendErr := v.smtpProvider.SendEmail(email)
+			sendErr := v.smtpProvider.SendEmail(em)
 
 			id, _ := helper.GenerateRandomID()
 			emailStatus := mailer.EmailStatus{
