@@ -118,6 +118,45 @@ func (c *MockvendorDBAccessorBulkGetByProductNameCall) DoAndReturn(f func(contex
 	return c
 }
 
+// CreateEvaluation mocks base method.
+func (m *MockvendorDBAccessor) CreateEvaluation(ctx context.Context, evaluation *VendorEvaluation) (*VendorEvaluation, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateEvaluation", ctx, evaluation)
+	ret0, _ := ret[0].(*VendorEvaluation)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateEvaluation indicates an expected call of CreateEvaluation.
+func (mr *MockvendorDBAccessorMockRecorder) CreateEvaluation(ctx, evaluation any) *MockvendorDBAccessorCreateEvaluationCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateEvaluation", reflect.TypeOf((*MockvendorDBAccessor)(nil).CreateEvaluation), ctx, evaluation)
+	return &MockvendorDBAccessorCreateEvaluationCall{Call: call}
+}
+
+// MockvendorDBAccessorCreateEvaluationCall wrap *gomock.Call
+type MockvendorDBAccessorCreateEvaluationCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockvendorDBAccessorCreateEvaluationCall) Return(arg0 *VendorEvaluation, arg1 error) *MockvendorDBAccessorCreateEvaluationCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockvendorDBAccessorCreateEvaluationCall) Do(f func(context.Context, *VendorEvaluation) (*VendorEvaluation, error)) *MockvendorDBAccessorCreateEvaluationCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockvendorDBAccessorCreateEvaluationCall) DoAndReturn(f func(context.Context, *VendorEvaluation) (*VendorEvaluation, error)) *MockvendorDBAccessorCreateEvaluationCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // GetAll mocks base method.
 func (m *MockvendorDBAccessor) GetAll(ctx context.Context, spec GetAllVendorSpec) (*AccessorGetAllPaginationData, error) {
 	m.ctrl.T.Helper()

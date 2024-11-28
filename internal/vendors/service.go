@@ -24,6 +24,7 @@ type vendorDBAccessor interface {
 	GetAllLocations(ctx context.Context) ([]string, error)
 	BulkGetByIDs(_ context.Context, ids []string) ([]Vendor, error)
 	BulkGetByProductName(_ context.Context, productName string) ([]Vendor, error)
+	CreateEvaluation(ctx context.Context, evaluation *VendorEvaluation) (*VendorEvaluation, error)
 }
 
 type emailStatusSvc interface {
@@ -80,6 +81,15 @@ func (v *VendorService) AutomatedEmailBlast(ctx context.Context, productName str
 	template.Body = v.replacePlaceholder(template.Body, replacements)
 
 	return v.executeBlastEmail(ctx, vendors, *template)
+}
+
+func (v *VendorService) CreateEvaluation(ctx context.Context, evaluation *VendorEvaluation) (*VendorEvaluation, error) {
+	id, _ := helper.GenerateRandomID()
+	evaluation.ID = id
+
+	evaluation.ModifiedDate = time.Now()
+
+	return v.vendorDBAccessor.CreateEvaluation(ctx, evaluation)
 }
 
 func (*VendorService) applyDefaultEmailTemplate(template *emailTemplate) {

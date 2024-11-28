@@ -145,6 +145,8 @@ func NewVendorEngine(
 		})
 	})
 	r.POST(cfg.AutomatedEmailBlast, func(ctx *gin.Context) {
+		utils.Logger.Info("Received automatedEmailBlast request")
+
 		productName := ctx.Param("product_name")
 		if productName == "" {
 			ctx.JSON(http.StatusBadRequest, gin.H{
@@ -168,6 +170,32 @@ func NewVendorEngine(
 		}
 		ctx.JSON(http.StatusOK, gin.H{
 			"message": "Emails successfully sent",
+		})
+	})
+	r.POST(cfg.Evaluation, func(ctx *gin.Context) {
+		utils.Logger.Info("Received vendor evaluation request")
+
+		vendorEvaluation := &vendors.VendorEvaluation{}
+
+		err := ctx.ShouldBindJSON(vendorEvaluation)
+		if err != nil {
+			utils.Logger.Error(err.Error())
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		_, err = vendorSvc.CreateEvaluation(ctx, vendorEvaluation)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		ctx.JSON(http.StatusCreated, gin.H{
+			"vendor evaluation": vendorEvaluation,
 		})
 	})
 }
