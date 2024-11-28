@@ -195,7 +195,7 @@ func NewVendorEngine(
 		}
 
 		ctx.JSON(http.StatusCreated, gin.H{
-			"vendor evaluation": vendorEvaluation,
+			"vendor_evaluation": vendorEvaluation,
 		})
 	})
 }
