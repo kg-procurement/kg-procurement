@@ -1668,11 +1668,6 @@ func Test_createVendorEvaluation(t *testing.T) {
 			ctx = context.Background()
 		)
 
-		c.cmock.Set(time.Now())
-		now := c.cmock.Now()
-		defer c.db.Close()
-
-		vendorEvaluation.ModifiedDate = now
 		transformedQuery, args, _ := sqlx.Named(createEvaluation, vendorEvaluation)
 
 		driverArgs := make([]driver.Value, len(args))
@@ -1694,11 +1689,6 @@ func Test_createVendorEvaluation(t *testing.T) {
 			ctx = context.Background()
 		)
 
-		c.cmock.Set(time.Now())
-		now := c.cmock.Now()
-		defer c.db.Close()
-
-		vendorEvaluation.ModifiedDate = now
 		transformedQuery, args, _ := sqlx.Named(createEvaluation, vendorEvaluation)
 
 		driverArgs := make([]driver.Value, len(args))
