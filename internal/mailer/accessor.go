@@ -18,6 +18,12 @@ const (
 		VALUES
 			(:id, :email_to, :status, :modified_date)
 	`
+	updateEmailStatus = `
+		UPDATE email_status
+		SET status = :status, modified_date = :modified_date
+		WHERE id = :id
+		RETURNING id, email_to, status, modified_date
+	`
 )
 
 type postgresEmailStatusAccessor struct {
@@ -31,6 +37,25 @@ func (p *postgresEmailStatusAccessor) WriteEmailStatus(_ context.Context, es Ema
 		return err
 	}
 	return nil
+}
+
+func (p *postgresEmailStatusAccessor) UpdateEmailStatus(_ context.Context, es EmailStatus) (*EmailStatus, error) {
+	es.ModifiedDate = p.clock.Now()
+	var updatedEmailStatus EmailStatus
+	rows, err := p.db.NamedQuery(updateEmailStatus, es)
+	if err != nil {
+		log.Printf("error updating email status: %v", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	if rows.Next() {
+		if err := rows.StructScan(&updatedEmailStatus); err != nil {
+			log.Printf("error scanning updated email status: %v", err)
+			return nil, err
+		}
+	}
+	return &updatedEmailStatus, nil
 }
 
 func (p *postgresEmailStatusAccessor) GetAll(ctx context.Context, spec GetAllEmailStatusSpec) (*AccessorGetAllPaginationData, error) {
