@@ -607,6 +607,89 @@ func TestVendorService_AutomatedBlastEmail(t *testing.T) {
 	})
 }
 
+func TestVendorService_CreateEvaluation(t *testing.T) {
+	t.Parallel()
+
+	var (
+		mockVendorAccessor *MockvendorDBAccessor
+		service            *VendorService
+	)
+
+	fixedTime := time.Date(2024, time.September, 27, 12, 30, 0, 0, time.UTC)
+
+	setup := func(t *testing.T) *gomega.GomegaWithT {
+		ctrl := gomock.NewController(t)
+		mockVendorAccessor = NewMockvendorDBAccessor(ctrl)
+
+		service = &VendorService{
+			cfg:              config.Application{},
+			vendorDBAccessor: mockVendorAccessor,
+		}
+
+		return gomega.NewWithT(t)
+	}
+
+	var (
+		vendorEvaluation = VendorEvaluation{
+			VendorID:                         "1",
+			KesesuaianProduk:                 1,
+			KualitasProduk:                   1,
+			KetepatanWaktuPengiriman:         1,
+			KompetitifitasHarga:              1,
+			ResponsivitasKemampuanKomunikasi: 1,
+			KemampuanDalamMenanganiMasalah:   1,
+			KelengkapanBarang:                1,
+			Harga:                            1,
+			TermOfPayment:                    1,
+			Reputasi:                         1,
+			KetersediaanBarang:               1,
+			KualitasLayananAfterServices:     1,
+		}
+
+		expectation = VendorEvaluation{
+			ID:                               "H58S2LBQblHMjce",
+			VendorID:                         "1",
+			KesesuaianProduk:                 1,
+			KualitasProduk:                   1,
+			KetepatanWaktuPengiriman:         1,
+			KompetitifitasHarga:              1,
+			ResponsivitasKemampuanKomunikasi: 1,
+			KemampuanDalamMenanganiMasalah:   1,
+			KelengkapanBarang:                1,
+			Harga:                            1,
+			TermOfPayment:                    1,
+			Reputasi:                         1,
+			KetersediaanBarang:               1,
+			KualitasLayananAfterServices:     1,
+			ModifiedDate:                     fixedTime,
+		}
+	)
+
+	t.Run("success", func(t *testing.T) {
+		g := setup(t)
+		ctx := context.Background()
+
+		mockVendorAccessor.EXPECT().
+			CreateEvaluation(ctx, &vendorEvaluation).
+			Return(&expectation, nil)
+
+		result, err := service.CreateEvaluation(ctx, &vendorEvaluation)
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(result).To(gomega.Equal(&expectation))
+	})
+	t.Run("error", func(t *testing.T) {
+		g := setup(t)
+		ctx := context.Background()
+
+		mockVendorAccessor.EXPECT().
+			CreateEvaluation(ctx, &vendorEvaluation).Return(nil, errors.New("error"))
+
+		result, err := service.CreateEvaluation(ctx, &vendorEvaluation)
+		g.Expect(err).ToNot(gomega.BeNil())
+		g.Expect(result).To(gomega.BeNil())
+	})
+}
+
 func TestVendorService_applyDefaultEmailTemplate(t *testing.T) {
 	t.Parallel()
 
