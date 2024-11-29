@@ -32,6 +32,8 @@ func Test_WriteEmailStatus(t *testing.T) {
 				ID:           "123",
 				EmailTo:      "email@email.com",
 				Status:       "sent",
+				VendorID:     "100",
+				DateSent:     now,
 				ModifiedDate: now,
 			}
 		)
@@ -59,6 +61,8 @@ func Test_WriteEmailStatus(t *testing.T) {
 				ID:           "123",
 				EmailTo:      "email@email.com",
 				Status:       "sent",
+				VendorID:     "100",
+				DateSent:     now,
 				ModifiedDate: now,
 			}
 		)
@@ -105,6 +109,8 @@ func Test_GetAll(t *testing.T) {
 		"id",
 		"email_to",
 		"status",
+		"vendor_id",
+		"date_sent",
 		"modified_date",
 	}
 
@@ -113,7 +119,9 @@ func Test_GetAll(t *testing.T) {
 			es.id,
 			es.email_to,
 			es.status,
-			es.modified_date
+			es.modified_date,
+			es.vendor_id,
+			es.date_sent
 		FROM email_status es
 		ORDER BY es.modified_date DESC
 		LIMIT $1
@@ -141,6 +149,8 @@ func Test_GetAll(t *testing.T) {
 				"1",
 				"test@example.com",
 				"sent",
+				"100",
+				fixedTime,
 				fixedTime,
 			)
 
@@ -161,13 +171,15 @@ func Test_GetAll(t *testing.T) {
 			ID:           "1",
 			EmailTo:      "test@example.com",
 			Status:       "sent",
+			VendorID:     "100",
+			DateSent:     fixedTime,
 			ModifiedDate: fixedTime,
 		}}
 
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(res).ToNot(gomega.BeNil())
 
-		expectation := &AccessorGetAllPaginationData{
+		expectation := &AccessorGetEmailStatusPaginationData{
 			EmailStatus: emailStatusExpectation,
 			Metadata:    res.Metadata,
 		}
@@ -184,6 +196,8 @@ func Test_GetAll(t *testing.T) {
 				"1",
 				"test@example.com",
 				"sent",
+				"100",
+				fixedTime,
 				fixedTime,
 			)
 
@@ -196,7 +210,7 @@ func Test_GetAll(t *testing.T) {
 			},
 		}
 
-		dataQuery := `SELECT DISTINCT es.id, es.email_to, es.status, es.modified_date FROM email_status es WHERE es.email_to ILIKE $1 ORDER BY es.modified_date DESC LIMIT $2 OFFSET $3`
+		dataQuery := `SELECT DISTINCT es.id, es.email_to, es.status, es.modified_date, es.vendor_id, es.date_sent FROM email_status es WHERE es.email_to ILIKE $1 ORDER BY es.modified_date DESC LIMIT $2 OFFSET $3`
 
 		args := []driver.Value{
 			"%" + customSpec.EmailTo + "%",
@@ -224,10 +238,12 @@ func Test_GetAll(t *testing.T) {
 			ID:           "1",
 			EmailTo:      "test@example.com",
 			Status:       "sent",
+			VendorID:     "100",
+			DateSent:     fixedTime,
 			ModifiedDate: fixedTime,
 		}}
 
-		expectation := &AccessorGetAllPaginationData{
+		expectation := &AccessorGetEmailStatusPaginationData{
 			EmailStatus: emailStatusExpectation,
 			Metadata:    res.Metadata,
 		}
@@ -248,6 +264,8 @@ func Test_GetAll(t *testing.T) {
 				"1",
 				"test@example.com",
 				"sent",
+				"100",
+				fixedTime,
 				fixedTime,
 			)
 
@@ -256,7 +274,9 @@ func Test_GetAll(t *testing.T) {
 				es.id,
 				es.email_to,
 				es.status,
-				es.modified_date
+				es.modified_date,
+				es.vendor_id,
+				es.date_sent
 			FROM email_status es
 			ORDER BY es.status DESC
 			LIMIT $1
@@ -289,10 +309,12 @@ func Test_GetAll(t *testing.T) {
 			ID:           "1",
 			EmailTo:      "test@example.com",
 			Status:       "sent",
+			VendorID:     "100",
+			DateSent:     fixedTime,
 			ModifiedDate: fixedTime,
 		}}
 
-		expectation := &AccessorGetAllPaginationData{
+		expectation := &AccessorGetEmailStatusPaginationData{
 			EmailStatus: emailStatusExpectation,
 			Metadata:    res.Metadata,
 		}
@@ -321,7 +343,7 @@ func Test_GetAll(t *testing.T) {
 		ctx := context.Background()
 		res, err := accessor.GetAll(ctx, spec)
 
-		expectation := &AccessorGetAllPaginationData{
+		expectation := &AccessorGetEmailStatusPaginationData{
 			EmailStatus: []EmailStatus{},
 			Metadata:    res.Metadata,
 		}
@@ -335,6 +357,8 @@ func Test_GetAll(t *testing.T) {
 		defer db.Close()
 
 		rows := sqlmock.NewRows(emailStatusFields).AddRow(
+			nil,
+			nil,
 			nil,
 			nil,
 			nil,
@@ -399,11 +423,15 @@ func Test_GetAll(t *testing.T) {
 				"1",
 				"test@example.com",
 				"sent",
+				"100",
+				fixedTime,
 				fixedTime,
 			).AddRow(
 			"2",
 			"test2@example.com",
 			"failed",
+			"100",
+			fixedTime,
 			fixedTime,
 		).RowError(1, fmt.Errorf("row error"))
 
@@ -433,6 +461,8 @@ func Test_GetAll(t *testing.T) {
 				"1",
 				"test@example.com",
 				"sent",
+				"100",
+				fixedTime,
 				fixedTime,
 			)
 
