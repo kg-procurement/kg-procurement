@@ -4,6 +4,7 @@ import (
 	"kg/procurement/cmd/config"
 	"kg/procurement/cmd/utils"
 	"kg/procurement/internal/vendors"
+	"kg/procurement/internal/mailer"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -169,5 +170,27 @@ func NewVendorEngine(
 		ctx.JSON(http.StatusOK, gin.H{
 			"message": "Emails successfully sent",
 		})
+	})
+
+	r.GET(cfg.GetPopulatedEmailStatus, func(ctx *gin.Context) {
+		utils.Logger.Info("Received GetPopulatedEmailStatus request")
+
+		paginationSpec := GetPaginationSpec(ctx.Request)
+		spec := mailer.GetAllEmailStatusSpec{
+			EmailTo:        ctx.Query("email_to"),
+			PaginationSpec: paginationSpec,
+		}
+
+		res, err := vendorSvc.GetPopulatedEmailStatus(ctx, spec)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		utils.Logger.Info("Completed GetPopulatedEmailStatus in vendor request process")
+
+		ctx.JSON(http.StatusOK, res)
 	})
 }
