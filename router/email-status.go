@@ -53,6 +53,12 @@ func NewEmailStatusEngine(
 			})
 			return
 		}
+		if _, err := mailer.ParseEmailStatusEnum(payload.Status); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
 
 		payload.ID = id
 
