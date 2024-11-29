@@ -44,14 +44,14 @@ func (p *postgresEmailStatusAccessor) UpdateEmailStatus(_ context.Context, es Em
 	var updatedEmailStatus EmailStatus
 	rows, err := p.db.NamedQuery(updateEmailStatus, es)
 	if err != nil {
-		log.Printf("error updating email status: %v", err)
+		utils.Logger.Errorf("error updating email status: %v", err)
 		return nil, err
 	}
 	defer rows.Close()
 
 	if rows.Next() {
 		if err := rows.StructScan(&updatedEmailStatus); err != nil {
-			log.Printf("error scanning updated email status: %v", err)
+			utils.Logger.Errorf("error scanning updated email status: %v", err)
 			return nil, err
 		}
 	}
