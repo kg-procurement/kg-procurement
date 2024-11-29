@@ -1668,7 +1668,7 @@ func Test_createVendorEvaluation(t *testing.T) {
 			ctx = context.Background()
 		)
 
-		transformedQuery, args, _ := sqlx.Named(createEvaluation, vendorEvaluation)
+		transformedQuery, args, _ := sqlx.Named(createEvaluationQuery, vendorEvaluation)
 
 		driverArgs := make([]driver.Value, len(args))
 		for i, arg := range args {
@@ -1689,7 +1689,7 @@ func Test_createVendorEvaluation(t *testing.T) {
 			ctx = context.Background()
 		)
 
-		transformedQuery, args, _ := sqlx.Named(createEvaluation, vendorEvaluation)
+		transformedQuery, args, _ := sqlx.Named(createEvaluationQuery, vendorEvaluation)
 
 		driverArgs := make([]driver.Value, len(args))
 		for i, arg := range args {

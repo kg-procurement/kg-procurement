@@ -39,7 +39,7 @@ const (
 		WHERE
 			p.name = :product_name
 	`
-	createEvaluation = `
+	createEvaluationQuery = `
 		INSERT INTO vendor_evaluation
 			(id, vendor_id, kesesuaian_produk, kualitas_produk, ketepatan_waktu_pengiriman, kompetitifitas_harga, responsivitas_kemampuan_komunikasi, kemampuan_dalam_menangani_masalah, kelengkapan_barang, harga, term_of_payment, reputasi, ketersediaan_barang, kualitas_layanan_after_services, modified_date)
 		VALUES
@@ -369,9 +369,7 @@ func (p *postgresVendorAccessor) BulkGetByProductName(_ context.Context, product
 }
 
 func (p *postgresVendorAccessor) CreateEvaluation(ctx context.Context, evaluation *VendorEvaluation) (*VendorEvaluation, error) {
-	query := createEvaluation
-
-	if _, err := p.db.NamedExec(query, evaluation); err != nil {
+	if _, err := p.db.NamedExec(createEvaluationQuery, evaluation); err != nil {
 		utils.Logger.Error(err.Error())
 		return nil, err
 	}
