@@ -28,6 +28,7 @@ type vendorDBAccessor interface {
 
 type emailStatusSvc interface {
 	WriteEmailStatus(ctx context.Context, status mailer.EmailStatus) error
+	GetAllEmailStatus(ctx context.Context, spec mailer.GetAllEmailStatusSpec) (*mailer.AccessorGetEmailStatusPaginationData, error)
 }
 
 type VendorService struct {
@@ -127,10 +128,13 @@ func (v *VendorService) executeBlastEmail(ctx context.Context, vendors []Vendor,
 			sendErr := v.smtpProvider.SendEmail(email)
 
 			id, _ := helper.GenerateRandomID()
+			dateSent := time.Now()
 			emailStatus := mailer.EmailStatus{
 				ID:           id,
 				EmailTo:      vendor.Email,
-				ModifiedDate: time.Now(),
+				VendorID:     vendor.ID,
+				DateSent:     dateSent,
+				ModifiedDate: dateSent,
 			}
 
 			if sendErr != nil {
@@ -178,6 +182,59 @@ func (v *VendorService) replacePlaceholder(template string, replacements map[str
 		template = strings.ReplaceAll(template, placeholder, value)
 	}
 	return template
+}
+
+func (v *VendorService) GetPopulatedEmailStatus(
+	ctx context.Context,
+	spec mailer.GetAllEmailStatusSpec,
+) (*mailer.GetAllEmailStatusResponse, error) {
+	emailStatus, err := v.emailStatusSvc.GetAllEmailStatus(ctx, spec)
+	if err != nil {
+		utils.Logger.Errorf("Error fetching email statuses: %v", err)
+		return nil, err
+	}
+	res := mailer.GetAllEmailStatusResponse{}
+	var vendorIDs []string
+	for _, es := range emailStatus.EmailStatus {
+		vendorIDs = append(vendorIDs, es.VendorID)
+	}
+
+	vendors, err := v.BulkGetByIDs(ctx, vendorIDs)
+	if err != nil {
+		utils.Logger.Errorf("Error fetching vendors: %v", err)
+		return nil, err
+	}
+
+	vendorMap := make(map[string]Vendor)
+	for _, vendor := range vendors {
+		vendorMap[vendor.ID] = vendor
+	}
+
+	for _, es := range emailStatus.EmailStatus {
+		vendorName := "Unknown Vendor" 
+		if vendor, exists := vendorMap[es.VendorID]; exists {
+			vendorName = vendor.Name
+		} else {
+			utils.Logger.Infof("Vendor not found for VendorID: %s", es.VendorID)
+		}
+
+		emailStatusResponse := mailer.EmailStatusResponse{
+			EmailStatus: mailer.EmailStatus{
+				ID:           es.ID,
+				EmailTo:      es.EmailTo,
+				Status:       es.Status,
+				VendorID:     es.VendorID,
+				DateSent:     es.DateSent,
+				ModifiedDate: es.ModifiedDate,
+			},
+			VendorName: vendorName,
+		}
+
+		res.EmailStatus = append(res.EmailStatus, emailStatusResponse)
+	}
+
+	res.Metadata = emailStatus.Metadata
+	return &res, nil
 }
 
 func NewVendorService(
