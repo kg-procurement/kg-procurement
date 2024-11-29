@@ -18,6 +18,8 @@ type EmailStatus struct {
 	ID           string    `db:"id" json:"id"`
 	EmailTo      string    `db:"email_to" json:"email_to"`
 	Status       string    `db:"status" json:"status"`
+	VendorID     string    `db:"vendor_id" json:"vendor_id"`
+	DateSent     time.Time `db:"date_sent" json:"date_sent"`
 	ModifiedDate time.Time `db:"modified_date" json:"modified_date"`
 }
 
@@ -31,4 +33,9 @@ type GetAllEmailStatusSpec struct {
 	Status       string    `db:"status" json:"status"`
 	ModifiedDate time.Time `db:"modified_date" json:"modified_date"`
 	database.PaginationSpec
+}
+
+type AccessorGetEmailStatusPaginationData struct {
+	EmailStatus []EmailStatus               `json:"email_status"`
+	Metadata    database.PaginationMetadata `json:"metadata"`
 }
