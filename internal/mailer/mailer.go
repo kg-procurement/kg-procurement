@@ -28,9 +28,9 @@ type EmailProvider interface {
 
 type GetAllEmailStatusSpec struct {
 	ID           string    `db:"id" json:"id"`
-	EmailTo      string    `db:"email_to"`
-	Status       string    `db:"status"`
-	ModifiedDate time.Time `db:"modified_date"`
+	EmailTo      string    `db:"email_to" json:"email_to"`
+	Status       string    `db:"status" json:"status"`
+	ModifiedDate time.Time `db:"modified_date" json:"modified_date"`
 	database.PaginationSpec
 }
 
