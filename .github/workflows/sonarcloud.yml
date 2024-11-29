@@ -38,7 +38,7 @@ jobs:
             -Dsonar.tests=.
             -Dsonar.test.inclusions=**/*_test.go
             -Dsonar.exclusions=**/migrations/**,**/fixtures/**,**/scripts/**,**/vendor/**,**/*_mock.go,internal/common/database/**
-            -Dsonar.coverage.exclusions=**/router/**,**/vendor/**,**/*_mock.go,**/*_test.go,**/cmd/**/*.*,**/internal/mailer/mailer.go
+            -Dsonar.coverage.exclusions=**/router/**,**/vendor/**,**/*_mock.go,**/*_test.go,**/cmd/**/*.*
             -Dsonar.cpd.exclusions=**/accessor.go,**/*.sql
             -Dsonar.language=go
             -Dsonar.sourceEncoding=UTF-8
