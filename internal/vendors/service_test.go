@@ -665,3 +665,160 @@ func TestVendorService_applyDefaultEmailTemplate(t *testing.T) {
 		g.Expect(temp.Subject).To(gomega.Equal("this is subject"))
 	})
 }
+
+func TestVendorService_GetPopulatedEmailStatus(t *testing.T) {
+	t.Parallel()
+
+	var (
+		mockVendorAccessor *MockvendorDBAccessor
+		mockEmailStatusSvc *MockemailStatusSvc
+		service            *VendorService
+	)
+
+	setup := func(t *testing.T) *gomega.GomegaWithT {
+		ctrl := gomock.NewController(t)
+		mockVendorAccessor = NewMockvendorDBAccessor(ctrl)
+		mockEmailStatusSvc = NewMockemailStatusSvc(ctrl)
+
+		service = &VendorService{
+			vendorDBAccessor: mockVendorAccessor,
+			emailStatusSvc:   mockEmailStatusSvc,
+		}
+
+		return gomega.NewWithT(t)
+	}
+
+	t.Run("successfully populates vendor names", func(t *testing.T) {
+		g := setup(t)
+
+		sampleEmailStatus := []mailer.EmailStatus{
+			{
+				ID:           "1",
+				EmailTo:      "vendor1@example.com",
+				Status:       "sent",
+				VendorID:     "vendor1",
+				DateSent:     time.Now(),
+				ModifiedDate: time.Now(),
+			},
+			{
+				ID:           "2",
+				EmailTo:      "vendor2@example.com",
+				Status:       "sent",
+				VendorID:     "vendor2",
+				DateSent:     time.Now(),
+				ModifiedDate: time.Now(),
+			},
+		}
+
+		sampleVendors := []Vendor{
+			{
+				ID:   "vendor1",
+				Name: "Vendor 1",
+			},
+			{
+				ID:   "vendor2",
+				Name: "Vendor 2",
+			},
+		}
+
+		mockEmailStatusSvc.EXPECT().GetAllEmailStatus(gomock.Any(), gomock.Any()).Return(
+			&mailer.AccessorGetEmailStatusPaginationData{
+				EmailStatus: sampleEmailStatus,
+				Metadata: database.PaginationMetadata{
+					TotalPage:   1,
+					CurrentPage: 1,
+				},
+			}, nil)
+
+		mockVendorAccessor.EXPECT().BulkGetByIDs(gomock.Any(), []string{"vendor1", "vendor2"}).Return(sampleVendors, nil)
+
+		result, err := service.GetPopulatedEmailStatus(context.Background(), mailer.GetAllEmailStatusSpec{})
+
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(result).ToNot(gomega.BeNil())
+		g.Expect(result.EmailStatus).To(gomega.HaveLen(2))
+
+		g.Expect(result.EmailStatus[0].VendorName).To(gomega.Equal("Vendor 1"))
+		g.Expect(result.EmailStatus[1].VendorName).To(gomega.Equal("Vendor 2"))
+	})
+
+	t.Run("vendor not found", func(t *testing.T) {
+		g := setup(t)
+
+		sampleEmailStatus := []mailer.EmailStatus{
+			{
+				ID:           "1",
+				EmailTo:      "vendor1@example.com",
+				Status:       "sent",
+				VendorID:     "vendor1",
+				DateSent:     time.Now(),
+				ModifiedDate: time.Now(),
+			},
+		}
+
+		sampleVendors := []Vendor{}
+
+		mockEmailStatusSvc.EXPECT().GetAllEmailStatus(gomock.Any(), gomock.Any()).Return(
+			&mailer.AccessorGetEmailStatusPaginationData{
+				EmailStatus: sampleEmailStatus,
+				Metadata: database.PaginationMetadata{
+					TotalPage:   1,
+					CurrentPage: 1,
+				},
+			}, nil)
+
+		mockVendorAccessor.EXPECT().BulkGetByIDs(gomock.Any(), []string{"vendor1"}).Return(sampleVendors, nil)
+
+		result, err := service.GetPopulatedEmailStatus(context.Background(), mailer.GetAllEmailStatusSpec{})
+
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(result).ToNot(gomega.BeNil())
+		g.Expect(result.EmailStatus).To(gomega.HaveLen(1))
+
+		g.Expect(result.EmailStatus[0].VendorName).To(gomega.Equal("Unknown Vendor"))
+	})
+
+	t.Run("fail when getting vendors by ID", func(t *testing.T) {
+		g := setup(t)
+
+		sampleEmailStatus := []mailer.EmailStatus{
+			{
+				ID:           "1",
+				EmailTo:      "vendor1@example.com",
+				Status:       "sent",
+				VendorID:     "vendor1",
+				DateSent:     time.Now(),
+				ModifiedDate: time.Now(),
+			},
+		}
+
+		mockEmailStatusSvc.EXPECT().GetAllEmailStatus(gomock.Any(), gomock.Any()).Return(
+			&mailer.AccessorGetEmailStatusPaginationData{
+				EmailStatus: sampleEmailStatus,
+				Metadata: database.PaginationMetadata{
+					TotalPage:   1,
+					CurrentPage: 1,
+				},
+			}, nil)
+
+		mockVendorAccessor.EXPECT().BulkGetByIDs(gomock.Any(), []string{"vendor1"}).Return(nil, errors.New("failed to fetch vendors"))
+
+		result, err := service.GetPopulatedEmailStatus(context.Background(), mailer.GetAllEmailStatusSpec{})
+
+		g.Expect(err).ToNot(gomega.BeNil())
+		g.Expect(err.Error()).To(gomega.Equal("failed to fetch vendors"))
+		g.Expect(result).To(gomega.BeNil())
+	})
+
+	t.Run("fail when getting email status", func(t *testing.T) {
+		g := setup(t)
+
+		mockEmailStatusSvc.EXPECT().GetAllEmailStatus(gomock.Any(), gomock.Any()).Return(nil, errors.New("failed to fetch email status"))
+
+		result, err := service.GetPopulatedEmailStatus(context.Background(), mailer.GetAllEmailStatusSpec{})
+
+		g.Expect(err).ToNot(gomega.BeNil())
+		g.Expect(err.Error()).To(gomega.Equal("failed to fetch email status"))
+		g.Expect(result).To(gomega.BeNil())
+	})
+}
