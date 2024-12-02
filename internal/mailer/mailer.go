@@ -2,6 +2,7 @@
 package mailer
 
 import (
+	"errors"
 	"kg/procurement/internal/common/database"
 	"time"
 )
@@ -38,4 +39,42 @@ type GetAllEmailStatusSpec struct {
 type AccessorGetEmailStatusPaginationData struct {
 	EmailStatus []EmailStatus               `json:"email_status"`
 	Metadata    database.PaginationMetadata `json:"metadata"`
+}
+
+type EmailStatusEnum int64
+
+const (
+	Success EmailStatusEnum = iota
+	Failed
+	InProgress
+	Completed
+)
+
+func (s EmailStatusEnum) String() string {
+	switch s {
+	case Success:
+		return "success"
+	case Failed:
+		return "failed"
+	case InProgress:
+		return "in_progress"
+	case Completed:
+		return "completed"
+	}
+	return "unknown"
+}
+
+func ParseEmailStatusEnum(status string) (EmailStatusEnum, error) {
+	switch status {
+	case "success":
+		return Success, nil
+	case "failed":
+		return Failed, nil
+	case "in_progress":
+		return InProgress, nil
+	case "completed":
+		return Completed, nil
+	default:
+		return -1, errors.New("invalid email status")
+	}
 }

@@ -82,7 +82,8 @@ type AccountRoutes struct {
 }
 
 type EmailStatusRoutes struct {
-	GetAll string `mapstructure:"get-all" validate:"required"`
+	GetAll            string `mapstructure:"get-all" validate:"required"`
+	UpdateEmailStatus string `mapstructure:"update-email-status" validate:"required"`
 }
 
 func Load() Application {

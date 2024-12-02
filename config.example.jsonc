@@ -30,7 +30,8 @@
       "get-current-user": "/account/user"
     },
     "email-status": {
-      "get-all": "/email-status" // email
+      "get-all": "/email-status", // email
+      "update-email-status": "/email-status/:id"
     }
   },
   "token": {

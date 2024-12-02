@@ -494,6 +494,104 @@ func Test_Close(t *testing.T) {
 	})
 }
 
+func Test_UpdateEmailStatus(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		var (
+			ctx         = context.Background()
+			c           = setupEmailStatusAccessorTestComponent(t, WithQueryMatcher(sqlmock.QueryMatcherRegexp))
+			now         = c.cmock.Now()
+			emailStatus = EmailStatus{
+				ID:           "123",
+				EmailTo:      "email@email.com",
+				Status:       "sent",
+				ModifiedDate: now,
+			}
+		)
+
+		transformedQuery, args, _ := sqlx.Named(updateEmailStatus, emailStatus)
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		rows := sqlmock.NewRows([]string{"id", "email_to", "status", "modified_date"}).
+			AddRow(emailStatus.ID, emailStatus.EmailTo, emailStatus.Status, emailStatus.ModifiedDate)
+
+		c.mock.ExpectQuery(regexp.QuoteMeta(transformedQuery)).WithArgs(
+			driverArgs...,
+		).WillReturnRows(rows)
+
+		updatedEmailStatus, err := c.accessor.UpdateEmailStatus(ctx, emailStatus)
+		c.g.Expect(err).Should(gomega.BeNil())
+		c.g.Expect(updatedEmailStatus).ShouldNot(gomega.BeNil())
+		c.g.Expect(updatedEmailStatus.ID).Should(gomega.Equal(emailStatus.ID))
+		c.g.Expect(updatedEmailStatus.EmailTo).Should(gomega.Equal(emailStatus.EmailTo))
+		c.g.Expect(updatedEmailStatus.Status).Should(gomega.Equal(emailStatus.Status))
+		c.g.Expect(updatedEmailStatus.ModifiedDate).Should(gomega.Equal(emailStatus.ModifiedDate))
+	})
+
+	t.Run("error on row scan", func(t *testing.T) {
+		var (
+			ctx         = context.Background()
+			c           = setupEmailStatusAccessorTestComponent(t, WithQueryMatcher(sqlmock.QueryMatcherRegexp))
+			now         = c.cmock.Now()
+			emailStatus = EmailStatus{
+				ID:           "123",
+				EmailTo:      "email@email.com",
+				Status:       "sent",
+				ModifiedDate: now,
+			}
+		)
+
+		transformedQuery, args, _ := sqlx.Named(updateEmailStatus, emailStatus)
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		rows := sqlmock.NewRows([]string{"id", "email_to", "status", "modified_date"}).
+			AddRow(nil, nil, nil, nil)
+
+		c.mock.ExpectQuery(regexp.QuoteMeta(transformedQuery)).WithArgs(
+			driverArgs...,
+		).WillReturnRows(rows)
+
+		updatedEmailStatus, err := c.accessor.UpdateEmailStatus(ctx, emailStatus)
+		c.g.Expect(err).Should(gomega.HaveOccurred())
+		c.g.Expect(updatedEmailStatus).Should(gomega.BeNil())
+	})
+
+	t.Run("error on db failure", func(t *testing.T) {
+		var (
+			ctx         = context.Background()
+			c           = setupEmailStatusAccessorTestComponent(t)
+			now         = c.cmock.Now()
+			emailStatus = EmailStatus{
+				ID:           "123",
+				EmailTo:      "email@email.com",
+				Status:       "sent",
+				ModifiedDate: now,
+			}
+		)
+
+		transformedQuery, args, _ := sqlx.Named(updateEmailStatus, emailStatus)
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectQuery(regexp.QuoteMeta(transformedQuery)).WithArgs(
+			driverArgs...,
+		).WillReturnError(sql.ErrConnDone)
+
+		updatedEmailStatus, err := c.accessor.UpdateEmailStatus(ctx, emailStatus)
+		c.g.Expect(err).Should(gomega.HaveOccurred())
+		c.g.Expect(updatedEmailStatus).Should(gomega.BeNil())
+	})
+}
+
 type emailStatusAccessorTestComponent struct {
 	g        *gomega.WithT
 	mock     sqlmock.Sqlmock

@@ -66,6 +66,65 @@ func TestEmailStatusService_WriteEmailStatus(t *testing.T) {
 	})
 }
 
+func TestEmailStatusService_UpdateEmailStatus(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	var (
+		now        = time.Now()
+		updateSpec = EmailStatus{
+			ID:           "some_id",
+			EmailTo:      "email@email.com",
+			Status:       "delivered",
+			ModifiedDate: now,
+		}
+		updatedEmailStatus = &EmailStatus{
+			ID:           "some_id",
+			EmailTo:      "email@email.com",
+			Status:       "delivered",
+			ModifiedDate: now,
+		}
+	)
+
+	t.Run("success", func(t *testing.T) {
+		var (
+			g                       = gomega.NewWithT(t)
+			ctx                     = context.Background()
+			mockCtrl                = gomock.NewController(t)
+			mockEmailStatusAccessor = NewMockemailStatusDBAccessor(mockCtrl)
+		)
+
+		svc := &EmailStatusService{
+			emailStatusDBAccessor: mockEmailStatusAccessor,
+		}
+
+		mockEmailStatusAccessor.EXPECT().UpdateEmailStatus(ctx, updateSpec).Return(updatedEmailStatus, nil)
+
+		result, err := svc.UpdateEmailStatus(ctx, updateSpec)
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(result).To(gomega.Equal(updatedEmailStatus))
+	})
+
+	t.Run("returns error on accessor failure", func(t *testing.T) {
+		var (
+			g                       = gomega.NewWithT(t)
+			ctx                     = context.Background()
+			mockCtrl                = gomock.NewController(t)
+			mockEmailStatusAccessor = NewMockemailStatusDBAccessor(mockCtrl)
+		)
+
+		svc := &EmailStatusService{
+			emailStatusDBAccessor: mockEmailStatusAccessor,
+		}
+
+		mockEmailStatusAccessor.EXPECT().UpdateEmailStatus(ctx, updateSpec).Return(nil, errors.New("update error"))
+
+		result, err := svc.UpdateEmailStatus(ctx, updateSpec)
+		g.Expect(err).ShouldNot(gomega.BeNil())
+		g.Expect(result).To(gomega.BeNil())
+	})
+}
+
 func TestEmailService_GetAll(t *testing.T) {
 	// Sample data to be returned by the mock accessor
 	sampleData := []EmailStatus{
