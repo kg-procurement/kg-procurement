@@ -163,10 +163,10 @@ func (v *VendorService) executeBlastEmail(ctx context.Context, vendors []Vendor,
 			}
 
 			if sendErr != nil {
-				emailStatus.Status = "failed"
+				emailStatus.Status = mailer.Failed.String()
 				errCh <- sendErr
 			} else {
-				emailStatus.Status = "success"
+				emailStatus.Status = mailer.Success.String()
 				errCh <- nil
 			}
 

@@ -11,6 +11,7 @@ import (
 type emailStatusDBAccessor interface {
 	WriteEmailStatus(ctx context.Context, payload EmailStatus) error
 	GetAll(ctx context.Context, spec GetAllEmailStatusSpec) (*AccessorGetAllPaginationData, error)
+	UpdateEmailStatus(ctx context.Context, payload EmailStatus) (*EmailStatus, error)
 }
 
 type EmailStatusService struct {
@@ -23,6 +24,10 @@ func (p *EmailStatusService) WriteEmailStatus(ctx context.Context, payload Email
 
 func (p *EmailStatusService) GetAllEmailStatus(ctx context.Context, spec GetAllEmailStatusSpec) (*AccessorGetAllPaginationData, error) {
 	return p.emailStatusDBAccessor.GetAll(ctx, spec)
+}
+
+func (p *EmailStatusService) UpdateEmailStatus(ctx context.Context, payload EmailStatus) (*EmailStatus, error) {
+	return p.emailStatusDBAccessor.UpdateEmailStatus(ctx, payload)
 }
 
 func NewEmailStatusService(
