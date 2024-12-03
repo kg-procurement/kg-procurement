@@ -61,6 +61,7 @@ type VendorRoutes struct {
 	GetLocations        string `mapstructure:"get-locations" validate:"required"`
 	EmailBlast          string `mapstructure:"email-blast" validate:"required"`
 	AutomatedEmailBlast string `mapstructure:"automated-email-blast" validate:"required"`
+	Evaluation          string `mapstructure:"evaluation" validate:"required"`
 }
 
 type ProductRoutes struct {

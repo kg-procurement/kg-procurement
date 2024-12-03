@@ -5,15 +5,16 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
-	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/benbjohnson/clock"
-	"github.com/jmoiron/sqlx"
-	"github.com/onsi/gomega"
 	"kg/procurement/internal/common/database"
 	"log"
 	"regexp"
 	"testing"
 	"time"
+
+	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/benbjohnson/clock"
+	"github.com/jmoiron/sqlx"
+	"github.com/onsi/gomega"
 )
 
 func Test_newPostgresEmailStatusAccessor(t *testing.T) {

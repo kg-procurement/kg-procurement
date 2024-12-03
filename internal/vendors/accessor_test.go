@@ -1640,6 +1640,72 @@ func Test_getAllVendorIdByProductName(t *testing.T) {
 	})
 }
 
+func Test_createVendorEvaluation(t *testing.T) {
+	t.Parallel()
+
+	var (
+		vendorEvaluation = VendorEvaluation{
+			ID:                               "Vp5XxWumASFvxD3",
+			VendorID:                         "1",
+			KesesuaianProduk:                 1,
+			KualitasProduk:                   1,
+			KetepatanWaktuPengiriman:         1,
+			KompetitifitasHarga:              1,
+			ResponsivitasKemampuanKomunikasi: 1,
+			KemampuanDalamMenanganiMasalah:   1,
+			KelengkapanBarang:                1,
+			Harga:                            1,
+			TermOfPayment:                    1,
+			Reputasi:                         1,
+			KetersediaanBarang:               1,
+			KualitasLayananAfterServices:     1,
+		}
+	)
+
+	t.Run("success", func(t *testing.T) {
+		var (
+			c   = setupVendorAccessorTestComponent(t)
+			ctx = context.Background()
+		)
+
+		transformedQuery, args, _ := sqlx.Named(createEvaluationQuery, vendorEvaluation)
+
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectExec(transformedQuery).
+			WithArgs(driverArgs...).WillReturnResult(sqlmock.NewResult(1, 1))
+
+		_, err := c.accessor.CreateEvaluation(ctx, &vendorEvaluation)
+
+		c.g.Expect(err).To(gomega.BeNil())
+	})
+
+	t.Run("error while doing db query", func(t *testing.T) {
+		var (
+			c   = setupVendorAccessorTestComponent(t)
+			ctx = context.Background()
+		)
+
+		transformedQuery, args, _ := sqlx.Named(createEvaluationQuery, vendorEvaluation)
+
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectExec(transformedQuery).
+			WithArgs(driverArgs...).WillReturnError(sql.ErrConnDone)
+
+		_, err := c.accessor.CreateEvaluation(ctx, &vendorEvaluation)
+
+		c.g.Expect(err).ToNot(gomega.BeNil())
+	})
+
+}
+
 func Test_Close(t *testing.T) {
 	t.Parallel()
 
