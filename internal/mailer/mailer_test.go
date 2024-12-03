@@ -52,13 +52,6 @@ func TestBulkFromMultipartForm(t *testing.T) {
 	g.Expect(string(attachments[1].Data)).To(gomega.Equal("This is the content of file2."))
 	g.Expect(attachments[1].MIMEType).To(gomega.Equal("application/octet-stream"))
 }
-=======
-
-package mailer
-
-import (
-	"testing"
-)
 
 func TestEmailStatusEnum_String(t *testing.T) {
 	tests := []struct {
