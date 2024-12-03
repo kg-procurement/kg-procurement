@@ -65,7 +65,6 @@ func (a *AccountService) RegisterAccount(ctx context.Context, spec RegisterContr
 }
 
 func (a *AccountService) Login(ctx context.Context, spec LoginContract) (string, error) {
-
 	// Find the account by email
 	account, err := a.accountDBAccessor.FindAccountByEmail(ctx, spec.Email)
 	if err != nil {

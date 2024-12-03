@@ -419,7 +419,7 @@ func TestVendorService_BlastEmail(t *testing.T) {
 			Return(nil).
 			Times(2)
 
-		errList, err := subject.BlastEmail(ctx, vendorIDs, emailTemplate{
+		errList, err := subject.BlastEmail(ctx, vendorIDs, mailer.Email{
 			Subject: "test",
 			Body:    "email body here uwaa",
 		})
@@ -436,7 +436,7 @@ func TestVendorService_BlastEmail(t *testing.T) {
 			BulkGetByIDs(ctx, vendorIDs).
 			Return(nil, errors.New("oh noo"))
 
-		errList, err := subject.BlastEmail(ctx, vendorIDs, emailTemplate{
+		errList, err := subject.BlastEmail(ctx, vendorIDs, mailer.Email{
 			Subject: "test",
 			Body:    "email body here uwaa",
 		})
@@ -466,7 +466,7 @@ func TestVendorService_BlastEmail(t *testing.T) {
 			Return(nil).
 			Times(2)
 
-		errList, err := subject.BlastEmail(ctx, vendorIDs, emailTemplate{
+		errList, err := subject.BlastEmail(ctx, vendorIDs, mailer.Email{
 			Subject: "test",
 			Body:    "email body here uwaa",
 		})
@@ -494,7 +494,7 @@ func TestVendorService_BlastEmail(t *testing.T) {
 			Return(errors.New("write error")).
 			Times(2)
 
-		errList, err := subject.BlastEmail(ctx, vendorIDs, emailTemplate{
+		errList, err := subject.BlastEmail(ctx, vendorIDs, mailer.Email{
 			Subject: "Test Subject",
 			Body:    "Test Body",
 		})
@@ -711,7 +711,7 @@ func TestVendorService_applyDefaultEmailTemplate(t *testing.T) {
 
 	t.Run("subject is empty", func(t *testing.T) {
 		g := setup(t)
-		temp := emailTemplate{
+		temp := mailer.Email{
 			Body: "this is body",
 		}
 		service.applyDefaultEmailTemplate(&temp)
@@ -721,7 +721,7 @@ func TestVendorService_applyDefaultEmailTemplate(t *testing.T) {
 
 	t.Run("body is empty", func(t *testing.T) {
 		g := setup(t)
-		temp := emailTemplate{
+		temp := mailer.Email{
 			Subject: "this is subject",
 		}
 		service.applyDefaultEmailTemplate(&temp)
@@ -731,7 +731,7 @@ func TestVendorService_applyDefaultEmailTemplate(t *testing.T) {
 
 	t.Run("both are empty", func(t *testing.T) {
 		g := setup(t)
-		temp := emailTemplate{}
+		temp := mailer.Email{}
 		service.applyDefaultEmailTemplate(&temp)
 		g.Expect(temp.Body).ToNot(gomega.BeEmpty())
 		g.Expect(temp.Subject).ToNot(gomega.BeEmpty())
@@ -739,7 +739,7 @@ func TestVendorService_applyDefaultEmailTemplate(t *testing.T) {
 
 	t.Run("both are filled", func(t *testing.T) {
 		g := setup(t)
-		temp := emailTemplate{
+		temp := mailer.Email{
 			Subject: "this is subject",
 			Body:    "this is body",
 		}
