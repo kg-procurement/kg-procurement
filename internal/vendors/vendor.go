@@ -23,6 +23,24 @@ type Vendor struct {
 	Date          time.Time `db:"dt" json:"dt"`
 }
 
+type VendorEvaluation struct {
+	ID                               string    `db:"id" json:"id" `
+	VendorID                         string    `db:"vendor_id" json:"vendor_id"`
+	KesesuaianProduk                 int       `db:"kesesuaian_produk" json:"kesesuaian_produk"`
+	KualitasProduk                   int       `db:"kualitas_produk" json:"kualitas_produk"`
+	KetepatanWaktuPengiriman         int       `db:"ketepatan_waktu_pengiriman" json:"ketepatan_waktu_pengiriman"`
+	KompetitifitasHarga              int       `db:"kompetitifitas_harga" json:"kompetitifitas_harga"`
+	ResponsivitasKemampuanKomunikasi int       `db:"responsivitas_kemampuan_komunikasi" json:"responsivitas_kemampuan_komunikasi"`
+	KemampuanDalamMenanganiMasalah   int       `db:"kemampuan_dalam_menangani_masalah" json:"kemampuan_dalam_menangani_masalah"`
+	KelengkapanBarang                int       `db:"kelengkapan_barang" json:"kelengkapan_barang"`
+	Harga                            int       `db:"harga" json:"harga"`
+	TermOfPayment                    int       `db:"term_of_payment" json:"term_of_payment"`
+	Reputasi                         int       `db:"reputasi" json:"reputasi"`
+	KetersediaanBarang               int       `db:"ketersediaan_barang" json:"ketersediaan_barang"`
+	KualitasLayananAfterServices     int       `db:"kualitas_layanan_after_services" json:"kualitas_layanan_after_services"`
+	ModifiedDate                     time.Time `db:"modified_date" json:"modified_date"`
+}
+
 type PutVendorSpec struct {
 	Name          string `json:"name"`
 	Description   string `json:"description"`
