@@ -57,15 +57,16 @@ func main() {
 		_ = os.Stdout.Sync()
 	}()
 
-	awsCfg := dependency.NewAWSConfig(cfg.AWS)
-	_ = mailer.NewSESProvider(*awsCfg)
-
 	clock := clock.New()
+	awsCfg := dependency.NewAWSConfig(cfg.AWS)
 
-	netSMTP := mailer.NewNativeSMTP(cfg.SMTP)
+	// SMTP Providers
+	_ = mailer.NewSESProvider(*awsCfg)
+	_ = mailer.NewNativeSMTP(cfg.SMTP)
+	gomailSMTP := mailer.NewGomailSMTP(cfg.SMTP)
 
 	mailerSvc := mailer.NewEmailStatusService(conn, clock)
-	vendorSvc := vendors.NewVendorService(cfg, conn, clock, netSMTP, mailerSvc, cache)
+	vendorSvc := vendors.NewVendorService(cfg, conn, clock, gomailSMTP, mailerSvc, cache)
 	productSvc := product.NewProductService(conn, clock)
 	tokenSvc := token.NewTokenService(cfg.Token, clock)
 	accountSvc := account.NewAccountService(conn, clock, tokenSvc)
