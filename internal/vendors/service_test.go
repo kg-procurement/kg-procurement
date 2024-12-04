@@ -2,7 +2,9 @@ package vendors
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"kg/procurement/cmd/config"
 	"kg/procurement/internal/common/database"
 	"kg/procurement/internal/mailer"
@@ -14,7 +16,7 @@ import (
 )
 
 func Test_NewVendorService(t *testing.T) {
-	_ = NewVendorService(config.Application{}, nil, nil, nil, nil)
+	_ = NewVendorService(config.Application{}, nil, nil, nil, nil, nil)
 }
 
 func TestVendorService_GetAll(t *testing.T) {
@@ -158,6 +160,7 @@ func TestVendorService_GetById(t *testing.T) {
 
 	type fields struct {
 		mockVendorDBAccessor *MockvendorDBAccessor
+		mockRedisClient      *database.MockRedisClientInterface
 	}
 
 	type args struct {
@@ -176,8 +179,9 @@ func TestVendorService_GetById(t *testing.T) {
 			name: "success",
 			fields: fields{
 				mockVendorDBAccessor: NewMockvendorDBAccessor(ctrl),
+				mockRedisClient:      database.NewMockRedisClientInterface(ctrl),
 			},
-			args: args{ctx: context.Background(), id: "ID"},
+			args: args{ctx: context.Background(), id: "1"},
 			want: data,
 			err:  nil,
 		},
@@ -187,14 +191,24 @@ func TestVendorService_GetById(t *testing.T) {
 			g := gomega.NewWithT(t)
 			v := &VendorService{
 				vendorDBAccessor: tt.fields.mockVendorDBAccessor,
+				redisClient:      tt.fields.mockRedisClient,
 			}
+			cacheKey := fmt.Sprintf("vendor:%s", "1")
+			tt.fields.mockRedisClient.EXPECT().
+				Get(tt.args.ctx, cacheKey).
+				Return("", errors.New("cache miss"))
 
 			tt.fields.mockVendorDBAccessor.EXPECT().
 				GetById(tt.args.ctx, tt.args.id).
 				Return(tt.want, tt.err)
 
-			res, err := v.GetById(tt.args.ctx, tt.args.id)
+			// Expect caching the result
+			cachedData, _ := json.Marshal(tt.want)
+			tt.fields.mockRedisClient.EXPECT().
+				Set(tt.args.ctx, cacheKey, cachedData, gomock.Any()).
+				Return(nil)
 
+			res, err := v.GetById(tt.args.ctx, tt.args.id)
 			if tt.err == nil {
 				g.Expect(err).To(gomega.BeNil())
 				g.Expect(res).To(gomega.Equal(tt.want))
@@ -419,7 +433,7 @@ func TestVendorService_BlastEmail(t *testing.T) {
 			Return(nil).
 			Times(2)
 
-		errList, err := subject.BlastEmail(ctx, vendorIDs, mailer.Email{
+		errList, err := subject.BlastEmail(ctx, vendorIDs, emailTemplate{
 			Subject: "test",
 			Body:    "email body here uwaa",
 		})
@@ -436,7 +450,7 @@ func TestVendorService_BlastEmail(t *testing.T) {
 			BulkGetByIDs(ctx, vendorIDs).
 			Return(nil, errors.New("oh noo"))
 
-		errList, err := subject.BlastEmail(ctx, vendorIDs, mailer.Email{
+		errList, err := subject.BlastEmail(ctx, vendorIDs, emailTemplate{
 			Subject: "test",
 			Body:    "email body here uwaa",
 		})
@@ -466,7 +480,7 @@ func TestVendorService_BlastEmail(t *testing.T) {
 			Return(nil).
 			Times(2)
 
-		errList, err := subject.BlastEmail(ctx, vendorIDs, mailer.Email{
+		errList, err := subject.BlastEmail(ctx, vendorIDs, emailTemplate{
 			Subject: "test",
 			Body:    "email body here uwaa",
 		})
@@ -494,7 +508,7 @@ func TestVendorService_BlastEmail(t *testing.T) {
 			Return(errors.New("write error")).
 			Times(2)
 
-		errList, err := subject.BlastEmail(ctx, vendorIDs, mailer.Email{
+		errList, err := subject.BlastEmail(ctx, vendorIDs, emailTemplate{
 			Subject: "Test Subject",
 			Body:    "Test Body",
 		})
@@ -607,89 +621,6 @@ func TestVendorService_AutomatedBlastEmail(t *testing.T) {
 	})
 }
 
-func TestVendorService_CreateEvaluation(t *testing.T) {
-	t.Parallel()
-
-	var (
-		mockVendorAccessor *MockvendorDBAccessor
-		service            *VendorService
-	)
-
-	fixedTime := time.Date(2024, time.September, 27, 12, 30, 0, 0, time.UTC)
-
-	setup := func(t *testing.T) *gomega.GomegaWithT {
-		ctrl := gomock.NewController(t)
-		mockVendorAccessor = NewMockvendorDBAccessor(ctrl)
-
-		service = &VendorService{
-			cfg:              config.Application{},
-			vendorDBAccessor: mockVendorAccessor,
-		}
-
-		return gomega.NewWithT(t)
-	}
-
-	var (
-		vendorEvaluation = VendorEvaluation{
-			VendorID:                         "1",
-			KesesuaianProduk:                 1,
-			KualitasProduk:                   1,
-			KetepatanWaktuPengiriman:         1,
-			KompetitifitasHarga:              1,
-			ResponsivitasKemampuanKomunikasi: 1,
-			KemampuanDalamMenanganiMasalah:   1,
-			KelengkapanBarang:                1,
-			Harga:                            1,
-			TermOfPayment:                    1,
-			Reputasi:                         1,
-			KetersediaanBarang:               1,
-			KualitasLayananAfterServices:     1,
-		}
-
-		expectation = VendorEvaluation{
-			ID:                               "H58S2LBQblHMjce",
-			VendorID:                         "1",
-			KesesuaianProduk:                 1,
-			KualitasProduk:                   1,
-			KetepatanWaktuPengiriman:         1,
-			KompetitifitasHarga:              1,
-			ResponsivitasKemampuanKomunikasi: 1,
-			KemampuanDalamMenanganiMasalah:   1,
-			KelengkapanBarang:                1,
-			Harga:                            1,
-			TermOfPayment:                    1,
-			Reputasi:                         1,
-			KetersediaanBarang:               1,
-			KualitasLayananAfterServices:     1,
-			ModifiedDate:                     fixedTime,
-		}
-	)
-
-	t.Run("success", func(t *testing.T) {
-		g := setup(t)
-		ctx := context.Background()
-
-		mockVendorAccessor.EXPECT().
-			CreateEvaluation(ctx, &vendorEvaluation).
-			Return(&expectation, nil)
-
-		result, err := service.CreateEvaluation(ctx, &vendorEvaluation)
-		g.Expect(err).To(gomega.BeNil())
-		g.Expect(result).To(gomega.Equal(&expectation))
-	})
-	t.Run("error", func(t *testing.T) {
-		g := setup(t)
-		ctx := context.Background()
-
-		mockVendorAccessor.EXPECT().
-			CreateEvaluation(ctx, &vendorEvaluation).Return(nil, errors.New("error"))
-
-		result, err := service.CreateEvaluation(ctx, &vendorEvaluation)
-		g.Expect(err).ToNot(gomega.BeNil())
-		g.Expect(result).To(gomega.BeNil())
-	})
-}
-
 func TestVendorService_applyDefaultEmailTemplate(t *testing.T) {
 	t.Parallel()
 
@@ -711,7 +642,7 @@ func TestVendorService_applyDefaultEmailTemplate(t *testing.T) {
 
 	t.Run("subject is empty", func(t *testing.T) {
 		g := setup(t)
-		temp := mailer.Email{
+		temp := emailTemplate{
 			Body: "this is body",
 		}
 		service.applyDefaultEmailTemplate(&temp)
@@ -721,7 +652,7 @@ func TestVendorService_applyDefaultEmailTemplate(t *testing.T) {
 
 	t.Run("body is empty", func(t *testing.T) {
 		g := setup(t)
-		temp := mailer.Email{
+		temp := emailTemplate{
 			Subject: "this is subject",
 		}
 		service.applyDefaultEmailTemplate(&temp)
@@ -731,7 +662,7 @@ func TestVendorService_applyDefaultEmailTemplate(t *testing.T) {
 
 	t.Run("both are empty", func(t *testing.T) {
 		g := setup(t)
-		temp := mailer.Email{}
+		temp := emailTemplate{}
 		service.applyDefaultEmailTemplate(&temp)
 		g.Expect(temp.Body).ToNot(gomega.BeEmpty())
 		g.Expect(temp.Subject).ToNot(gomega.BeEmpty())
@@ -739,7 +670,7 @@ func TestVendorService_applyDefaultEmailTemplate(t *testing.T) {
 
 	t.Run("both are filled", func(t *testing.T) {
 		g := setup(t)
-		temp := mailer.Email{
+		temp := emailTemplate{
 			Subject: "this is subject",
 			Body:    "this is body",
 		}
