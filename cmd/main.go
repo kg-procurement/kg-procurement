@@ -48,6 +48,15 @@ func main() {
 		_ = os.Stdout.Sync()
 	}()
 
+	cache := dependency.NewRedisCache(cfg.Common.Redis)
+	defer func() {
+		err := cache.Close()
+		if err != nil {
+			utils.Logger.Fatalf("failed to close redis, err: %v", err)
+		}
+		_ = os.Stdout.Sync()
+	}()
+
 	clock := clock.New()
 	awsCfg := dependency.NewAWSConfig(cfg.AWS)
 
@@ -57,7 +66,7 @@ func main() {
 	gomailSMTP := mailer.NewGomailSMTP(cfg.SMTP)
 
 	mailerSvc := mailer.NewEmailStatusService(conn, clock)
-	vendorSvc := vendors.NewVendorService(cfg, conn, clock, gomailSMTP, mailerSvc)
+	vendorSvc := vendors.NewVendorService(cfg, conn, clock, gomailSMTP, mailerSvc, cache)
 	productSvc := product.NewProductService(conn, clock)
 	tokenSvc := token.NewTokenService(cfg.Token, clock)
 	accountSvc := account.NewAccountService(conn, clock, tokenSvc)

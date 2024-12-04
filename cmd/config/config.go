@@ -36,7 +36,8 @@ type AWS struct {
 }
 
 type Common struct {
-	Postgres PostgresConfig `mapstructure:"postgres" validate:"required"`
+	Postgres PostgresConfig    `mapstructure:"postgres" validate:"required"`
+	Redis    RedisClientConfig `mapstructure:"redis" validate:"required"`
 }
 
 type PostgresConfig struct {
@@ -45,6 +46,11 @@ type PostgresConfig struct {
 	Username string `mapstructure:"username" validate:"required"`
 	Password string `mapstructure:"password" validate:"required"`
 	Port     string `mapstructure:"port" validate:"required"`
+}
+
+type RedisClientConfig struct {
+	Address  string `mapstructure:"address" validate:"required"`
+	Password string `mapstructure:"password" validate:"required"`
 }
 
 type Routes struct {
@@ -61,7 +67,6 @@ type VendorRoutes struct {
 	GetLocations        string `mapstructure:"get-locations" validate:"required"`
 	EmailBlast          string `mapstructure:"email-blast" validate:"required"`
 	AutomatedEmailBlast string `mapstructure:"automated-email-blast" validate:"required"`
-	Evaluation          string `mapstructure:"evaluation" validate:"required"`
 }
 
 type ProductRoutes struct {
@@ -82,8 +87,7 @@ type AccountRoutes struct {
 }
 
 type EmailStatusRoutes struct {
-	GetAll            string `mapstructure:"get-all" validate:"required"`
-	UpdateEmailStatus string `mapstructure:"update-email-status" validate:"required"`
+	GetAll string `mapstructure:"get-all" validate:"required"`
 }
 
 func Load() Application {

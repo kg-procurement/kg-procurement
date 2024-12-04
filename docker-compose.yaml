@@ -29,7 +29,19 @@ services:
     volumes:
       - pgadmin-local:/var/lib/pgadmin
 
+  redis-local:
+    container_name: "redis-local"
+    image: "redis:latest"
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass password
+    environment:
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: password
+
 volumes:
   postgres-local:
   pgadmin-local:
     driver: local
+  redis-local:
