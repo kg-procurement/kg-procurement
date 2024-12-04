@@ -3,6 +3,7 @@ package vendors
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"kg/procurement/cmd/config"
 	"kg/procurement/cmd/utils"
@@ -35,10 +36,30 @@ type VendorService struct {
 	vendorDBAccessor
 	smtpProvider   mailer.EmailProvider
 	emailStatusSvc emailStatusSvc
+	redisClient    database.RedisClientInterface
 }
 
 func (v *VendorService) GetById(ctx context.Context, id string) (*Vendor, error) {
-	return v.vendorDBAccessor.GetById(ctx, id)
+	cacheKey := fmt.Sprintf("vendor:%s", id)
+	if cachedData, err := v.redisClient.Get(ctx, cacheKey); err == nil {
+		var vendor Vendor
+		if err := json.Unmarshal([]byte(cachedData), &vendor); err == nil {
+			// cache hit
+			return &vendor, nil
+		}
+	}
+
+	// cache miss
+	vendor, err := v.vendorDBAccessor.GetById(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if vendorJSON, err := json.Marshal(vendor); err == nil {
+		_ = v.redisClient.Set(ctx, cacheKey, vendorJSON, 0)
+	}
+
+	return vendor, nil
 }
 
 func (v *VendorService) GetAll(ctx context.Context, spec GetAllVendorSpec) (*AccessorGetAllPaginationData, error) {
@@ -46,7 +67,15 @@ func (v *VendorService) GetAll(ctx context.Context, spec GetAllVendorSpec) (*Acc
 }
 
 func (v *VendorService) UpdateDetail(ctx context.Context, vendor Vendor) (*Vendor, error) {
-	return v.vendorDBAccessor.UpdateDetail(ctx, vendor)
+	updatedVendor, err := v.vendorDBAccessor.UpdateDetail(ctx, vendor)
+	if err != nil {
+		return nil, err
+	}
+
+	cacheKey := fmt.Sprintf("vendor:%s", updatedVendor.ID)
+	v.redisClient.Delete(ctx, cacheKey)
+
+	return updatedVendor, nil
 }
 
 func (v *VendorService) GetLocations(ctx context.Context) ([]string, error) {
@@ -186,11 +215,13 @@ func NewVendorService(
 	clock clock.Clock,
 	smtpProvider mailer.EmailProvider,
 	emailStatusSvc emailStatusSvc,
+	redisClient database.RedisClientInterface,
 ) *VendorService {
 	return &VendorService{
 		cfg:              cfg,
 		vendorDBAccessor: newPostgresVendorAccessor(conn, clock),
 		smtpProvider:     smtpProvider,
 		emailStatusSvc:   emailStatusSvc,
+		redisClient:      redisClient,
 	}
 }
