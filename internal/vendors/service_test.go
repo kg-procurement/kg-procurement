@@ -319,30 +319,56 @@ func TestVendorService_UpdateDetail(t *testing.T) {
 			},
 			want: UpdatedVendorData,
 		},
+		{
+            name: "error - database failure",
+            fields: fields{
+                mockvendorDBAccessor: NewMockvendorDBAccessor(ctrl),
+                mockRedisClient:      database.NewMockRedisClientInterface(ctrl),
+            },
+            args: args{
+                ctx:    context.Background(),
+                spec: updateSpec,
+            },
+            want:    nil,
+            wantErr: errors.New("database error"),
+        },
 	}
 	for _, tt := range tests {
-		g := gomega.NewWithT(t)
-		v := VendorService{
-			vendorDBAccessor: tt.fields.mockvendorDBAccessor,
-			redisClient:      tt.fields.mockRedisClient,
-		}
+		t.Run(tt.name, func(t *testing.T) {
+            g := gomega.NewWithT(t)
+            v := &VendorService{
+                vendorDBAccessor: tt.fields.mockvendorDBAccessor,
+                redisClient:      tt.fields.mockRedisClient,
+            }
 
-		tt.fields.mockvendorDBAccessor.
-			EXPECT().
-			UpdateDetail(tt.args.ctx, tt.args.spec).
-			Return(tt.want, tt.wantErr)
+            if tt.wantErr != nil {
+                tt.fields.mockvendorDBAccessor.EXPECT().
+                    UpdateDetail(tt.args.ctx, tt.args.spec).
+                    Return(nil, errors.New("database error"))
+                tt.fields.mockRedisClient.EXPECT().
+                    Delete(gomock.Any(), gomock.Any()).
+                    Times(0)
+            } else {
+                tt.fields.mockvendorDBAccessor.EXPECT().
+                    UpdateDetail(tt.args.ctx, tt.args.spec).
+                    Return(tt.want, nil)
+                cacheKey := fmt.Sprintf("vendor:%s", tt.want.ID)
+                tt.fields.mockRedisClient.EXPECT().
+                    Delete(tt.args.ctx, cacheKey).
+                    Return(nil)
+            }
 
-		cacheKey := fmt.Sprintf("vendor:%s", tt.args.spec.ID)
-		tt.fields.mockRedisClient.
-			EXPECT().
-			Delete(tt.args.ctx, cacheKey).
-			Return(nil)
+            res, err := v.UpdateDetail(tt.args.ctx, tt.args.spec)
 
-		res, err := v.UpdateDetail(tt.args.ctx, tt.args.spec)
-
-		g.Expect(err).To(gomega.BeNil())
-		g.Expect(res).To(gomega.Equal(tt.want))
-
+            if tt.wantErr != nil {
+                g.Expect(err).ToNot(gomega.BeNil())
+                g.Expect(err.Error()).To(gomega.ContainSubstring(tt.wantErr.Error()))
+                g.Expect(res).To(gomega.BeNil())
+            } else {
+                g.Expect(err).To(gomega.BeNil())
+                g.Expect(res).To(gomega.Equal(tt.want))
+            }
+        })
 	}
 }
 
