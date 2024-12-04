@@ -258,6 +258,7 @@ func TestVendorService_UpdateDetail(t *testing.T) {
 
 	type fields struct {
 		mockvendorDBAccessor *MockvendorDBAccessor
+		mockRedisClient      *database.MockRedisClientInterface
 	}
 
 	type args struct {
@@ -275,6 +276,7 @@ func TestVendorService_UpdateDetail(t *testing.T) {
 			name: "success",
 			fields: fields{
 				mockvendorDBAccessor: NewMockvendorDBAccessor(ctrl),
+				mockRedisClient:      database.NewMockRedisClientInterface(ctrl),
 			},
 			args: args{
 				ctx:  context.Background(),
@@ -287,12 +289,19 @@ func TestVendorService_UpdateDetail(t *testing.T) {
 		g := gomega.NewWithT(t)
 		v := VendorService{
 			vendorDBAccessor: tt.fields.mockvendorDBAccessor,
+			redisClient:      tt.fields.mockRedisClient,
 		}
 
 		tt.fields.mockvendorDBAccessor.
 			EXPECT().
 			UpdateDetail(tt.args.ctx, tt.args.spec).
 			Return(tt.want, tt.wantErr)
+
+		cacheKey := fmt.Sprintf("vendor:%s", tt.args.spec.ID)
+		tt.fields.mockRedisClient.
+			EXPECT().
+			Delete(tt.args.ctx, cacheKey).
+			Return(nil)
 
 		res, err := v.UpdateDetail(tt.args.ctx, tt.args.spec)
 
