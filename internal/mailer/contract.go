@@ -12,4 +12,5 @@ type GetAllEmailStatusResponse struct {
 type EmailStatusResponse struct {
 	EmailStatus
 	VendorName string `json:"vendor_name"`
+	VendorRating int `json:"vendor_rating"`
 }

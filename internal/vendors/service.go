@@ -92,7 +92,7 @@ func (*VendorService) applyDefaultEmailTemplate(email *mailer.Email) {
 		email.Body = "Kepada Yth {{name}},\n\nKami mengajukan permintaan untuk pengadaan produk {{product_name}} yang dibutuhkan oleh perusahaan kami. Mohon informasi mengenai ketersediaan, harga, dan waktu pengiriman untuk produk tersebut.\n\nTerima kasih atas perhatian dan kerjasamanya.\n\nHormat kami"
 	}
 }
-    
+
 func (v *VendorService) CreateEvaluation(ctx context.Context, evaluation *VendorEvaluation) (*VendorEvaluation, error) {
 	id, _ := helper.GenerateRandomID()
 	evaluation.ID = id
@@ -101,7 +101,7 @@ func (v *VendorService) CreateEvaluation(ctx context.Context, evaluation *Vendor
 
 	return v.vendorDBAccessor.CreateEvaluation(ctx, evaluation)
 }
-    
+
 func (v *VendorService) executeBlastEmail(ctx context.Context, vendors []Vendor, email mailer.Email) ([]string, error) {
 	errCh := make(chan error, len(vendors))
 	statusCh := make(chan mailer.EmailStatus, len(vendors))
@@ -221,9 +221,11 @@ func (v *VendorService) GetPopulatedEmailStatus(
 	}
 
 	for _, es := range emailStatus.EmailStatus {
-		vendorName := "Unknown Vendor" 
+		vendorName := "Unknown Vendor"
+		vendorRating := 0
 		if vendor, exists := vendorMap[es.VendorID]; exists {
 			vendorName = vendor.Name
+			vendorRating = vendor.Rating
 		} else {
 			utils.Logger.Infof("Vendor not found for VendorID: %s", es.VendorID)
 		}
@@ -237,7 +239,8 @@ func (v *VendorService) GetPopulatedEmailStatus(
 				DateSent:     es.DateSent,
 				ModifiedDate: es.ModifiedDate,
 			},
-			VendorName: vendorName,
+			VendorName:   vendorName,
+			VendorRating: vendorRating,
 		}
 
 		res.EmailStatus = append(res.EmailStatus, emailStatusResponse)
