@@ -797,10 +797,12 @@ func TestVendorService_GetPopulatedEmailStatus(t *testing.T) {
 			{
 				ID:   "vendor1",
 				Name: "Vendor 1",
+				Rating: 100,
 			},
 			{
 				ID:   "vendor2",
 				Name: "Vendor 2",
+				Rating: 50,
 			},
 		}
 
