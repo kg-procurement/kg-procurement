@@ -174,9 +174,10 @@ func TestVendorService_GetById(t *testing.T) {
 		args   args
 		want   *Vendor
 		err    error
+		cacheHit bool
 	}{
 		{
-			name: "success",
+			name: "success - cache miss",
 			fields: fields{
 				mockVendorDBAccessor: NewMockvendorDBAccessor(ctrl),
 				mockRedisClient:      database.NewMockRedisClientInterface(ctrl),
@@ -184,40 +185,74 @@ func TestVendorService_GetById(t *testing.T) {
 			args: args{ctx: context.Background(), id: "1"},
 			want: data,
 			err:  nil,
+			cacheHit: false,
 		},
+		{
+            name: "success - cache hit",
+            fields: fields{
+                mockVendorDBAccessor: NewMockvendorDBAccessor(ctrl),
+                mockRedisClient:      database.NewMockRedisClientInterface(ctrl),
+            },
+            args:     args{ctx: context.Background(), id: "1"},
+            want:     data,
+            err:      nil,
+            cacheHit: true,
+        },
+		{
+            name: "error - database failure",
+            fields: fields{
+                mockVendorDBAccessor: NewMockvendorDBAccessor(ctrl),
+                mockRedisClient:      database.NewMockRedisClientInterface(ctrl),
+            },
+            args:     args{ctx: context.Background(), id: "1"},
+            want:     nil,
+            err:      errors.New("database error"),
+            cacheHit: false,
+        },
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			g := gomega.NewWithT(t)
-			v := &VendorService{
-				vendorDBAccessor: tt.fields.mockVendorDBAccessor,
-				redisClient:      tt.fields.mockRedisClient,
-			}
-			cacheKey := fmt.Sprintf("vendor:%s", "1")
-			tt.fields.mockRedisClient.EXPECT().
-				Get(tt.args.ctx, cacheKey).
-				Return("", errors.New("cache miss"))
+        t.Run(tt.name, func(t *testing.T) {
+            g := gomega.NewWithT(t)
+            v := &VendorService{
+                vendorDBAccessor: tt.fields.mockVendorDBAccessor,
+                redisClient:      tt.fields.mockRedisClient,
+            }
+            cacheKey := fmt.Sprintf("vendor:%s", tt.args.id)
+            if tt.cacheHit {
+                cachedData, _ := json.Marshal(tt.want)
+                tt.fields.mockRedisClient.EXPECT().
+                    Get(tt.args.ctx, cacheKey).
+                    Return(string(cachedData), nil)
+                tt.fields.mockVendorDBAccessor.EXPECT().
+                    GetById(gomock.Any(), gomock.Any()).
+                    Times(0)
+            } else {
+                tt.fields.mockRedisClient.EXPECT().
+                    Get(tt.args.ctx, cacheKey).
+                    Return("", errors.New("cache miss"))
+                tt.fields.mockVendorDBAccessor.EXPECT().
+                    GetById(tt.args.ctx, tt.args.id).
+                    Return(tt.want, tt.err)
+                if tt.err == nil {
+                    // Expect caching the result
+                    cachedData, _ := json.Marshal(tt.want)
+                    tt.fields.mockRedisClient.EXPECT().
+                        Set(tt.args.ctx, cacheKey, cachedData, gomock.Any()).
+                        Return(nil)
+                }
+            }
 
-			tt.fields.mockVendorDBAccessor.EXPECT().
-				GetById(tt.args.ctx, tt.args.id).
-				Return(tt.want, tt.err)
-
-			// Expect caching the result
-			cachedData, _ := json.Marshal(tt.want)
-			tt.fields.mockRedisClient.EXPECT().
-				Set(tt.args.ctx, cacheKey, cachedData, gomock.Any()).
-				Return(nil)
-
-			res, err := v.GetById(tt.args.ctx, tt.args.id)
-			if tt.err == nil {
-				g.Expect(err).To(gomega.BeNil())
-				g.Expect(res).To(gomega.Equal(tt.want))
-			} else {
-				g.Expect(err).ToNot(gomega.BeNil())
-				g.Expect(res).To(gomega.BeNil())
-			}
-		})
-	}
+            res, err := v.GetById(tt.args.ctx, tt.args.id)
+            
+            if tt.err == nil {
+                g.Expect(err).To(gomega.BeNil())
+                g.Expect(res).To(gomega.Equal(tt.want))
+            } else {
+                g.Expect(err).ToNot(gomega.BeNil())
+                g.Expect(res).To(gomega.BeNil())
+            }
+        })
+    }
 }
 
 func TestVendorService_UpdateDetail(t *testing.T) {
