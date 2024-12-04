@@ -2,7 +2,9 @@ package vendors
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"kg/procurement/cmd/config"
 	"kg/procurement/internal/common/database"
 	"kg/procurement/internal/mailer"
@@ -14,7 +16,7 @@ import (
 )
 
 func Test_NewVendorService(t *testing.T) {
-	_ = NewVendorService(config.Application{}, nil, nil, nil, nil)
+	_ = NewVendorService(config.Application{}, nil, nil, nil, nil, nil)
 }
 
 func TestVendorService_GetAll(t *testing.T) {
@@ -158,6 +160,7 @@ func TestVendorService_GetById(t *testing.T) {
 
 	type fields struct {
 		mockVendorDBAccessor *MockvendorDBAccessor
+		mockRedisClient      *database.MockRedisClientInterface
 	}
 
 	type args struct {
@@ -176,8 +179,9 @@ func TestVendorService_GetById(t *testing.T) {
 			name: "success",
 			fields: fields{
 				mockVendorDBAccessor: NewMockvendorDBAccessor(ctrl),
+				mockRedisClient:      database.NewMockRedisClientInterface(ctrl),
 			},
-			args: args{ctx: context.Background(), id: "ID"},
+			args: args{ctx: context.Background(), id: "1"},
 			want: data,
 			err:  nil,
 		},
@@ -187,14 +191,24 @@ func TestVendorService_GetById(t *testing.T) {
 			g := gomega.NewWithT(t)
 			v := &VendorService{
 				vendorDBAccessor: tt.fields.mockVendorDBAccessor,
+				redisClient:      tt.fields.mockRedisClient,
 			}
+			cacheKey := fmt.Sprintf("vendor:%s", "1")
+			tt.fields.mockRedisClient.EXPECT().
+				Get(tt.args.ctx, cacheKey).
+				Return("", errors.New("cache miss"))
 
 			tt.fields.mockVendorDBAccessor.EXPECT().
 				GetById(tt.args.ctx, tt.args.id).
 				Return(tt.want, tt.err)
 
-			res, err := v.GetById(tt.args.ctx, tt.args.id)
+			// Expect caching the result
+			cachedData, _ := json.Marshal(tt.want)
+			tt.fields.mockRedisClient.EXPECT().
+				Set(tt.args.ctx, cacheKey, cachedData, gomock.Any()).
+				Return(nil)
 
+			res, err := v.GetById(tt.args.ctx, tt.args.id)
 			if tt.err == nil {
 				g.Expect(err).To(gomega.BeNil())
 				g.Expect(res).To(gomega.Equal(tt.want))
