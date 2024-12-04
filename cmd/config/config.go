@@ -67,6 +67,7 @@ type VendorRoutes struct {
 	GetLocations        string `mapstructure:"get-locations" validate:"required"`
 	EmailBlast          string `mapstructure:"email-blast" validate:"required"`
 	AutomatedEmailBlast string `mapstructure:"automated-email-blast" validate:"required"`
+	Evaluation          string `mapstructure:"evaluation" validate:"required"`
 }
 
 type ProductRoutes struct {
@@ -87,7 +88,8 @@ type AccountRoutes struct {
 }
 
 type EmailStatusRoutes struct {
-	GetAll string `mapstructure:"get-all" validate:"required"`
+	GetAll            string `mapstructure:"get-all" validate:"required"`
+	UpdateEmailStatus string `mapstructure:"update-email-status" validate:"required"`
 }
 
 func Load() Application {

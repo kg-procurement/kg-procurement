@@ -225,11 +225,13 @@ func NewVendorService(
 	clock clock.Clock,
 	smtpProvider mailer.EmailProvider,
 	emailStatusSvc emailStatusSvc,
+	redisClient database.RedisClientInterface,
 ) *VendorService {
 	return &VendorService{
 		cfg:              cfg,
 		vendorDBAccessor: newPostgresVendorAccessor(conn, clock),
 		smtpProvider:     smtpProvider,
 		emailStatusSvc:   emailStatusSvc,
+		redisClient:      redisClient,
 	}
 }
