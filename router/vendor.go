@@ -6,7 +6,6 @@ import (
 	"kg/procurement/cmd/utils"
 	"kg/procurement/internal/mailer"
 	"kg/procurement/internal/vendors"
-	"kg/procurement/internal/mailer"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
