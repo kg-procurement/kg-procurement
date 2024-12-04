@@ -39,6 +39,12 @@ const (
 		WHERE
 			p.name = :product_name
 	`
+	createEvaluationQuery = `
+		INSERT INTO vendor_evaluation
+			(id, vendor_id, kesesuaian_produk, kualitas_produk, ketepatan_waktu_pengiriman, kompetitifitas_harga, responsivitas_kemampuan_komunikasi, kemampuan_dalam_menangani_masalah, kelengkapan_barang, harga, term_of_payment, reputasi, ketersediaan_barang, kualitas_layanan_after_services, modified_date)
+		VALUES
+			(:id, :vendor_id, :kesesuaian_produk, :kualitas_produk, :ketepatan_waktu_pengiriman, :kompetitifitas_harga, :responsivitas_kemampuan_komunikasi, :kemampuan_dalam_menangani_masalah, :kelengkapan_barang, :harga, :term_of_payment, :reputasi, :ketersediaan_barang, :kualitas_layanan_after_services, :modified_date)
+	`
 )
 
 // GetSomeStuff is just an example
@@ -360,6 +366,15 @@ func (p *postgresVendorAccessor) BulkGetByProductName(_ context.Context, product
 	}
 
 	return vendors, nil
+}
+
+func (p *postgresVendorAccessor) CreateEvaluation(ctx context.Context, evaluation *VendorEvaluation) (*VendorEvaluation, error) {
+	if _, err := p.db.NamedExec(createEvaluationQuery, evaluation); err != nil {
+		utils.Logger.Error(err.Error())
+		return nil, err
+	}
+
+	return evaluation, nil
 }
 
 func (p *postgresVendorAccessor) Close() error {

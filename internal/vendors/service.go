@@ -24,6 +24,7 @@ type vendorDBAccessor interface {
 	GetAllLocations(ctx context.Context) ([]string, error)
 	BulkGetByIDs(_ context.Context, ids []string) ([]Vendor, error)
 	BulkGetByProductName(_ context.Context, productName string) ([]Vendor, error)
+	CreateEvaluation(ctx context.Context, evaluation *VendorEvaluation) (*VendorEvaluation, error)
 }
 
 type emailStatusSvc interface {
@@ -54,15 +55,15 @@ func (v *VendorService) GetLocations(ctx context.Context) ([]string, error) {
 	return v.vendorDBAccessor.GetAllLocations(ctx)
 }
 
-func (v *VendorService) BlastEmail(ctx context.Context, vendorIDs []string, template emailTemplate) ([]string, error) {
+func (v *VendorService) BlastEmail(ctx context.Context, vendorIDs []string, email mailer.Email) ([]string, error) {
 	vendors, err := v.vendorDBAccessor.BulkGetByIDs(ctx, vendorIDs)
 	if err != nil {
 		return nil, err
 	}
 
-	v.applyDefaultEmailTemplate(&template)
+	v.applyDefaultEmailTemplate(&email)
 
-	return v.executeBlastEmail(ctx, vendors, template)
+	return v.executeBlastEmail(ctx, vendors, email)
 }
 
 func (v *VendorService) AutomatedEmailBlast(ctx context.Context, productName string) ([]string, error) {
@@ -72,27 +73,36 @@ func (v *VendorService) AutomatedEmailBlast(ctx context.Context, productName str
 		return nil, err
 	}
 
-	template := &emailTemplate{}
-	v.applyDefaultEmailTemplate(template)
+	email := &mailer.Email{}
+	v.applyDefaultEmailTemplate(email)
 	replacements := map[string]string{
 		"{{product_name}}": productName,
 	}
 
-	template.Body = v.replacePlaceholder(template.Body, replacements)
+	email.Body = v.replacePlaceholder(email.Body, replacements)
 
-	return v.executeBlastEmail(ctx, vendors, *template)
+	return v.executeBlastEmail(ctx, vendors, *email)
 }
 
-func (*VendorService) applyDefaultEmailTemplate(template *emailTemplate) {
-	if template.Subject == "" {
-		template.Subject = "Request for products"
+func (*VendorService) applyDefaultEmailTemplate(email *mailer.Email) {
+	if email.Subject == "" {
+		email.Subject = "Request for products"
 	}
-	if template.Body == "" {
-		template.Body = "Kepada Yth {{name}},\n\nKami mengajukan permintaan untuk pengadaan produk {{product_name}} yang dibutuhkan oleh perusahaan kami. Mohon informasi mengenai ketersediaan, harga, dan waktu pengiriman untuk produk tersebut.\n\nTerima kasih atas perhatian dan kerjasamanya.\n\nHormat kami"
+	if email.Body == "" {
+		email.Body = "Kepada Yth {{name}},\n\nKami mengajukan permintaan untuk pengadaan produk {{product_name}} yang dibutuhkan oleh perusahaan kami. Mohon informasi mengenai ketersediaan, harga, dan waktu pengiriman untuk produk tersebut.\n\nTerima kasih atas perhatian dan kerjasamanya.\n\nHormat kami"
 	}
 }
+    
+func (v *VendorService) CreateEvaluation(ctx context.Context, evaluation *VendorEvaluation) (*VendorEvaluation, error) {
+	id, _ := helper.GenerateRandomID()
+	evaluation.ID = id
 
-func (v *VendorService) executeBlastEmail(ctx context.Context, vendors []Vendor, template emailTemplate) ([]string, error) {
+	evaluation.ModifiedDate = time.Now()
+
+	return v.vendorDBAccessor.CreateEvaluation(ctx, evaluation)
+}
+    
+func (v *VendorService) executeBlastEmail(ctx context.Context, vendors []Vendor, email mailer.Email) ([]string, error) {
 	errCh := make(chan error, len(vendors))
 	statusCh := make(chan mailer.EmailStatus, len(vendors))
 
@@ -116,16 +126,16 @@ func (v *VendorService) executeBlastEmail(ctx context.Context, vendors []Vendor,
 				"{{name}}": vendor.Name,
 			}
 
-			templateBody := v.replacePlaceholder(template.Body, replacements)
-
-			email := mailer.Email{
-				From:    v.cfg.SMTP.AuthEmail,
-				To:      []string{vendor.Email},
-				Subject: template.Subject,
-				Body:    templateBody,
+			em := mailer.Email{
+				From:        v.cfg.SMTP.AuthEmail,
+				To:          []string{vendor.Email},
+				CC:          email.CC,
+				Subject:     email.Subject,
+				Body:        v.replacePlaceholder(email.Body, replacements),
+				Attachments: email.Attachments,
 			}
 
-			sendErr := v.smtpProvider.SendEmail(email)
+			sendErr := v.smtpProvider.SendEmail(em)
 
 			id, _ := helper.GenerateRandomID()
 			dateSent := time.Now()

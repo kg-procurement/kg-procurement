@@ -16,7 +16,8 @@
       "get-locations": "/vendor/location",
       "email-blast": "/vendor/blast",
       "automated-email-blast": "/vendor/automated-blast",
-      "get-populated-email-status":"/vendor/email"
+      "get-populated-email-status":"/vendor/email",
+      "evaluation": "/vendor/evaluation"
     },
     "product": {
       "get-products-by-vendor": "/product/vendor/:vendor_id",

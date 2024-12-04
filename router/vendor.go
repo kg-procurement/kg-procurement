@@ -1,8 +1,10 @@
 package router
 
 import (
+	"encoding/json"
 	"kg/procurement/cmd/config"
 	"kg/procurement/cmd/utils"
+	"kg/procurement/internal/mailer"
 	"kg/procurement/internal/vendors"
 	"kg/procurement/internal/mailer"
 	"net/http"
@@ -116,8 +118,27 @@ func NewVendorEngine(
 	r.POST(cfg.EmailBlast, func(ctx *gin.Context) {
 		utils.Logger.Info("Received emailBlast request")
 
+		// parse vendor ids
+		var vendorIDs []string
+		if err := json.Unmarshal([]byte(ctx.PostForm("vendor_ids")), &vendorIDs); err != nil {
+			utils.Logger.Error(err.Error())
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"error": "Invalid vendor_ids JSON",
+			})
+			return
+		}
+
+		maxMemory := int64(16 << 20) // 16 MB
+		if err := ctx.Request.ParseMultipartForm(maxMemory); err != nil {
+			utils.Logger.Error(err.Error())
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"error": "Failed to parse multipart form",
+			})
+			return
+		}
+
 		payload := vendors.EmailBlastContract{}
-		if err := ctx.ShouldBindJSON(&payload); err != nil {
+		if err := ctx.ShouldBind(&payload); err != nil {
 			utils.Logger.Error(err.Error())
 			ctx.JSON(http.StatusBadRequest, gin.H{
 				"error": "Invalid request payload",
@@ -125,7 +146,24 @@ func NewVendorEngine(
 			return
 		}
 
-		errList, err := vendorSvc.BlastEmail(ctx, payload.VendorIDs, payload.EmailTemplate)
+		form := ctx.Request.MultipartForm
+		files := form.File["attachments"]
+		attachments, err := mailer.BulkFromMultipartForm(files)
+		if err != nil {
+			utils.Logger.Error(err.Error())
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		email := mailer.Email{
+			Subject:     payload.Subject,
+			Body:        payload.Body,
+			Attachments: attachments,
+		}
+
+		errList, err := vendorSvc.BlastEmail(ctx, vendorIDs, email)
 		if err != nil {
 			if len(errList) > 0 {
 				ctx.JSON(http.StatusMultiStatus, gin.H{
@@ -145,7 +183,10 @@ func NewVendorEngine(
 			"message": "Emails successfully sent",
 		})
 	})
+
 	r.POST(cfg.AutomatedEmailBlast, func(ctx *gin.Context) {
+		utils.Logger.Info("Received automatedEmailBlast request")
+
 		productName := ctx.Param("product_name")
 		if productName == "" {
 			ctx.JSON(http.StatusBadRequest, gin.H{
@@ -192,5 +233,32 @@ func NewVendorEngine(
 		utils.Logger.Info("Completed GetPopulatedEmailStatus in vendor request process")
 
 		ctx.JSON(http.StatusOK, res)
+	})
+
+	r.POST(cfg.Evaluation, func(ctx *gin.Context) {
+		utils.Logger.Info("Received vendor evaluation request")
+
+		vendorEvaluation := &vendors.VendorEvaluation{}
+
+		err := ctx.ShouldBindJSON(vendorEvaluation)
+		if err != nil {
+			utils.Logger.Error(err.Error())
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		_, err = vendorSvc.CreateEvaluation(ctx, vendorEvaluation)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		ctx.JSON(http.StatusCreated, gin.H{
+			"vendor_evaluation": vendorEvaluation,
+		})
 	})
 }
