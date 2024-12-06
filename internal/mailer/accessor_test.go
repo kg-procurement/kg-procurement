@@ -505,8 +505,10 @@ func Test_UpdateEmailStatus(t *testing.T) {
 			now         = c.cmock.Now()
 			emailStatus = EmailStatus{
 				ID:           "123",
+				VendorID:     "100",
 				EmailTo:      "email@email.com",
 				Status:       "sent",
+				DateSent:     now,
 				ModifiedDate: now,
 			}
 		)
@@ -517,8 +519,8 @@ func Test_UpdateEmailStatus(t *testing.T) {
 			driverArgs[i] = arg
 		}
 
-		rows := sqlmock.NewRows([]string{"id", "email_to", "status", "modified_date"}).
-			AddRow(emailStatus.ID, emailStatus.EmailTo, emailStatus.Status, emailStatus.ModifiedDate)
+		rows := sqlmock.NewRows([]string{"id", "vendor_id", "email_to", "status", "date_sent", "modified_date"}).
+			AddRow(emailStatus.ID, emailStatus.VendorID, emailStatus.EmailTo, emailStatus.Status, emailStatus.DateSent, emailStatus.ModifiedDate)
 
 		c.mock.ExpectQuery(regexp.QuoteMeta(transformedQuery)).WithArgs(
 			driverArgs...,
@@ -540,8 +542,10 @@ func Test_UpdateEmailStatus(t *testing.T) {
 			now         = c.cmock.Now()
 			emailStatus = EmailStatus{
 				ID:           "123",
+				VendorID:     "100",
 				EmailTo:      "email@email.com",
 				Status:       "sent",
+				DateSent:     now,
 				ModifiedDate: now,
 			}
 		)
@@ -552,8 +556,8 @@ func Test_UpdateEmailStatus(t *testing.T) {
 			driverArgs[i] = arg
 		}
 
-		rows := sqlmock.NewRows([]string{"id", "email_to", "status", "modified_date"}).
-			AddRow(nil, nil, nil, nil)
+		rows := sqlmock.NewRows([]string{"id", "vendor_id", "email_to", "status", "date_sent", "modified_date"}).
+			AddRow(nil, nil, nil, nil, nil, nil)
 
 		c.mock.ExpectQuery(regexp.QuoteMeta(transformedQuery)).WithArgs(
 			driverArgs...,
@@ -571,8 +575,10 @@ func Test_UpdateEmailStatus(t *testing.T) {
 			now         = c.cmock.Now()
 			emailStatus = EmailStatus{
 				ID:           "123",
+				VendorID:     "100",
 				EmailTo:      "email@email.com",
 				Status:       "sent",
+				DateSent:     now,
 				ModifiedDate: now,
 			}
 		)
