@@ -203,6 +203,15 @@ func (v *VendorService) GetPopulatedEmailStatus(
 		utils.Logger.Errorf("Error fetching email statuses: %v", err)
 		return nil, err
 	}
+
+	if len(emailStatus.EmailStatus) == 0 {
+		utils.Logger.Infof("No email statuses found for the given spec.")
+		return &mailer.GetAllEmailStatusResponse{
+			EmailStatus: []mailer.EmailStatusResponse{},
+			Metadata:    emailStatus.Metadata,
+		}, nil
+	}
+
 	res := mailer.GetAllEmailStatusResponse{}
 	var vendorIDs []string
 	for _, es := range emailStatus.EmailStatus {
