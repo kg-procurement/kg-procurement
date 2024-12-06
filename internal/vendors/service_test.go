@@ -795,13 +795,13 @@ func TestVendorService_GetPopulatedEmailStatus(t *testing.T) {
 
 		sampleVendors := []Vendor{
 			{
-				ID:   "vendor1",
-				Name: "Vendor 1",
+				ID:     "vendor1",
+				Name:   "Vendor 1",
 				Rating: 100,
 			},
 			{
-				ID:   "vendor2",
-				Name: "Vendor 2",
+				ID:     "vendor2",
+				Name:   "Vendor 2",
 				Rating: 50,
 			},
 		}
@@ -825,6 +825,27 @@ func TestVendorService_GetPopulatedEmailStatus(t *testing.T) {
 
 		g.Expect(result.EmailStatus[0].VendorName).To(gomega.Equal("Vendor 1"))
 		g.Expect(result.EmailStatus[1].VendorName).To(gomega.Equal("Vendor 2"))
+	})
+
+	t.Run("no email statuses found", func(t *testing.T) {
+		g := setup(t)
+
+		mockEmailStatusSvc.EXPECT().GetAllEmailStatus(gomock.Any(), gomock.Any()).Return(
+			&mailer.AccessorGetEmailStatusPaginationData{
+				EmailStatus: []mailer.EmailStatus{},
+				Metadata: database.PaginationMetadata{
+					TotalPage:   1,
+					CurrentPage: 1,
+				},
+			}, nil)
+
+		result, err := service.GetPopulatedEmailStatus(context.Background(), mailer.GetAllEmailStatusSpec{})
+
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(result).ToNot(gomega.BeNil())
+		g.Expect(result.EmailStatus).To(gomega.HaveLen(0))
+		g.Expect(result.Metadata.TotalPage).To(gomega.Equal(1))
+		g.Expect(result.Metadata.CurrentPage).To(gomega.Equal(1))
 	})
 
 	t.Run("vendor not found", func(t *testing.T) {
