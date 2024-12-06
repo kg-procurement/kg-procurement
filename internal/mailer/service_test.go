@@ -136,7 +136,7 @@ func TestEmailService_GetAll(t *testing.T) {
 		},
 	}
 
-	data := &AccessorGetAllPaginationData{
+	data := &AccessorGetEmailStatusPaginationData{
 		EmailStatus: sampleData,
 		Metadata: database.PaginationMetadata{
 			TotalPage:   1,
@@ -160,7 +160,7 @@ func TestEmailService_GetAll(t *testing.T) {
 		name   string
 		fields fields
 		args   args
-		want   *AccessorGetAllPaginationData
+		want   *AccessorGetEmailStatusPaginationData
 		err    error
 	}{
 		{

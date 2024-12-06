@@ -10,7 +10,7 @@ import (
 
 type emailStatusDBAccessor interface {
 	WriteEmailStatus(ctx context.Context, payload EmailStatus) error
-	GetAll(ctx context.Context, spec GetAllEmailStatusSpec) (*AccessorGetAllPaginationData, error)
+	GetAll(ctx context.Context, spec GetAllEmailStatusSpec) (*AccessorGetEmailStatusPaginationData, error)
 	UpdateEmailStatus(ctx context.Context, payload EmailStatus) (*EmailStatus, error)
 }
 
@@ -22,7 +22,7 @@ func (p *EmailStatusService) WriteEmailStatus(ctx context.Context, payload Email
 	return p.emailStatusDBAccessor.WriteEmailStatus(ctx, payload)
 }
 
-func (p *EmailStatusService) GetAllEmailStatus(ctx context.Context, spec GetAllEmailStatusSpec) (*AccessorGetAllPaginationData, error) {
+func (p *EmailStatusService) GetAllEmailStatus(ctx context.Context, spec GetAllEmailStatusSpec) (*AccessorGetEmailStatusPaginationData, error) {
 	return p.emailStatusDBAccessor.GetAll(ctx, spec)
 }
 

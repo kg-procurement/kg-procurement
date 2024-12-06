@@ -375,6 +375,45 @@ func (m *MockemailStatusSvc) EXPECT() *MockemailStatusSvcMockRecorder {
 	return m.recorder
 }
 
+// GetAllEmailStatus mocks base method.
+func (m *MockemailStatusSvc) GetAllEmailStatus(ctx context.Context, spec mailer.GetAllEmailStatusSpec) (*mailer.AccessorGetEmailStatusPaginationData, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllEmailStatus", ctx, spec)
+	ret0, _ := ret[0].(*mailer.AccessorGetEmailStatusPaginationData)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllEmailStatus indicates an expected call of GetAllEmailStatus.
+func (mr *MockemailStatusSvcMockRecorder) GetAllEmailStatus(ctx, spec any) *MockemailStatusSvcGetAllEmailStatusCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllEmailStatus", reflect.TypeOf((*MockemailStatusSvc)(nil).GetAllEmailStatus), ctx, spec)
+	return &MockemailStatusSvcGetAllEmailStatusCall{Call: call}
+}
+
+// MockemailStatusSvcGetAllEmailStatusCall wrap *gomock.Call
+type MockemailStatusSvcGetAllEmailStatusCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockemailStatusSvcGetAllEmailStatusCall) Return(arg0 *mailer.AccessorGetEmailStatusPaginationData, arg1 error) *MockemailStatusSvcGetAllEmailStatusCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockemailStatusSvcGetAllEmailStatusCall) Do(f func(context.Context, mailer.GetAllEmailStatusSpec) (*mailer.AccessorGetEmailStatusPaginationData, error)) *MockemailStatusSvcGetAllEmailStatusCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockemailStatusSvcGetAllEmailStatusCall) DoAndReturn(f func(context.Context, mailer.GetAllEmailStatusSpec) (*mailer.AccessorGetEmailStatusPaginationData, error)) *MockemailStatusSvcGetAllEmailStatusCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // WriteEmailStatus mocks base method.
 func (m *MockemailStatusSvc) WriteEmailStatus(ctx context.Context, status mailer.EmailStatus) error {
 	m.ctrl.T.Helper()

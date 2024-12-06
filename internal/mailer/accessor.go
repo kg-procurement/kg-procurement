@@ -14,15 +14,15 @@ import (
 const (
 	insertEmailStatus = `
 		INSERT INTO email_status
-			(id, email_to, status, modified_date)
+			(id, email_to, status, vendor_id, date_sent, modified_date)
 		VALUES
-			(:id, :email_to, :status, :modified_date)
+			(:id, :email_to, :status, :vendor_id, :date_sent, :modified_date)
 	`
 	updateEmailStatus = `
 		UPDATE email_status
 		SET status = :status, modified_date = :modified_date
 		WHERE id = :id
-		RETURNING id, email_to, status, modified_date
+		RETURNING id, email_to, status, vendor_id, date_sent, modified_date
 	`
 )
 
@@ -58,7 +58,7 @@ func (p *postgresEmailStatusAccessor) UpdateEmailStatus(_ context.Context, es Em
 	return &updatedEmailStatus, nil
 }
 
-func (p *postgresEmailStatusAccessor) GetAll(ctx context.Context, spec GetAllEmailStatusSpec) (*AccessorGetAllPaginationData, error) {
+func (p *postgresEmailStatusAccessor) GetAll(ctx context.Context, spec GetAllEmailStatusSpec) (*AccessorGetEmailStatusPaginationData, error) {
 	paginationArgs := database.BuildPaginationArgs(spec.PaginationSpec)
 
 	var (
@@ -118,7 +118,9 @@ func (p *postgresEmailStatusAccessor) GetAll(ctx context.Context, spec GetAllEma
             es.id,
             es.email_to,
             es.status,
-            es.modified_date
+            es.modified_date,
+			es.vendor_id,
+			es.date_sent
         FROM email_status es
         %s
         %s
@@ -162,7 +164,7 @@ func (p *postgresEmailStatusAccessor) GetAll(ctx context.Context, spec GetAllEma
 	// Generate pagination metadata
 	metadata := database.GeneratePaginationMetadata(spec.PaginationSpec, totalEntries)
 
-	return &AccessorGetAllPaginationData{EmailStatus: emailStatus, Metadata: metadata}, nil
+	return &AccessorGetEmailStatusPaginationData{EmailStatus: emailStatus, Metadata: metadata}, nil
 }
 
 func (p *postgresEmailStatusAccessor) Close() error {
