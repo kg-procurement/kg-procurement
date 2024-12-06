@@ -22,7 +22,7 @@ const (
 		UPDATE email_status
 		SET status = :status, modified_date = :modified_date
 		WHERE id = :id
-		RETURNING id, email_to, status, modified_date
+		RETURNING id, email_to, status, vendor_id, date_sent, modified_date
 	`
 )
 
