@@ -19,6 +19,7 @@ func NewEmailStatusEngine(
 
 		paginationSpec := GetPaginationSpec(ctx.Request)
 		spec := mailer.GetAllEmailStatusSpec{
+			EmailTo:        ctx.Query("email_to"),
 			PaginationSpec: paginationSpec,
 		}
 
