@@ -5,50 +5,90 @@ import (
 	"time"
 )
 
-type GetProductVendorsByVendorResponse struct {
+type GetProductVendorsResponse struct {
 	ProductVendors []ProductVendorResponse     `json:"product_vendors"`
 	Metadata       database.PaginationMetadata `json:"metadata"`
 }
 
-type ProductResponse struct {
-	ID                ProductID `json:"id"`
-	ProductCategoryID string    `json:"product_category_id"`
-	UOMID             string    `json:"uom_id"`
-	IncomeTaxID       string    `json:"income_tax_id"`
-	ProductTypeID     string    `json:"product_type_id"`
-	Name              string    `json:"name"`
-	Description       string    `json:"description"`
-	ModifiedDate      time.Time `json:"modified_date"` // parse as time.dateTime
-	ModifiedBy        string    `json:"modified_by"`
-}
-
-func newProductResponseFromProduct(product *Product) *ProductResponse {
-	return &ProductResponse{
-		ID:                product.ID,
-		ProductCategoryID: product.ProductCategoryID,
-		UOMID:             product.UOMID,
-		IncomeTaxID:       product.IncomeTaxID,
-		ProductTypeID:     product.ProductTypeID,
-		Name:              product.Name,
-		Description:       product.Description,
-		ModifiedDate:      product.ModifiedDate,
-		ModifiedBy:        product.ModifiedBy,
-	}
-}
-
-type PriceResponse struct {
+type ProductCategoryResponse struct {
 	ID           string    `json:"id"`
-	Price        float64   `json:"price"`
+	CategoryName string    `json:"category_name"`
+	Description  string    `json:"description"`
 	ModifiedDate time.Time `json:"modified_date"`
 	ModifiedBy   string    `json:"modified_by"`
 }
 
-func newPriceResponseFromPrice(price *Price) *PriceResponse {
+func newFromProductCategory(productCategory *ProductCategory) *ProductCategoryResponse {
+	return &ProductCategoryResponse{
+		ID:           productCategory.ID,
+		CategoryName: productCategory.Name,
+		Description:  productCategory.Description,
+		ModifiedDate: productCategory.ModifiedDate,
+		ModifiedBy:   productCategory.ModifiedBy,
+	}
+}
+
+type UOMResponse struct {
+	ID      string `json:"id"`
+	UOMName string `json:"uom_name"`
+}
+
+func newFromUOM(uom *UOM) *UOMResponse {
+	return &UOMResponse{
+		ID:           uom.ID,
+		UOMName:      uom.Name,
+	}
+}
+
+type ProductResponse struct {
+	ID              ProductID               `json:"id"`
+	ProductCategory ProductCategoryResponse `json:"product_category"`
+	UOMID           string                  `json:"uom_id"`
+	IncomeTaxID     string                  `json:"income_tax_id"`
+	ProductTypeID   string                  `json:"product_type_id"`
+	Name            string                  `json:"name"`
+	Description     string                  `json:"description"`
+	ModifiedDate    time.Time               `json:"modified_date"` // parse as time.dateTime
+	ModifiedBy      string                  `json:"modified_by"`
+}
+
+func newProductResponseFromProduct(product *Product, productCategory *ProductCategory) *ProductResponse {
+	productCategoryResponse := newFromProductCategory(productCategory)
+	return &ProductResponse{
+		ID:              product.ID,
+		ProductCategory: *productCategoryResponse,
+		UOMID:           product.UOMID,
+		IncomeTaxID:     product.IncomeTaxID,
+		ProductTypeID:   product.ProductTypeID,
+		Name:            product.Name,
+		Description:     product.Description,
+		ModifiedDate:    product.ModifiedDate,
+		ModifiedBy:      product.ModifiedBy,
+	}
+}
+
+type PriceResponse struct {
+	ID            string         `json:"id"`
+	Price         float64        `json:"price"`
+	CurrencyCode  string         `json:"currency_code"`
+	PriceQuantity int         `json:"price_quantity"`
+	VendorID      string         `json:"vendor_id"`
+	UOM           UOMResponse    `json:"uom"`
+	ModifiedDate  time.Time      `json:"modified_date"`
+	ModifiedBy    string         `json:"modified_by"`
+}
+
+func newPriceResponseFromPrice(price *Price, uom *UOM) *PriceResponse {
+	UOMResponse := newFromUOM(uom)
 	return &PriceResponse{
-		ID:           price.ID,
-		Price:        price.Price,
-		ModifiedDate: price.ModifiedDate,
-		ModifiedBy:   price.ModifiedBy,
+		ID:            price.ID,
+		Price:         price.Price,
+		CurrencyCode:  price.CurrencyCode,
+		PriceQuantity: price.PriceQuantity,
+		VendorID:      price.VendorID,
+		UOM:           *UOMResponse,
+		ModifiedDate:  price.ModifiedDate,
+		ModifiedBy:    price.ModifiedBy,
 	}
 }
 
@@ -68,9 +108,9 @@ type ProductVendorResponse struct {
 	ModifiedBy          string          `json:"modified_by"`
 }
 
-func ToProductVendorResponse(pv *ProductVendor, p *Product, pr *Price) *ProductVendorResponse {
-	productResponse := newProductResponseFromProduct(p)
-	priceResponse := newPriceResponseFromPrice(pr)
+func ToProductVendorResponse(pv *ProductVendor, p *Product, pr *Price, pc *ProductCategory, uom *UOM) *ProductVendorResponse {
+	productResponse := newProductResponseFromProduct(p, pc)
+	priceResponse := newPriceResponseFromPrice(pr, uom)
 	return &ProductVendorResponse{
 		ID:                  pv.ID,
 		Product:             *productResponse,

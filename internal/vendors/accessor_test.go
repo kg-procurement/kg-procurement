@@ -671,9 +671,10 @@ func Test_postgresVendorAccessor_GetAll_WithLocationAndProduct(t *testing.T) {
 			v.modified_by,
 			v.dt
 		FROM vendor v
-		JOIN product_vendor pv ON pv.vendor_id = v.id
+		JOIN price pr ON pr.vendor_id = v.id
+		JOIN product_vendor pv ON pv.id = pr.product_vendor_id
 		JOIN product p ON p.id = pv.product_id
-		WHERE area_group_name = $1 AND p.name iLIKE $2 AND p.name iLIKE $3
+		WHERE v.area_group_name = $1 AND p.name iLIKE $2 AND p.name iLIKE $3
 		ORDER BY v.dt %s
 		LIMIT $4
 		OFFSET $5
@@ -793,7 +794,7 @@ func Test_postgresVendorAccessor_GetAll_WithLocationAndProduct(t *testing.T) {
 				v.modified_by,
 				v.dt
 			FROM vendor v
-			WHERE area_group_name = $1
+			WHERE v.area_group_name = $1
 			ORDER BY v.dt DESC
 			LIMIT $2
 			OFFSET $3
@@ -880,7 +881,8 @@ func Test_postgresVendorAccessor_GetAll_WithLocationAndProduct(t *testing.T) {
 				v.modified_by,
 				v.dt
 			FROM vendor v
-			JOIN product_vendor pv ON pv.vendor_id = v.id
+			JOIN price pr ON pr.vendor_id = v.id
+			JOIN product_vendor pv ON pv.id = pr.product_vendor_id
 			JOIN product p ON p.id = pv.product_id
 			WHERE p.name iLIKE $1 AND p.name iLIKE $2
 			ORDER BY v.dt DESC
@@ -1476,7 +1478,17 @@ func Test_getAllVendorIdByProductName(t *testing.T) {
 
 	var (
 		productName   = "book"
-		vendorColumns = []string{"id"}
+		vendorColumns = []string{"id", "email"}
+		vendors       = []Vendor{
+			{
+				ID:    "1",
+				Email: "valerian@outlook.com",
+			},
+			{
+				ID:    "2",
+				Email: "salim@outlook.com",
+			},
+		}
 	)
 
 	t.Run("success", func(t *testing.T) {
@@ -1486,15 +1498,15 @@ func Test_getAllVendorIdByProductName(t *testing.T) {
 		)
 		defer c.db.Close()
 
-		expected := []string{"2550", "2580"}
+		// expected := []string{"2550", "2580"}
 
-		transformedQuery, args, _ := sqlx.Named(getAllVendorIdByProductName, map[string]interface{}{
+		transformedQuery, args, _ := sqlx.Named(getBulkByProductName, map[string]interface{}{
 			"product_name": productName,
 		})
 
 		rows := sqlmock.NewRows(vendorColumns).
-			AddRow("2550").
-			AddRow("2580")
+			AddRow("1", "valerian@outlook.com").
+			AddRow("2", "salim@outlook.com")
 
 		driverArgs := make([]driver.Value, len(args))
 		for i, arg := range args {
@@ -1505,10 +1517,10 @@ func Test_getAllVendorIdByProductName(t *testing.T) {
 			WithArgs(driverArgs...).
 			WillReturnRows(rows)
 
-		results, err := c.accessor.getAllVendorIdByProductName(ctx, productName)
+		results, err := c.accessor.BulkGetByProductName(ctx, productName)
 
 		c.g.Expect(err).To(gomega.BeNil())
-		c.g.Expect(results).To(gomega.Equal(expected))
+		c.g.Expect(results).To(gomega.Equal(vendors))
 	})
 
 	t.Run("success returning empty array", func(t *testing.T) {
@@ -1518,11 +1530,11 @@ func Test_getAllVendorIdByProductName(t *testing.T) {
 		)
 		defer c.db.Close()
 
-		expected := []string{}
+		expected := []Vendor{}
 
 		rows := sqlmock.NewRows(vendorColumns)
 
-		transformedQuery, args, _ := sqlx.Named(getAllVendorIdByProductName, map[string]interface{}{
+		transformedQuery, args, _ := sqlx.Named(getBulkByProductName, map[string]interface{}{
 			"product_name": productName,
 		})
 
@@ -1535,7 +1547,7 @@ func Test_getAllVendorIdByProductName(t *testing.T) {
 			WithArgs(driverArgs...).
 			WillReturnRows(rows)
 
-		results, err := c.accessor.getAllVendorIdByProductName(ctx, productName)
+		results, err := c.accessor.BulkGetByProductName(ctx, productName)
 
 		c.g.Expect(err).To(gomega.BeNil())
 		c.g.Expect(results).To(gomega.Equal(expected))
@@ -1548,7 +1560,7 @@ func Test_getAllVendorIdByProductName(t *testing.T) {
 		)
 		defer c.db.Close()
 
-		transformedQuery, args, _ := sqlx.Named(getAllVendorIdByProductName, map[string]interface{}{
+		transformedQuery, args, _ := sqlx.Named(getBulkByProductName, map[string]interface{}{
 			"product_name": productName,
 		})
 
@@ -1561,7 +1573,7 @@ func Test_getAllVendorIdByProductName(t *testing.T) {
 			WithArgs(driverArgs...).
 			WillReturnError(errors.New("error"))
 
-		results, err := c.accessor.getAllVendorIdByProductName(ctx, productName)
+		results, err := c.accessor.BulkGetByProductName(ctx, productName)
 
 		c.g.Expect(err).ToNot(gomega.BeNil())
 		c.g.Expect(results).To(gomega.BeNil())
@@ -1575,11 +1587,11 @@ func Test_getAllVendorIdByProductName(t *testing.T) {
 		defer c.db.Close()
 
 		rows := sqlmock.NewRows(vendorColumns).
-			AddRow("2550").
-			AddRow("2580").
+			AddRow("1", "valerian@outlook.com").
+			AddRow("2", "salim@outlook.com").
 			RowError(1, errors.New("error"))
 
-		transformedQuery, args, _ := sqlx.Named(getAllVendorIdByProductName, map[string]interface{}{
+		transformedQuery, args, _ := sqlx.Named(getBulkByProductName, map[string]interface{}{
 			"product_name": productName,
 		})
 
@@ -1592,7 +1604,7 @@ func Test_getAllVendorIdByProductName(t *testing.T) {
 			WithArgs(driverArgs...).
 			WillReturnRows(rows)
 
-		results, err := c.accessor.getAllVendorIdByProductName(ctx, productName)
+		results, err := c.accessor.BulkGetByProductName(ctx, productName)
 
 		c.g.Expect(err).ToNot(gomega.BeNil())
 		c.g.Expect(results).To(gomega.BeNil())
@@ -1606,9 +1618,9 @@ func Test_getAllVendorIdByProductName(t *testing.T) {
 		defer c.db.Close()
 
 		rows := sqlmock.NewRows(vendorColumns).
-			AddRow(nil)
+			AddRow(nil, nil)
 
-		transformedQuery, args, _ := sqlx.Named(getAllVendorIdByProductName, map[string]interface{}{
+		transformedQuery, args, _ := sqlx.Named(getBulkByProductName, map[string]interface{}{
 			"product_name": productName,
 		})
 
@@ -1621,11 +1633,77 @@ func Test_getAllVendorIdByProductName(t *testing.T) {
 			WithArgs(driverArgs...).
 			WillReturnRows(rows)
 
-		results, err := c.accessor.getAllVendorIdByProductName(ctx, productName)
+		results, err := c.accessor.BulkGetByProductName(ctx, productName)
 
 		c.g.Expect(err).ToNot(gomega.BeNil())
 		c.g.Expect(results).To(gomega.BeNil())
 	})
+}
+
+func Test_createVendorEvaluation(t *testing.T) {
+	t.Parallel()
+
+	var (
+		vendorEvaluation = VendorEvaluation{
+			ID:                               "Vp5XxWumASFvxD3",
+			VendorID:                         "1",
+			KesesuaianProduk:                 1,
+			KualitasProduk:                   1,
+			KetepatanWaktuPengiriman:         1,
+			KompetitifitasHarga:              1,
+			ResponsivitasKemampuanKomunikasi: 1,
+			KemampuanDalamMenanganiMasalah:   1,
+			KelengkapanBarang:                1,
+			Harga:                            1,
+			TermOfPayment:                    1,
+			Reputasi:                         1,
+			KetersediaanBarang:               1,
+			KualitasLayananAfterServices:     1,
+		}
+	)
+
+	t.Run("success", func(t *testing.T) {
+		var (
+			c   = setupVendorAccessorTestComponent(t)
+			ctx = context.Background()
+		)
+
+		transformedQuery, args, _ := sqlx.Named(createEvaluationQuery, vendorEvaluation)
+
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectExec(transformedQuery).
+			WithArgs(driverArgs...).WillReturnResult(sqlmock.NewResult(1, 1))
+
+		_, err := c.accessor.CreateEvaluation(ctx, &vendorEvaluation)
+
+		c.g.Expect(err).To(gomega.BeNil())
+	})
+
+	t.Run("error while doing db query", func(t *testing.T) {
+		var (
+			c   = setupVendorAccessorTestComponent(t)
+			ctx = context.Background()
+		)
+
+		transformedQuery, args, _ := sqlx.Named(createEvaluationQuery, vendorEvaluation)
+
+		driverArgs := make([]driver.Value, len(args))
+		for i, arg := range args {
+			driverArgs[i] = arg
+		}
+
+		c.mock.ExpectExec(transformedQuery).
+			WithArgs(driverArgs...).WillReturnError(sql.ErrConnDone)
+
+		_, err := c.accessor.CreateEvaluation(ctx, &vendorEvaluation)
+
+		c.g.Expect(err).ToNot(gomega.BeNil())
+	})
+
 }
 
 func Test_Close(t *testing.T) {

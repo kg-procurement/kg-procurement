@@ -23,11 +23,11 @@ const (
 		VALUES 
 			(:id, :name, :email, :description, :bp_id, :bp_name, :rating, :area_group_id, :area_group_name, :sap_code, :modified_date, :modified_by, :dt)
 	`
-	getBulkByID                 = `SELECT * FROM vendor WHERE id IN (?)`
-	getAllLocationsQuery        = `SELECT DISTINCT area_group_name FROM vendor`
-	getAllVendorIdByProductName = `
+	getBulkByID          = `SELECT * FROM vendor WHERE id IN (?)`
+	getAllLocationsQuery = `SELECT DISTINCT area_group_name FROM vendor`
+	getBulkByProductName = `
 		SELECT
-			v.id
+			v.*
 		FROM
 			vendor v
 		JOIN 
@@ -38,6 +38,12 @@ const (
 			product p ON p.id = pv.product_id
 		WHERE
 			p.name = :product_name
+	`
+	createEvaluationQuery = `
+		INSERT INTO vendor_evaluation
+			(id, vendor_id, kesesuaian_produk, kualitas_produk, ketepatan_waktu_pengiriman, kompetitifitas_harga, responsivitas_kemampuan_komunikasi, kemampuan_dalam_menangani_masalah, kelengkapan_barang, harga, term_of_payment, reputasi, ketersediaan_barang, kualitas_layanan_after_services, modified_date)
+		VALUES
+			(:id, :vendor_id, :kesesuaian_produk, :kualitas_produk, :ketepatan_waktu_pengiriman, :kompetitifitas_harga, :responsivitas_kemampuan_komunikasi, :kemampuan_dalam_menangani_masalah, :kelengkapan_barang, :harga, :term_of_payment, :reputasi, :ketersediaan_barang, :kualitas_layanan_after_services, :modified_date)
 	`
 )
 
@@ -83,14 +89,15 @@ func (p *postgresVendorAccessor) GetAll(ctx context.Context, spec GetAllVendorSp
 
 	// Build WHERE clause for location
 	if spec.Location != "" {
-		whereClauses = append(whereClauses, fmt.Sprintf("area_group_name = $%d", argsIndex))
+		whereClauses = append(whereClauses, fmt.Sprintf("v.area_group_name = $%d", argsIndex))
 		args = append(args, spec.Location)
 		argsIndex++
 	}
 
 	// Build JOIN and WHERE clauses for product
 	if spec.Product != "" {
-		joinClauses = append(joinClauses, "JOIN product_vendor pv ON pv.vendor_id = v.id")
+		joinClauses = append(joinClauses, "JOIN price pr ON pr.vendor_id = v.id")
+		joinClauses = append(joinClauses, "JOIN product_vendor pv ON pv.id = pr.product_vendor_id")
 		joinClauses = append(joinClauses, "JOIN product p ON p.id = pv.product_id")
 
 		productNameList := strings.Fields(spec.Product)
@@ -331,31 +338,43 @@ func (p *postgresVendorAccessor) writeVendor(ctx context.Context, vendor Vendor)
 	return nil
 }
 
-func (p *postgresVendorAccessor) getAllVendorIdByProductName(ctx context.Context, productName string) ([]string, error) {
-	query := getAllVendorIdByProductName
+func (p *postgresVendorAccessor) BulkGetByProductName(_ context.Context, productName string) ([]Vendor, error) {
+	query := getBulkByProductName
 
 	rows, err := p.db.NamedQuery(query, map[string]interface{}{
 		"product_name": productName,
 	})
 
 	if err != nil {
+		utils.Logger.Error(err.Error())
 		return nil, err
 	}
 	defer rows.Close()
 
-	vendorIDs := []string{}
+	vendors := []Vendor{}
 	for rows.Next() {
-		var vendorID string
-		if err = rows.Scan(&vendorID); err != nil {
+		var vendor Vendor
+		if err = rows.StructScan(&vendor); err != nil {
+			utils.Logger.Error(err.Error())
 			return nil, err
 		}
-		vendorIDs = append(vendorIDs, vendorID)
+		vendors = append(vendors, vendor)
 	}
 	if err := rows.Err(); err != nil {
+		utils.Logger.Error(err.Error())
 		return nil, err
 	}
 
-	return vendorIDs, nil
+	return vendors, nil
+}
+
+func (p *postgresVendorAccessor) CreateEvaluation(ctx context.Context, evaluation *VendorEvaluation) (*VendorEvaluation, error) {
+	if _, err := p.db.NamedExec(createEvaluationQuery, evaluation); err != nil {
+		utils.Logger.Error(err.Error())
+		return nil, err
+	}
+
+	return evaluation, nil
 }
 
 func (p *postgresVendorAccessor) Close() error {

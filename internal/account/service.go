@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"kg/procurement/cmd/utils"
 	"kg/procurement/internal/common/database"
+	"kg/procurement/internal/common/helper"
 	"kg/procurement/internal/token"
 	"net/mail"
 
@@ -19,10 +20,12 @@ var ErrLoginFailed = errors.New("login failed")
 type accountDBAccessor interface {
 	RegisterAccount(ctx context.Context, account Account) error
 	FindAccountByEmail(ctx context.Context, email string) (*Account, error)
+	FindAccountByID(ctx context.Context, id string) (*Account, error)
 }
 
 type tokenService interface {
 	GenerateToken(spec token.ClaimSpec) (string, error)
+	ValidateToken(tokenString string) (*token.Claims, error)
 }
 
 type AccountService struct {
@@ -45,7 +48,7 @@ func (a *AccountService) RegisterAccount(ctx context.Context, spec RegisterContr
 	}
 
 	// Generate ID
-	id, err := generateRandomID()
+	id, err := helper.GenerateRandomID()
 	if err != nil {
 		utils.Logger.Errorf("failed to generate random ID: %v", err)
 		return fmt.Errorf("failed to generate random ID: %w", err)
@@ -62,7 +65,6 @@ func (a *AccountService) RegisterAccount(ctx context.Context, spec RegisterContr
 }
 
 func (a *AccountService) Login(ctx context.Context, spec LoginContract) (string, error) {
-
 	// Find the account by email
 	account, err := a.accountDBAccessor.FindAccountByEmail(ctx, spec.Email)
 	if err != nil {
@@ -84,6 +86,25 @@ func (a *AccountService) Login(ctx context.Context, spec LoginContract) (string,
 	}
 
 	return token, nil
+}
+
+func (a *AccountService) GetCurrentUser(ctx context.Context, tokenString string) (*Account, error) {
+	// Parse and validate the JWT token
+	claims, err := a.tokenService.ValidateToken(tokenString)
+	if err != nil {
+		utils.Logger.Errorf("failed to parse token: %v", err)
+		return nil, fmt.Errorf("invalid token: %w", err)
+	}
+
+	// Find the account associated with the user ID in the token claims
+	userID := claims.Subject
+	account, err := a.accountDBAccessor.FindAccountByID(ctx, userID)
+	if err != nil {
+		utils.Logger.Errorf("account not found for user ID: %v", userID)
+		return nil, fmt.Errorf("account not found: %w", err)
+	}
+
+	return account, nil
 }
 
 func NewAccountService(

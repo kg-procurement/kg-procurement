@@ -15,7 +15,9 @@
       "get-by-id": "/vendor/:id",
       "get-locations": "/vendor/location",
       "email-blast": "/vendor/blast",
-      "automated-email-blast": "/vendor/automated-blast"
+      "automated-email-blast": "/vendor/automated-blast",
+      "get-populated-email-status":"/vendor/email",
+      "evaluation": "/vendor/evaluation"
     },
     "product": {
       "get-products-by-vendor": "/product/vendor/:vendor_id",
@@ -25,7 +27,12 @@
     },
     "account": {
       "register": "/account/register",
-      "login": "/account/login"
+      "login": "/account/login",
+      "get-current-user": "/account/user"
+    },
+    "email-status": {
+      "get-all": "/email-status", // email
+      "update-email-status": "/email-status/:id"
     }
   },
   "token": {
@@ -45,5 +52,10 @@
     "ses": {
       "domain": "your-domain"
     }
+  },
+  "newrelic": {
+    "enabled": false,
+    "application-name": "kg-local",
+    "license-key": "license should have len 40, ends in NRAL"
   }
 }

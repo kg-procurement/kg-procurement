@@ -3,9 +3,11 @@ package account
 import (
 	"context"
 	"errors"
+	"kg/procurement/internal/common/helper"
 	"testing"
 
 	"bou.ke/monkey"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
 	"golang.org/x/crypto/bcrypt"
@@ -128,10 +130,10 @@ func TestAccountService_RegisterAccount(t *testing.T) {
 				defer monkey.Unpatch(bcrypt.GenerateFromPassword)
 			} else if tt.name == "failed to generate ID" {
 				// Mock GenerateRandomID to return an error
-				monkey.Patch(generateRandomID, func() (string, error) {
+				monkey.Patch(helper.GenerateRandomID, func() (string, error) {
 					return "", errors.New("failed to generate ID")
 				})
-				defer monkey.Unpatch(generateRandomID)
+				defer monkey.Unpatch(helper.GenerateRandomID)
 			}
 
 			err := a.RegisterAccount(tt.args.ctx, tt.args.spec)
@@ -303,3 +305,140 @@ func TestAccountService_Login(t *testing.T) {
 		})
 	}
 }
+
+func TestAccountService_GetCurrentUser(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	type fields struct {
+		mockAccountDBAccessor *MockaccountDBAccessor
+		mockTokenService      *MocktokenService
+	}
+
+	type args struct {
+		ctx   context.Context
+		token string
+	}
+
+	tests := []struct {
+		name     string
+		fields   fields
+		args     args
+		wantErr  error
+		wantUser *Account
+	}{
+		{
+			name: "success",
+			fields: fields{
+				mockAccountDBAccessor: NewMockaccountDBAccessor(ctrl),
+				mockTokenService:      NewMocktokenService(ctrl),
+			},
+			args: args{
+				ctx:   context.Background(),
+				token: "validToken",
+			},
+			wantErr: nil,
+			wantUser: &Account{
+				ID:       "1",
+				Email:    "test@example.com",
+				Password: "hashedPassword",
+			},
+		},
+		{
+			name: "invalid token",
+			fields: fields{
+				mockAccountDBAccessor: NewMockaccountDBAccessor(ctrl),
+				mockTokenService:      NewMocktokenService(ctrl),
+			},
+			args: args{
+				ctx:   context.Background(),
+				token: "invalidToken",
+			},
+			wantErr: errors.New("invalid token"),
+		},
+		{
+			name: "user not found",
+			fields: fields{
+				mockAccountDBAccessor: NewMockaccountDBAccessor(ctrl),
+				mockTokenService:      NewMocktokenService(ctrl),
+			},
+			args: args{
+				ctx:   context.Background(),
+				token: "validToken",
+			},
+			wantErr: errors.New("user not found"),
+		},
+		{
+			name: "failed to validate token",
+			fields: fields{
+				mockAccountDBAccessor: NewMockaccountDBAccessor(ctrl),
+				mockTokenService:      NewMocktokenService(ctrl),
+			},
+			args: args{
+				ctx:   context.Background(),
+				token: "brokenToken",
+			},
+			wantErr: errors.New("failed to validate token"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := gomega.NewWithT(t)
+			a := &AccountService{
+				accountDBAccessor: tt.fields.mockAccountDBAccessor,
+				tokenService:      tt.fields.mockTokenService,
+			}
+
+			if tt.name == "success" {
+				// Mock the token service to validate the token and extract claims
+				tt.fields.mockTokenService.EXPECT().
+					ValidateToken(tt.args.token).
+					Return(&token.Claims{
+						RegisteredClaims: jwt.RegisteredClaims{
+							Subject: "1",
+						},
+					}, nil)
+
+				tt.fields.mockAccountDBAccessor.EXPECT().
+					FindAccountByID(tt.args.ctx, "1").
+					Return(tt.wantUser, nil)
+			} else if tt.name == "invalid token" {
+				// Mock token service to return an error for invalid token
+				tt.fields.mockTokenService.EXPECT().
+					ValidateToken(tt.args.token).
+					Return(nil, errors.New("invalid token"))
+			} else if tt.name == "user not found" {
+				// Mock successful token validation but user not found
+				tt.fields.mockTokenService.EXPECT().
+					ValidateToken(tt.args.token).
+					Return(&token.Claims{
+						RegisteredClaims: jwt.RegisteredClaims{
+							Subject: "1",
+						},
+					}, nil)
+
+				// Mock account retrieval to return nil (user not found)
+				tt.fields.mockAccountDBAccessor.EXPECT().
+					FindAccountByID(tt.args.ctx, "1").
+					Return(nil, errors.New("user not found"))
+			} else if tt.name == "failed to validate token" {
+				// Mock the token service to return an error during token validation
+				tt.fields.mockTokenService.EXPECT().
+					ValidateToken(tt.args.token).
+					Return(nil, errors.New("failed to validate token"))
+			}
+
+			user, err := a.GetCurrentUser(tt.args.ctx, tt.args.token)
+
+			if tt.wantErr == nil {
+				g.Expect(err).To(gomega.BeNil())
+				g.Expect(user).To(gomega.Equal(tt.wantUser))
+			} else {
+				g.Expect(err).ToNot(gomega.BeNil())
+				g.Expect(err.Error()).To(gomega.ContainSubstring(tt.wantErr.Error()))
+			}
+		})
+	}
+}
+

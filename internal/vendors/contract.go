@@ -1,11 +1,12 @@
 package vendors
 
-type EmailBlastContract struct {
-	VendorIDs     []string      `json:"vendor_ids" binding:"required"`
-	EmailTemplate emailTemplate `json:"email_template" binding:"required"`
-}
+import (
+	"mime/multipart"
+)
 
-type emailTemplate struct {
-	Subject string `json:"subject" binding:"required"`
-	Body    string `json:"body" binding:"required"`
+type EmailBlastContract struct {
+	VendorIDs   []string                `form:"vendor_ids" binding:"required"`
+	Subject     string                  `form:"subject"`
+	Body        string                  `form:"body"`
+	Attachments []*multipart.FileHeader `form:"attachments"`
 }

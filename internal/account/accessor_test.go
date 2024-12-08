@@ -168,6 +168,75 @@ func Test_FindAccountByEmail(t *testing.T) {
 	})
 }
 
+func Test_FindAccountByID(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		var (
+			ctx = context.Background()
+			c   = setupAccountAccessorTestComponent(t, WithQueryMatcher(sqlmock.QueryMatcherRegexp))
+		)
+		defer c.db.Close()
+
+		expectedAccount := Account{
+			ID:           "ID",
+			Email:        "a@mail.com",
+			Password:     "hashed_password",
+			ModifiedDate: time.Now(),
+			CreatedAt:    time.Now(),
+		}
+
+		c.mock.ExpectQuery(findAccountByIDQuery).
+			WithArgs(expectedAccount.ID).
+			WillReturnRows(sqlmock.NewRows([]string{"id", "email", "password", "modified_date", "created_at"}).
+				AddRow(expectedAccount.ID, expectedAccount.Email, expectedAccount.Password, expectedAccount.ModifiedDate, expectedAccount.CreatedAt))
+
+		account, err := c.accessor.FindAccountByID(ctx, expectedAccount.ID)
+
+		c.g.Expect(err).To(gomega.BeNil())
+		c.g.Expect(account).ToNot(gomega.BeNil())
+		c.g.Expect(account.ID).To(gomega.Equal(expectedAccount.ID))
+		c.g.Expect(account.Email).To(gomega.Equal(expectedAccount.Email))
+	})
+
+	t.Run("error - account not found", func(t *testing.T) {
+		var (
+			ctx = context.Background()
+			c   = setupAccountAccessorTestComponent(t, WithQueryMatcher(sqlmock.QueryMatcherRegexp))
+		)
+		defer c.db.Close()
+
+		c.mock.ExpectQuery(findAccountByIDQuery).
+			WithArgs("nonexistentID").
+			WillReturnError(sql.ErrNoRows)
+
+		account, err := c.accessor.FindAccountByID(ctx, "nonexistentID")
+
+		c.g.Expect(err).ToNot(gomega.BeNil())
+		c.g.Expect(err).To(gomega.Equal(sql.ErrNoRows))
+		c.g.Expect(account).To(gomega.BeNil())
+	})
+
+	t.Run("error - query execution failure", func(t *testing.T) {
+		var (
+			ctx = context.Background()
+			c   = setupAccountAccessorTestComponent(t, WithQueryMatcher(sqlmock.QueryMatcherRegexp))
+		)
+		defer c.db.Close()
+
+		c.mock.ExpectQuery(findAccountByIDQuery).
+			WithArgs("ID").
+			WillReturnError(sql.ErrConnDone)
+
+		account, err := c.accessor.FindAccountByID(ctx, "ID")
+
+		c.g.Expect(err).ToNot(gomega.BeNil())
+		c.g.Expect(err).To(gomega.Equal(sql.ErrConnDone))
+		c.g.Expect(account).To(gomega.BeNil())
+	})
+}
+
+
 type accountAccessorTestComponent struct {
 	g        *gomega.WithT
 	mock     sqlmock.Sqlmock

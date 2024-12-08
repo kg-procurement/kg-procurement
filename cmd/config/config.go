@@ -7,11 +7,18 @@ import (
 )
 
 type Application struct {
-	Common Common `mapstructure:"common" validate:"required"`
-	Routes Routes `mapstructure:"routes" validate:"required"`
-	Token  Token  `mapstructure:"token" validate:"required"`
-	SMTP   SMTP   `mapstructure:"smtp" validate:"required"`
-	AWS    AWS    `mapstructure:"aws" validate:"required"`
+	Common   Common   `mapstructure:"common" validate:"required"`
+	Routes   Routes   `mapstructure:"routes" validate:"required"`
+	Token    Token    `mapstructure:"token" validate:"required"`
+	SMTP     SMTP     `mapstructure:"smtp" validate:"required"`
+	AWS      AWS      `mapstructure:"aws" validate:"required"`
+	NewRelic NewRelic `mapstructure:"newrelic" validate:"required"`
+}
+
+type NewRelic struct {
+	Enabled         bool   `mapstructure:"enabled"`
+	ApplicationName string `mapstructure:"application-name" validate:"required"`
+	LicenseKey      string `mapstructure:"license-key" validate:"required"`
 }
 
 type SMTP struct {
@@ -41,18 +48,21 @@ type PostgresConfig struct {
 }
 
 type Routes struct {
-	Vendor  VendorRoutes  `mapstructure:"vendor" validate:"required"`
-	Product ProductRoutes `mapstructure:"product" validate:"required"`
-	Account AccountRoutes `mapstructure:"account" validate:"required"`
+	Vendor      VendorRoutes      `mapstructure:"vendor" validate:"required"`
+	Product     ProductRoutes     `mapstructure:"product" validate:"required"`
+	Account     AccountRoutes     `mapstructure:"account" validate:"required"`
+	EmailStatus EmailStatusRoutes `mapstructure:"email-status" validate:"required"`
 }
 
 type VendorRoutes struct {
-	GetAll              string `mapstructure:"get-all" validate:"required"`
-	UpdateDetail        string `mapstructure:"update-detail" validate:"required"`
-	GetById             string `mapstructure:"get-by-id" validate:"required"`
-	GetLocations        string `mapstructure:"get-locations" validate:"required"`
-	EmailBlast          string `mapstructure:"email-blast" validate:"required"`
-	AutomatedEmailBlast string `mapstructure:"automated-email-blast" validate:"required"`
+	GetAll                  string `mapstructure:"get-all" validate:"required"`
+	UpdateDetail            string `mapstructure:"update-detail" validate:"required"`
+	GetById                 string `mapstructure:"get-by-id" validate:"required"`
+	GetLocations            string `mapstructure:"get-locations" validate:"required"`
+	EmailBlast              string `mapstructure:"email-blast" validate:"required"`
+	AutomatedEmailBlast     string `mapstructure:"automated-email-blast" validate:"required"`
+	Evaluation              string `mapstructure:"evaluation" validate:"required"`
+	GetPopulatedEmailStatus string `mapstructure:"get-populated-email-status" validate:"required"`
 }
 
 type ProductRoutes struct {
@@ -67,8 +77,14 @@ type Token struct {
 }
 
 type AccountRoutes struct {
-	Register string `mapstructure:"register" validate:"required"`
-	Login    string `mapstructure:"login" validate:"required"`
+	Register       string `mapstructure:"register" validate:"required"`
+	Login          string `mapstructure:"login" validate:"required"`
+	GetCurrentUser string `mapstructure:"get-current-user" validate:"required"`
+}
+
+type EmailStatusRoutes struct {
+	GetAll            string `mapstructure:"get-all" validate:"required"`
+	UpdateEmailStatus string `mapstructure:"update-email-status" validate:"required"`
 }
 
 func Load() Application {
